@@ -31,4 +31,6 @@ delegation. Workers do not stage or commit. The lead owns review and Git.
 Preserve unrelated changes. Use codex/ branches and coherent checkpoints. Run
 focused checks during implementation and full checks at completed steps. Commit
 Core behavior and its regression tests separately, then push each checkpoint.
-Do not force-push or merge to main without a request. New rules need approval.
+After the relevant checks pass, merge completed, authorized work to main without
+another review or permission request. Keep pull requests as change records.
+Do not force-push without a request. New rules need approval.
