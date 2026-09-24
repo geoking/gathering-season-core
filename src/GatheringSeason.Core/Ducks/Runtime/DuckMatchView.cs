@@ -24,6 +24,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             IEnumerable<DuckShopOffer> shopOffers,
             IEnumerable<DuckHistoryEntry> history,
             IEnumerable<DuckPublicAwardView> publicAwards,
+            DuckRestPreview? restPreview,
             int finalDayDecisionBeat,
             bool awaitingFinalDayDecisions,
             DuckFinalResult? finalResult)
@@ -43,6 +44,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             ShopOffers = Freeze(shopOffers);
             History = Freeze(history);
             PublicAwards = Freeze(publicAwards);
+            RestPreview = restPreview;
             FinalDayDecisionBeat = finalDayDecisionBeat;
             AwaitingFinalDayDecisions = awaitingFinalDayDecisions;
             FinalResult = finalResult;
@@ -66,6 +68,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
         public IReadOnlyList<DuckShopOffer> ShopOffers { get; }
         public IReadOnlyList<DuckHistoryEntry> History { get; }
         public IReadOnlyList<DuckPublicAwardView> PublicAwards { get; }
+        public DuckRestPreview? RestPreview { get; }
         public int FinalDayDecisionBeat { get; }
         public bool AwaitingFinalDayDecisions { get; }
         public DuckFinalResult? FinalResult { get; }
