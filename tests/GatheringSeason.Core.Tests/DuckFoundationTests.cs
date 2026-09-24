@@ -142,6 +142,7 @@ public sealed class DuckFoundationTests
     public void Snapshot_is_detached_and_contains_authoritative_day_and_Night_state()
     {
         var runtime = DuckMatchRuntime.Create(11);
+        runtime.State.Phase = DuckPhase.Night;
         var player = runtime.Player("human");
         var placedId = player.BagPhysicalChipIds[0];
         player.TotalTwigs = 7;
@@ -159,6 +160,8 @@ public sealed class DuckFoundationTests
         player.PendingMostRestedStep = true;
         player.PlacedHelpfulTypes.Add(DuckEncounterType.Reeds);
         player.PlacedChips.Add(new DuckPlacedChipState(placedId, 4, nuisanceSuppressed: true));
+        player.Position = 4;
+        player.BagPhysicalChipIds.Remove(placedId);
         player.PurchasedEncounterDefinitionIds.Add("tailwind_4");
         player.PurchasedShopTypes.Add(DuckEncounterType.Tailwind);
         player.LastNightOutcome = Outcome();

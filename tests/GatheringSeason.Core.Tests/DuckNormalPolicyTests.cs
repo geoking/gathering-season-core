@@ -633,13 +633,13 @@ public sealed class DuckNormalPolicyTests
         bool wornOut = false,
         int? frozenSleep = null)
     {
+        PrepareAdventurePlayer(runtime, "ai", position, wornOut ? 6 : 0, Array.Empty<string>());
         var opponent = runtime.Player("ai");
         opponent.Position = position;
         opponent.HasFinishedDay = true;
         opponent.IsWornOut = wornOut;
         opponent.IsSleepFrozen = frozenSleep.HasValue;
         opponent.FrozenSleep = frozenSleep ?? 0;
-        opponent.PlacedChips.Clear();
     }
 
     private static void SetPublicOpponentScore(DuckMatchRuntime runtime, int totalTwigs, int position)

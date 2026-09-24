@@ -15,25 +15,140 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (state.Players.Any(player => player.IsSleepFrozen))
                 throw new InvalidOperationException("This Night has already been resolved.");
 
-            var worldEvent = rules.WorldEvent(state.WorldEventDeckDefinitionIds[state.CurrentEventIndex]).EventType;
-            var allSafe = state.Players.All(player => !player.IsWornOut);
-            var allShelters = state.Players.All(player => rules.BoardSpaceAt(player.Position).IsShelter);
-            var allSeeds = state.Players.All(player => player.PlacedHelpfulTypes.Contains(DuckEncounterType.Seeds));
-            var economy = rules.Economy;
-            var allTuckedIn = allShelters && (rules.RulesRevision >= 5 || allSafe);
-            var eventSleep = worldEvent == DuckWorldEventType.AllTuckedIn && allTuckedIn ? economy.AllTuckedInReward
-                : worldEvent == DuckWorldEventType.HomeBeforeDark && allSafe ? economy.HomeBeforeDarkReward
-                : worldEvent == DuckWorldEventType.SharedSupper && allSeeds ? economy.SharedSupperReward : 0;
-            var competingFlocks = rules.RulesRevision >= 5
-                ? state.Players
-                : state.Players.Where(player => !player.IsWornOut);
-            var greatestFlock = competingFlocks.Select(player => player.ActiveFlock).DefaultIfEmpty(0).Max();
-            var amounts = state.Players.Select(player => new NightAmounts(
-                state.Day, player, rules, worldEvent, eventSleep, greatestFlock)).ToArray();
-            var bestSafeSleep = amounts.Where(amount => !amount.Player.IsWornOut).Select(amount => amount.FrozenSleep).DefaultIfEmpty(-1).Max();
+            var amounts = CalculateAmounts(state, rules);
+            var bestSafeSleep = BestSafeSleep(amounts);
             return amounts.ToDictionary(amount => amount.Player.Id, amount => amount.ToOutcome(
                 !amount.Player.IsWornOut && amount.FrozenSleep == bestSafeSleep), StringComparer.Ordinal);
         }
+
+        internal static DuckRestPreview? Preview(DuckMatchState state, DuckRuleDefinitions rules, DuckPlayerState viewer)
+        {
+            if (state.Phase != DuckPhase.Adventure || viewer.PlacedChips.Count == 0) return null;
+
+            var worldEvent = CurrentEventType(state, rules);
+            var eventStars = CollectiveEventAward(rules, worldEvent);
+            var eventStatus = CollectiveEventStatus(state, rules, viewer, worldEvent, eventStars);
+            var flockStars = FlockAward(rules, viewer);
+            var flockStatus = FlockStatus(state, rules, viewer, flockStars);
+            var lowEvent = eventStatus == DuckRestBonusStatus.Guaranteed ? eventStars : 0;
+            var highEvent = eventStatus == DuckRestBonusStatus.Unavailable ? 0 : eventStars;
+            var lowFlockLeader = flockStatus == DuckRestBonusStatus.Guaranteed
+                ? viewer.ActiveFlock : int.MaxValue;
+            var highFlockLeader = flockStatus == DuckRestBonusStatus.Unavailable
+                ? int.MaxValue : viewer.ActiveFlock;
+            var minimum = new NightAmounts(state.Day, viewer, rules, worldEvent, lowEvent, lowFlockLeader);
+            var maximum = new NightAmounts(state.Day, viewer, rules, worldEvent, highEvent, highFlockLeader);
+
+            DuckRestBonusStatus mostRested;
+            if (viewer.IsWornOut)
+                mostRested = DuckRestBonusStatus.Unavailable;
+            else if (state.Players.Where(player => player != viewer).All(player => player.HasFinishedDay))
+            {
+                var exactAmounts = CalculateAmounts(state, rules);
+                var own = exactAmounts.Single(amount => amount.Player == viewer);
+                mostRested = own.FrozenSleep == BestSafeSleep(exactAmounts)
+                    ? DuckRestBonusStatus.Guaranteed : DuckRestBonusStatus.Unavailable;
+            }
+            else if (state.Players.Where(player => player != viewer && player.HasFinishedDay && !player.IsWornOut)
+                .Any(player => new NightAmounts(state.Day, player, rules, worldEvent, 0, int.MaxValue)
+                    .FrozenSleep > maximum.FrozenSleep))
+                mostRested = DuckRestBonusStatus.Unavailable;
+            else
+                mostRested = DuckRestBonusStatus.Possible;
+
+            var lowOutcome = minimum.ToOutcome(mostRested == DuckRestBonusStatus.Guaranteed);
+            var highOutcome = maximum.ToOutcome(mostRested != DuckRestBonusStatus.Unavailable);
+            return new DuckRestPreview(
+                lowOutcome.TotalTwigsEarned,
+                lowOutcome.PrintedTwigs - lowOutcome.BramblesPenalty,
+                lowOutcome.FeathersAwarded,
+                lowOutcome.FrozenSleep,
+                highOutcome.FrozenSleep,
+                lowOutcome.DreamTwigs,
+                highOutcome.DreamTwigs,
+                eventStars,
+                eventStatus,
+                flockStars,
+                flockStatus,
+                mostRested);
+        }
+
+        private static NightAmounts[] CalculateAmounts(DuckMatchState state, DuckRuleDefinitions rules)
+        {
+            var worldEvent = CurrentEventType(state, rules);
+            var eventSleep = state.Players.All(player => QualifiesForCollectiveEvent(player, rules, worldEvent))
+                ? CollectiveEventAward(rules, worldEvent) : 0;
+            var greatestFlock = GreatestEligibleFlock(state, rules);
+            return state.Players.Select(player => new NightAmounts(
+                state.Day, player, rules, worldEvent, eventSleep, greatestFlock)).ToArray();
+        }
+
+        private static DuckWorldEventType CurrentEventType(DuckMatchState state, DuckRuleDefinitions rules) =>
+            rules.WorldEvent(state.WorldEventDeckDefinitionIds[state.CurrentEventIndex]).EventType;
+
+        private static int CollectiveEventAward(DuckRuleDefinitions rules, DuckWorldEventType worldEvent) =>
+            worldEvent switch
+            {
+                DuckWorldEventType.AllTuckedIn => rules.Economy.AllTuckedInReward,
+                DuckWorldEventType.HomeBeforeDark => rules.Economy.HomeBeforeDarkReward,
+                DuckWorldEventType.SharedSupper => rules.Economy.SharedSupperReward,
+                _ => 0
+            };
+
+        private static bool QualifiesForCollectiveEvent(
+            DuckPlayerState player, DuckRuleDefinitions rules, DuckWorldEventType worldEvent) =>
+            worldEvent switch
+            {
+                DuckWorldEventType.AllTuckedIn => rules.BoardSpaceAt(player.Position).IsShelter
+                    && (rules.RulesRevision >= 5 || !player.IsWornOut),
+                DuckWorldEventType.HomeBeforeDark => !player.IsWornOut,
+                DuckWorldEventType.SharedSupper => player.PlacedHelpfulTypes.Contains(DuckEncounterType.Seeds),
+                _ => false
+            };
+
+        private static DuckRestBonusStatus CollectiveEventStatus(
+            DuckMatchState state, DuckRuleDefinitions rules, DuckPlayerState viewer,
+            DuckWorldEventType worldEvent, int award)
+        {
+            if (award == 0 || !QualifiesForCollectiveEvent(viewer, rules, worldEvent))
+                return DuckRestBonusStatus.Unavailable;
+            var others = state.Players.Where(player => player != viewer).ToArray();
+            if (others.Any(player => player.HasFinishedDay
+                    && !QualifiesForCollectiveEvent(player, rules, worldEvent)))
+                return DuckRestBonusStatus.Unavailable;
+            if (worldEvent == DuckWorldEventType.SharedSupper
+                && others.All(player => QualifiesForCollectiveEvent(player, rules, worldEvent)))
+                return DuckRestBonusStatus.Guaranteed;
+            return others.All(player => player.HasFinishedDay)
+                ? DuckRestBonusStatus.Guaranteed : DuckRestBonusStatus.Possible;
+        }
+
+        private static bool EligibleForFlock(DuckPlayerState player, DuckRuleDefinitions rules) =>
+            rules.RulesRevision >= 5 || !player.IsWornOut;
+
+        private static int GreatestEligibleFlock(DuckMatchState state, DuckRuleDefinitions rules) =>
+            state.Players.Where(player => EligibleForFlock(player, rules))
+                .Select(player => player.ActiveFlock).DefaultIfEmpty(0).Max();
+
+        private static int FlockAward(DuckRuleDefinitions rules, DuckPlayerState viewer) =>
+            EligibleForFlock(viewer, rules) && viewer.ActiveFlock > 0
+                ? rules.Economy.CalculateFlockLeaderReward(viewer.ActiveFlock) : 0;
+
+        private static DuckRestBonusStatus FlockStatus(
+            DuckMatchState state, DuckRuleDefinitions rules, DuckPlayerState viewer, int award)
+        {
+            if (award == 0) return DuckRestBonusStatus.Unavailable;
+            var others = state.Players.Where(player => player != viewer).ToArray();
+            if (others.Any(player => player.HasFinishedDay && EligibleForFlock(player, rules)
+                    && player.ActiveFlock > viewer.ActiveFlock))
+                return DuckRestBonusStatus.Unavailable;
+            return others.All(player => player.HasFinishedDay)
+                ? DuckRestBonusStatus.Guaranteed : DuckRestBonusStatus.Possible;
+        }
+
+        private static int BestSafeSleep(IEnumerable<NightAmounts> amounts) =>
+            amounts.Where(amount => !amount.Player.IsWornOut)
+                .Select(amount => amount.FrozenSleep).DefaultIfEmpty(-1).Max();
 
         internal static void Resolve(DuckMatchState state, DuckRuleDefinitions rules)
         {

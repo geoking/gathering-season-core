@@ -73,3 +73,20 @@ The terminal interface intentionally hides changing pouch composition and
 accumulated purchase lists. The opening recipe is shown before the first draw;
 every player's current-Night purchases remain visible until Dawn clears them.
 Explicit Signpost previews and already placed chips remain available.
+
+## Settling projection
+
+`DuckMatchView.RestPreview` is present during Adventure once the viewer has a
+placed chip. It projects resting on that occupied space through the same reward
+calculation used by Night, without issuing a command or consuming randomness.
+Twigs earned today include already-banked Reeds/event Twigs; the separate signed
+`NestTwigChangeOnRest` is the additional route change, excluding final Dream
+Twigs. Feathers are exact. Star and Dream Twig minimum/maximum bounds distinguish
+secure rewards from bonuses still dependent on the other ducks.
+
+Shared-event, Flock and Most Rested statuses are `Unavailable`, `Possible` or
+`Guaranteed`. Final-Day commitments remain private until their cohort resolves.
+Clients must not present a possible bonus as earned. The property is absent
+before a first placement and outside Adventure; resolved Night outcomes remain
+the authority after settlement. Retained catalogues use their original currency
+and conversion rules despite the current `Stars` property names.

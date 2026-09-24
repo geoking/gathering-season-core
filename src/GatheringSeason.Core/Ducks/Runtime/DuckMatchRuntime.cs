@@ -117,6 +117,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 Rules.ShopOffers,
                 history,
                 awards,
+                DuckNightResolver.Preview(State, Rules, viewer),
                 State.FinalDayDecisionBeat,
                 State.FinalDayCommits.Count > 0,
                 State.FinalResult);
