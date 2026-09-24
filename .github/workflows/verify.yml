@@ -1,0 +1,17 @@
+name: Verify
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  core-and-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 tools/check_public_boundary.py
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build GatheringSeason.sln --configuration Release
+      - run: dotnet test GatheringSeason.sln --configuration Release --no-build
+      - run: python3 -m unittest discover -s tools/tests -v
+      - run: dotnet run --project src/GatheringSeason.Cli --configuration Release --no-build -- --seed 42 --demo-game

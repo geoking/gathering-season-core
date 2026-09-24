@@ -1,0 +1,101 @@
+{
+  "status": "Current Gathering Season specification; Stars/Wishes economy. Rules revision 6.",
+  "offers": [
+    {
+      "id": "seeds",
+      "family": "Seeds",
+      "intrinsic_movement": 1,
+      "bundle_quantity": null,
+      "star_price": 0
+    },
+    {
+      "id": "tailwind_2",
+      "family": "Tailwind",
+      "intrinsic_movement": 2,
+      "bundle_quantity": null,
+      "star_price": 1
+    },
+    {
+      "id": "tailwind_4",
+      "family": "Tailwind",
+      "intrinsic_movement": 4,
+      "bundle_quantity": null,
+      "star_price": 2
+    },
+    {
+      "id": "tailwind_6",
+      "family": "Tailwind",
+      "intrinsic_movement": 6,
+      "bundle_quantity": null,
+      "star_price": 3
+    },
+    {
+      "id": "signpost",
+      "family": "Signpost",
+      "intrinsic_movement": 2,
+      "bundle_quantity": null,
+      "star_price": 2
+    },
+    {
+      "id": "splash",
+      "family": "Refreshing splash",
+      "intrinsic_movement": 1,
+      "bundle_quantity": null,
+      "star_price": 1
+    },
+    {
+      "id": "reeds_1",
+      "family": "Nesting reeds",
+      "intrinsic_movement": 1,
+      "bundle_quantity": 1,
+      "star_price": 2
+    },
+    {
+      "id": "reeds_2",
+      "family": "Nesting reeds",
+      "intrinsic_movement": 1,
+      "bundle_quantity": 2,
+      "star_price": 3
+    },
+    {
+      "id": "reeds_3",
+      "family": "Nesting reeds",
+      "intrinsic_movement": 1,
+      "bundle_quantity": 3,
+      "star_price": 4
+    },
+    {
+      "id": "companion",
+      "family": "Companion duck",
+      "intrinsic_movement": null,
+      "bundle_quantity": null,
+      "star_price": 2
+    },
+    {
+      "id": "wildflowers",
+      "family": "Wildflowers",
+      "intrinsic_movement": 1,
+      "bundle_quantity": null,
+      "star_price": 1
+    }
+  ],
+  "purchase_policy": {
+    "nights": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "stock": "unlimited for the initial balance pass",
+    "maximum_per_family_per_night": 1,
+    "night_10": "no purchases; convert each retained Star to one Dream Twig",
+    "remaining_stars_carry_to_next_day": false
+  },
+  "purchase_policy_status": "Approved: all Wishes, unlimited stock, one purchase per helpful type within nest capacity.",
+  "rules_revision": 4
+}

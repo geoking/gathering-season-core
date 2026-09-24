@@ -1,0 +1,787 @@
+{
+  "status": "Current Gathering Season specification; Stars/Wishes economy; shelter terminology. Rules revision 7.",
+  "version": 1,
+  "nest": {
+    "index": 0,
+    "scorable": false
+  },
+  "rows": [
+    {
+      "space": 1,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 2,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 3,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 4,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Reed hammock",
+      "stars": 2
+    },
+    {
+      "space": 5,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 6,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 7,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 8,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 9,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 10,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Willow nest",
+      "stars": 2
+    },
+    {
+      "space": 11,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 12,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 13,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 14,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 15,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 16,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 17,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Clover hollow",
+      "stars": 3
+    },
+    {
+      "space": 18,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 19,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 20,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 21,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Orchard shelter",
+      "stars": 3
+    },
+    {
+      "space": 22,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 23,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 24,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 25,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Hayloft hideaway",
+      "stars": 3
+    },
+    {
+      "space": 26,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 27,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 28,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 29,
+      "biome": "wasteland",
+      "twigs": 6,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 30,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 31,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 32,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": true,
+      "feathers": 2,
+      "shelterName": "Shaded rock nook",
+      "stars": 4
+    },
+    {
+      "space": 33,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 34,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 35,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 36,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": true,
+      "feathers": 2,
+      "shelterName": "Spring-fed refuge",
+      "stars": 4
+    },
+    {
+      "space": 37,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 38,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 39,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 40,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 41,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 42,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 43,
+      "biome": "wasteland",
+      "twigs": 9,
+      "shelter": true,
+      "feathers": 2,
+      "shelterName": "Oasis sanctuary",
+      "stars": 5
+    }
+  ],
+  "spaces": [
+    {
+      "space": 1,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 2,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 3,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 4,
+      "biome": "wetlands",
+      "twigs": 1,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Reed hammock",
+      "stars": 2
+    },
+    {
+      "space": 5,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 6,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 7,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 8,
+      "biome": "wetlands",
+      "twigs": 2,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 9,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 10,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Willow nest",
+      "stars": 2
+    },
+    {
+      "space": 11,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 12,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 13,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 14,
+      "biome": "wetlands",
+      "twigs": 3,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 15,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 16,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 17,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Clover hollow",
+      "stars": 3
+    },
+    {
+      "space": 18,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 19,
+      "biome": "meadow",
+      "twigs": 4,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 20,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 21,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Orchard shelter",
+      "stars": 3
+    },
+    {
+      "space": 22,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 23,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 24,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 25,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": true,
+      "feathers": 1,
+      "shelterName": "Hayloft hideaway",
+      "stars": 3
+    },
+    {
+      "space": 26,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 27,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 28,
+      "biome": "meadow",
+      "twigs": 5,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 2
+    },
+    {
+      "space": 29,
+      "biome": "wasteland",
+      "twigs": 6,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 30,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 31,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 32,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": true,
+      "feathers": 2,
+      "shelterName": "Shaded rock nook",
+      "stars": 4
+    },
+    {
+      "space": 33,
+      "biome": "wasteland",
+      "twigs": 7,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 34,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 35,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 36,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": true,
+      "feathers": 2,
+      "shelterName": "Spring-fed refuge",
+      "stars": 4
+    },
+    {
+      "space": 37,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 38,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 39,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 40,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 41,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 42,
+      "biome": "wasteland",
+      "twigs": 8,
+      "shelter": false,
+      "feathers": 0,
+      "shelterName": "",
+      "stars": 1
+    },
+    {
+      "space": 43,
+      "biome": "wasteland",
+      "twigs": 9,
+      "shelter": true,
+      "feathers": 2,
+      "shelterName": "Oasis sanctuary",
+      "stars": 5
+    }
+  ],
+  "rules_revision": 7
+}

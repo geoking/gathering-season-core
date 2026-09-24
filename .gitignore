@@ -1,0 +1,19 @@
+**/bin/
+**/obj/
+**/__pycache__/
+.vs/
+.vscode/
+.idea/
+TestResults/
+*.user
+*.suo
+*.log
+.DS_Store
+
+# Out-of-scope game presentation and local workspace output.
+/plans/
+/evidence/
+/screenshots/
+/assets/
+/Assets/
+/.codex/

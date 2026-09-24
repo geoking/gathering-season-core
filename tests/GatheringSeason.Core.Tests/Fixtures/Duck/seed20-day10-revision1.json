@@ -1,0 +1,1964 @@
+{
+  "FormatVersion": 1,
+  "ProfileId": "gathering-season.duck.v1",
+  "RulesVersion": 1,
+  "Settings": {
+    "Days": 10,
+    "StartingFeathers": 0
+  },
+  "Day": 10,
+  "Phase": 1,
+  "CurrentEventIndex": 9,
+  "FinalDayDecisionBeat": 2,
+  "NextPhysicalChipId": 52,
+  "Random": {
+    "Algorithm": "pcg32-v1",
+    "State": 1111864567167238653,
+    "Increment": 109
+  },
+  "WorldEventDeckDefinitionIds": [
+    "a_friendly_guide",
+    "sunlit_signboards",
+    "a_pocket_of_driftwood",
+    "thick_morning_mist",
+    "shared_supper",
+    "home_before_dark",
+    "restless_night",
+    "rain_softened_seeds",
+    "all_tucked_in",
+    "still_air"
+  ],
+  "Players": [
+    {
+      "Id": "human",
+      "Name": "Human",
+      "PermanentFeatherTrail": 18,
+      "TotalTwigs": 40,
+      "DayReedsTwigs": 0,
+      "DayEventTwigs": 0,
+      "Position": 20,
+      "Exhaustion": 1,
+      "SafeExhaustionMaximum": 5,
+      "ActiveFlock": 0,
+      "SplashProtectionArmed": false,
+      "LogSlowdownPending": false,
+      "GuideProtectionAvailable": false,
+      "PocketDriftwoodAwarded": false,
+      "FlowersPlaced": 0,
+      "FrozenSleep": 0,
+      "IsSleepFrozen": false,
+      "RemainingSleep": 0,
+      "PendingMostRestedStep": false,
+      "ActiveMostRestedStep": true,
+      "EffectiveStart": 19,
+      "HasFinishedDay": false,
+      "HasFinishedDream": false,
+      "IsWornOut": false,
+      "DawnTwigDeficit": 0,
+      "DawnFeathersAwarded": 0,
+      "Inventory": [
+        {
+          "PhysicalChipId": 1,
+          "DefinitionId": "fallen_log"
+        },
+        {
+          "PhysicalChipId": 2,
+          "DefinitionId": "fallen_log"
+        },
+        {
+          "PhysicalChipId": 3,
+          "DefinitionId": "mud_puddle"
+        },
+        {
+          "PhysicalChipId": 4,
+          "DefinitionId": "mud_puddle"
+        },
+        {
+          "PhysicalChipId": 5,
+          "DefinitionId": "loose_pebbles"
+        },
+        {
+          "PhysicalChipId": 6,
+          "DefinitionId": "loose_pebbles"
+        },
+        {
+          "PhysicalChipId": 7,
+          "DefinitionId": "brambles"
+        },
+        {
+          "PhysicalChipId": 8,
+          "DefinitionId": "brambles"
+        },
+        {
+          "PhysicalChipId": 9,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 10,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 11,
+          "DefinitionId": "tailwind_2"
+        },
+        {
+          "PhysicalChipId": 12,
+          "DefinitionId": "signpost"
+        },
+        {
+          "PhysicalChipId": 13,
+          "DefinitionId": "splash"
+        },
+        {
+          "PhysicalChipId": 27,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 29,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 31,
+          "DefinitionId": "reeds_1"
+        },
+        {
+          "PhysicalChipId": 33,
+          "DefinitionId": "companion"
+        },
+        {
+          "PhysicalChipId": 35,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 37,
+          "DefinitionId": "grumpy_goose"
+        },
+        {
+          "PhysicalChipId": 39,
+          "DefinitionId": "tailwind_4"
+        },
+        {
+          "PhysicalChipId": 43,
+          "DefinitionId": "tailwind_6"
+        },
+        {
+          "PhysicalChipId": 44,
+          "DefinitionId": "reeds_3"
+        },
+        {
+          "PhysicalChipId": 47,
+          "DefinitionId": "reeds_3"
+        },
+        {
+          "PhysicalChipId": 48,
+          "DefinitionId": "splash"
+        },
+        {
+          "PhysicalChipId": 50,
+          "DefinitionId": "reeds_3"
+        },
+        {
+          "PhysicalChipId": 51,
+          "DefinitionId": "companion"
+        }
+      ],
+      "BagPhysicalChipIds": [
+        51,
+        39,
+        27,
+        13,
+        10,
+        44,
+        3,
+        12,
+        11,
+        43,
+        29,
+        33,
+        1,
+        47,
+        37,
+        35,
+        9,
+        5,
+        31,
+        2,
+        6,
+        48,
+        7,
+        4,
+        50
+      ],
+      "KnownNextPhysicalChipIds": [],
+      "PlacedChips": [
+        {
+          "PhysicalChipId": 8,
+          "Position": 20,
+          "NuisanceSuppressed": false
+        }
+      ],
+      "PlacedHelpfulTypes": [],
+      "PurchasedEncounterDefinitionIds": [],
+      "PurchasedShopTypes": [],
+      "LastNightOutcome": {
+        "Day": 9,
+        "PrintedSleep": 20,
+        "PrintedTwigs": 8,
+        "ReedsTwigs": 4,
+        "EventTwigs": 0,
+        "BramblesPenalty": 0,
+        "FlowerSleep": 0,
+        "FinalHavenSleep": 0,
+        "RestlessNightPenalty": 0,
+        "CollectiveEventSleep": 2,
+        "FlockSleep": 1,
+        "PebblesPenalty": 0,
+        "SleepBeforeWear": 23,
+        "FrozenSleep": 23,
+        "TotalTwigsEarned": 12,
+        "FeathersAwarded": 2,
+        "IsMostRested": true,
+        "NextDayTemporaryStep": 1,
+        "DreamTwigs": 0
+      }
+    },
+    {
+      "Id": "ai",
+      "Name": "AI",
+      "PermanentFeatherTrail": 8,
+      "TotalTwigs": 32,
+      "DayReedsTwigs": 0,
+      "DayEventTwigs": 0,
+      "Position": 10,
+      "Exhaustion": 0,
+      "SafeExhaustionMaximum": 5,
+      "ActiveFlock": 0,
+      "SplashProtectionArmed": false,
+      "LogSlowdownPending": false,
+      "GuideProtectionAvailable": false,
+      "PocketDriftwoodAwarded": false,
+      "FlowersPlaced": 0,
+      "FrozenSleep": 0,
+      "IsSleepFrozen": false,
+      "RemainingSleep": 0,
+      "PendingMostRestedStep": false,
+      "ActiveMostRestedStep": false,
+      "EffectiveStart": 8,
+      "HasFinishedDay": false,
+      "HasFinishedDream": false,
+      "IsWornOut": false,
+      "DawnTwigDeficit": 8,
+      "DawnFeathersAwarded": 2,
+      "Inventory": [
+        {
+          "PhysicalChipId": 14,
+          "DefinitionId": "fallen_log"
+        },
+        {
+          "PhysicalChipId": 15,
+          "DefinitionId": "fallen_log"
+        },
+        {
+          "PhysicalChipId": 16,
+          "DefinitionId": "mud_puddle"
+        },
+        {
+          "PhysicalChipId": 17,
+          "DefinitionId": "mud_puddle"
+        },
+        {
+          "PhysicalChipId": 18,
+          "DefinitionId": "loose_pebbles"
+        },
+        {
+          "PhysicalChipId": 19,
+          "DefinitionId": "loose_pebbles"
+        },
+        {
+          "PhysicalChipId": 20,
+          "DefinitionId": "brambles"
+        },
+        {
+          "PhysicalChipId": 21,
+          "DefinitionId": "brambles"
+        },
+        {
+          "PhysicalChipId": 22,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 23,
+          "DefinitionId": "seeds"
+        },
+        {
+          "PhysicalChipId": 24,
+          "DefinitionId": "tailwind_2"
+        },
+        {
+          "PhysicalChipId": 25,
+          "DefinitionId": "signpost"
+        },
+        {
+          "PhysicalChipId": 26,
+          "DefinitionId": "splash"
+        },
+        {
+          "PhysicalChipId": 28,
+          "DefinitionId": "reeds_1"
+        },
+        {
+          "PhysicalChipId": 30,
+          "DefinitionId": "companion"
+        },
+        {
+          "PhysicalChipId": 32,
+          "DefinitionId": "tailwind_4"
+        },
+        {
+          "PhysicalChipId": 34,
+          "DefinitionId": "companion"
+        },
+        {
+          "PhysicalChipId": 36,
+          "DefinitionId": "splash"
+        },
+        {
+          "PhysicalChipId": 38,
+          "DefinitionId": "grumpy_goose"
+        },
+        {
+          "PhysicalChipId": 40,
+          "DefinitionId": "companion"
+        },
+        {
+          "PhysicalChipId": 41,
+          "DefinitionId": "wildflowers"
+        },
+        {
+          "PhysicalChipId": 42,
+          "DefinitionId": "splash"
+        },
+        {
+          "PhysicalChipId": 45,
+          "DefinitionId": "splash"
+        },
+        {
+          "PhysicalChipId": 46,
+          "DefinitionId": "reeds_1"
+        },
+        {
+          "PhysicalChipId": 49,
+          "DefinitionId": "reeds_2"
+        }
+      ],
+      "BagPhysicalChipIds": [
+        21,
+        38,
+        45,
+        16,
+        25,
+        17,
+        24,
+        20,
+        30,
+        15,
+        19,
+        49,
+        23,
+        14,
+        26,
+        40,
+        36,
+        22,
+        18,
+        46,
+        34,
+        41,
+        28,
+        42
+      ],
+      "KnownNextPhysicalChipIds": [],
+      "PlacedChips": [
+        {
+          "PhysicalChipId": 32,
+          "Position": 10,
+          "NuisanceSuppressed": false
+        }
+      ],
+      "PlacedHelpfulTypes": [
+        1
+      ],
+      "PurchasedEncounterDefinitionIds": [],
+      "PurchasedShopTypes": [],
+      "LastNightOutcome": {
+        "Day": 9,
+        "PrintedSleep": 10,
+        "PrintedTwigs": 3,
+        "ReedsTwigs": 1,
+        "EventTwigs": 0,
+        "BramblesPenalty": 0,
+        "FlowerSleep": 0,
+        "FinalHavenSleep": 0,
+        "RestlessNightPenalty": 0,
+        "CollectiveEventSleep": 2,
+        "FlockSleep": 0,
+        "PebblesPenalty": 0,
+        "SleepBeforeWear": 12,
+        "FrozenSleep": 12,
+        "TotalTwigsEarned": 4,
+        "FeathersAwarded": 1,
+        "IsMostRested": false,
+        "NextDayTemporaryStep": 0,
+        "DreamTwigs": 0
+      }
+    }
+  ],
+  "History": [
+    {
+      "Day": 1,
+      "ActorId": "human",
+      "Message": "Human placed Fallen log at space 1."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI placed Signpost at space 2."
+    },
+    {
+      "Day": 1,
+      "ActorId": "human",
+      "Message": "Human settled down at space 1."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI placed Tailwind 2 at space 4."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI settled down at space 4."
+    },
+    {
+      "Day": 1,
+      "ActorId": "human",
+      "Message": "Human rests at 1: 1 Twigs today, 3 Sleep."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI rests at 4: 1 Twigs today, 6 Sleep."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI is a Most Rested Duck."
+    },
+    {
+      "Day": 1,
+      "ActorId": "human",
+      "Message": "Human buys Seeds for 3 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI buys Nesting reeds 1 for 6 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 1,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 1,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 2,
+      "ActorId": "human",
+      "Message": "Human starts Day 2 at 0: trail 0, temporary Most Rested 0; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI starts Day 2 at 2: trail 1, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 2,
+      "ActorId": "",
+      "Message": "World Event: Sunlit Signboards."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Signpost at space 4."
+    },
+    {
+      "Day": 2,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 1."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 5."
+    },
+    {
+      "Day": 2,
+      "ActorId": "human",
+      "Message": "Human settled down at space 1."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 6."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Brambles at space 7."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Mud puddle at space 8."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Nesting reeds 1 at space 9."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 10."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI settled down at space 10."
+    },
+    {
+      "Day": 2,
+      "ActorId": "human",
+      "Message": "Human rests at 1: 1 Twigs today, 3 Sleep."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI rests at 10: 4 Twigs today, 10 Sleep."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI is a Most Rested Duck."
+    },
+    {
+      "Day": 2,
+      "ActorId": "human",
+      "Message": "Human buys Seeds for 3 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI buys Companion duck for 7 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 2,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 2,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human starts Day 3 at 1: trail 1, temporary Most Rested 0; Dawn deficit 3 gave 1 Feather(s)."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI starts Day 3 at 3: trail 2, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 3,
+      "ActorId": "",
+      "Message": "World Event: A Pocket of Driftwood."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 4."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 2."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 5."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 2 at space 4."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Mud puddle at space 6."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human settled down at space 4."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 7."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI gained 1 Twig from A Pocket of Driftwood."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Nesting reeds 1 at space 8."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 9."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 10."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI settled down at space 10."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human rests at 4: 1 Twigs today, 6 Sleep."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI rests at 10: 5 Twigs today, 10 Sleep."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI is a Most Rested Duck."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human buys Nesting reeds 1 for 6 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI buys Tailwind 4 for 10 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 3,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 3,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human gains 2 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human starts Day 4 at 4: trail 4, temporary Most Rested 0; Dawn deficit 7 gave 2 Feather(s)."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI starts Day 4 at 4: trail 3, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 4,
+      "ActorId": "",
+      "Message": "World Event: Thick Morning Mist."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 5."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human placed Fallen log at space 5."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 6."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 2 at space 6."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 7."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human placed Signpost at space 8."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 8."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human placed Mud puddle at space 9."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 9."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 10."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Brambles at space 10."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human settled down at space 10."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Tailwind 2 at space 12."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Signpost at space 14."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 15."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 16."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI settled down at space 16."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human rests at 10: 3 Twigs today, 10 Sleep."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI rests at 16: 4 Twigs today, 12 Sleep."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI is a Most Rested Duck."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human buys Companion duck for 7 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI buys Companion duck for 7 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human buys Seeds for 3 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI buys Refreshing splash for 4 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 4,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 4,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human gains 2 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human starts Day 5 at 7: trail 7, temporary Most Rested 0; Dawn deficit 8 gave 2 Feather(s)."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI starts Day 5 at 5: trail 4, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 5,
+      "ActorId": "",
+      "Message": "World Event: Shared Supper."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 6."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 8."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI placed Companion duck at space 8."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human placed Companion duck at space 10."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI placed Brambles at space 9."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human settled down at space 10."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 10."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI settled down at space 10."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human rests at 10: 3 Twigs today, 12 Sleep."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human is a Most Rested Duck."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI rests at 10: 3 Twigs today, 12 Sleep."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI is a Most Rested Duck."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human buys Tailwind 4 for 10 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI buys Companion duck for 7 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 5,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI buys Wildflowers for 5 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 5,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human gains 2 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human starts Day 6 at 11: trail 10, temporary Most Rested 1; Dawn deficit 8 gave 2 Feather(s)."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI starts Day 6 at 6: trail 5, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 6,
+      "ActorId": "",
+      "Message": "World Event: Home Before Dark."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 7."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Brambles at space 12."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 8."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 2 at space 14."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 9."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Refreshing splash at space 15."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Brambles at space 10."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Companion duck at space 17."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 11."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Loose pebbles at space 18."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Wildflowers at space 12."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 19."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Brambles at space 13."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Loose pebbles at space 20."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI placed Mud puddle at space 14."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI became worn out at space 14."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human placed Mud puddle at space 21."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human settled down at space 21."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human rests at 21: 5 Twigs today, 15 Sleep."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human is a Most Rested Duck."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI rests at 14: 3 Twigs today, 4 Sleep after worn-out halving."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI buys Refreshing splash for 4 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human buys Tailwind 6 for 15 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 6,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 6,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human starts Day 7 at 13: trail 12, temporary Most Rested 1; Dawn deficit 6 gave 1 Feather(s)."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI starts Day 7 at 5: trail 5, temporary Most Rested 0; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 7,
+      "ActorId": "",
+      "Message": "World Event: Restless Night."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 4 at space 17."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Companion duck at space 7."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human placed Companion duck at space 19."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 8."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 20."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 9."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 6 at space 26."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Tailwind 4 at space 13."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human settled down at space 26."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 14."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Brambles at space 15."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 16."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Mud puddle at space 17."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Grumpy Goose at space 18."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 19."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI became worn out at space 19."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human rests at 26: 5 Twigs today, 16 Sleep."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human is a Most Rested Duck."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI rests at 19: 4 Twigs today, 5 Sleep after worn-out halving."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human buys Nesting reeds 3 for 16 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI buys Refreshing splash for 4 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 7,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 7,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human gains 1 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human starts Day 8 at 15: trail 14, temporary Most Rested 1; Dawn deficit 5 gave 1 Feather(s)."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI starts Day 8 at 5: trail 5, temporary Most Rested 0; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 8,
+      "ActorId": "",
+      "Message": "World Event: Rain-Softened Seeds."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Tailwind 2 at space 7."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Signpost at space 17."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 8."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 19."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 9."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Loose pebbles at space 20."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 10."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Brambles at space 21."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Fallen log at space 11."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Mud puddle at space 22."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Seeds at space 12."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 24."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Refreshing splash at space 13."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Loose pebbles at space 25."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Mud puddle at space 14."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 27."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Loose pebbles at space 15."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 29."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI placed Mud puddle at space 16."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI became worn out at space 16."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 31."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 2 at space 33."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Companion duck at space 35."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human placed Nesting reeds 1 at space 36."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human settled down at space 36."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human gains 2 Feather(s) from haven."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human rests at 36: 9 Twigs today, 21 Sleep."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human is a Most Rested Duck."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI rests at 16: 4 Twigs today, 6 Sleep after worn-out halving."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI buys Nesting reeds 1 for 6 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human buys Nesting reeds 3 for 16 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 8,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human buys Refreshing splash for 4 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 8,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human starts Day 9 at 17: trail 16, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI starts Day 9 at 5: trail 5, temporary Most Rested 0; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 9,
+      "ActorId": "",
+      "Message": "World Event: All Tucked In."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 18."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI placed Nesting reeds 1 at space 6."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Tailwind 6 at space 24."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI placed Tailwind 4 at space 10."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Nesting reeds 1 at space 25."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI settled down at space 10."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Signpost at space 27."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Fallen log at space 28."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Seeds at space 29."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Grumpy Goose at space 30."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Brambles at space 31."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Companion duck at space 33."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Nesting reeds 3 at space 34."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Refreshing splash at space 35."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human placed Mud puddle at space 36."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human settled down at space 36."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human gains 2 Feather(s) from haven."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human rests at 36: 12 Twigs today, 23 Sleep."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human is a Most Rested Duck."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI gains 1 Feather(s) from haven."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI rests at 10: 4 Twigs today, 12 Sleep."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI buys Nesting reeds 2 for 11 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human buys Nesting reeds 3 for 16 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 9,
+      "ActorId": "ai",
+      "Message": "AI finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human buys Companion duck for 7 Sleep; it enters tomorrow\u0027s bag."
+    },
+    {
+      "Day": 9,
+      "ActorId": "human",
+      "Message": "Human finishes Dream choices; unspent Sleep expires."
+    },
+    {
+      "Day": 10,
+      "ActorId": "human",
+      "Message": "Human starts Day 10 at 19: trail 18, temporary Most Rested 1; Dawn deficit 0 gave 0 Feather(s)."
+    },
+    {
+      "Day": 10,
+      "ActorId": "ai",
+      "Message": "AI gains 2 Feather(s) from dawn_delivery."
+    },
+    {
+      "Day": 10,
+      "ActorId": "ai",
+      "Message": "AI starts Day 10 at 8: trail 8, temporary Most Rested 0; Dawn deficit 8 gave 2 Feather(s)."
+    },
+    {
+      "Day": 10,
+      "ActorId": "",
+      "Message": "World Event: Still Air."
+    },
+    {
+      "Day": 10,
+      "ActorId": "human",
+      "Message": "Human placed Brambles at space 20."
+    },
+    {
+      "Day": 10,
+      "ActorId": "ai",
+      "Message": "AI placed Tailwind 4 at space 10."
+    }
+  ],
+  "PublicAwards": [
+    {
+      "Day": 1,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 1,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 2,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 2,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 3,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 3,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 3,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 3,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 4,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 2
+    },
+    {
+      "Day": 4,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 4,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 4,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 5,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 2
+    },
+    {
+      "Day": 5,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 5,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 5,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 5,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 6,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 2
+    },
+    {
+      "Day": 6,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 6,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 7,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 7,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 7,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 8,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 8,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 2
+    },
+    {
+      "Day": 8,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 9,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 2
+    },
+    {
+      "Day": 9,
+      "DefinitionId": "most_rested",
+      "PlayerIds": [
+        "human"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 0
+    },
+    {
+      "Day": 9,
+      "DefinitionId": "haven",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 1
+    },
+    {
+      "Day": 10,
+      "DefinitionId": "dawn_delivery",
+      "PlayerIds": [
+        "ai"
+      ],
+      "Sleep": 0,
+      "Twigs": 0,
+      "Feathers": 2
+    }
+  ],
+  "FinalDayCommits": [
+    {
+      "Beat": 2,
+      "PlayerId": "human",
+      "ActionKind": 11
+    }
+  ],
+  "CommandRevisions": [
+    {
+      "PlayerId": "human",
+      "Revision": 86
+    },
+    {
+      "PlayerId": "ai",
+      "Revision": 90
+    }
+  ],
+  "DayFiveGooseAdded": true,
+  "FinalResult": null
+}
