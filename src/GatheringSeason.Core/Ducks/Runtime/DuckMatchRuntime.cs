@@ -28,8 +28,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
             State.WorldEventDeckDefinitionIds.AddRange(Rules.WorldEvents.Select(item => item.DefinitionId));
             ShuffleInPlace(State.WorldEventDeckDefinitionIds);
-            State.Players.Add(CreatePlayer("human", "Human"));
-            State.Players.Add(CreatePlayer("ai", "AI"));
+            for (var seat = 0; seat < settings.PlayerCount; seat++)
+                State.Players.Add(CreatePlayer(DuckPlayerSeats.Id(seat), DuckPlayerSeats.Name(seat)));
             if (CurrentEvent.EventType == DuckWorldEventType.FriendlyGuide)
                 foreach (var player in State.Players) player.GuideProtectionAvailable = true;
             State.RandomState = _random.CaptureState();

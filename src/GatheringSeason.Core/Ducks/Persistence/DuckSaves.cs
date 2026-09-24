@@ -29,7 +29,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 Settings = new DuckSaveSettingsData
                 {
                     Days = state.Settings.Days,
-                    StartingFeathers = state.Settings.StartingFeathers
+                    StartingFeathers = state.Settings.StartingFeathers,
+                    PlayerCount = state.Settings.PlayerCount,
+                    WishSetId = state.Settings.WishSetId
                 },
                 Day = state.Day,
                 Phase = state.Phase,
@@ -80,7 +82,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
         public static MatchSession<DuckMatchView> Restore(DuckSaveData save)
         {
             Validate(save);
-            var state = new DuckMatchState(DuckMatchSettings.Standard, save.RulesVersion)
+            var state = new DuckMatchState(SettingsFromSave(save), save.RulesVersion)
             {
                 Day = save.Day,
                 Phase = save.Phase,
@@ -121,6 +123,14 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 "Settings.Days must match the ten-Day rules profile.");
             Require(save.Settings.StartingFeathers == 0,
                 "Settings.StartingFeathers must match the approved fixed-zero setting.");
+            var playerCount = save.Settings.PlayerCount == 0 ? 2 : save.Settings.PlayerCount;
+            Require(playerCount >= 2 && playerCount <= 4,
+                "Settings.PlayerCount must be two, three or four.");
+            Require(save.RulesVersion == CurrentRulesVersion || playerCount == 2,
+                "Earlier rules revisions support two players only.");
+            Require(save.Settings.WishSetId == null || save.Settings.WishSetId.Length == 0
+                    || save.Settings.WishSetId == DuckMatchSettings.StandardWishSetId,
+                "Settings.WishSetId is unsupported.");
             Require(save.Day >= 1 && save.Day <= DuckMatchSettings.StandardDays, "Day is outside the supported calendar.");
             Require(Enum.IsDefined(typeof(DuckPhase), save.Phase), "Phase is not defined.");
             Require(save.Phase != DuckPhase.Preparation, "Preparation is not a resumable command boundary.");
@@ -138,11 +148,12 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 "WorldEventDeckDefinitionIds must contain each v1 event exactly once.");
 
             Require(save.Players != null, "Players are required.");
-            Require(save.Players.Count == 2, "A Duck v1 save needs exactly two players.");
-            var expectedPlayerIds = new HashSet<string>(new[] { "human", "ai" }, StringComparer.Ordinal);
-            Require(save.Players[0] != null && save.Players[0].Id == "human"
-                    && save.Players[1] != null && save.Players[1].Id == "ai",
-                "Players must contain the human then AI in fixed reveal order.");
+            Require(save.Players.Count == playerCount, "Players must match Settings.PlayerCount.");
+            var expectedPlayerIds = new HashSet<string>(
+                Enumerable.Range(0, playerCount).Select(DuckPlayerSeats.Id), StringComparer.Ordinal);
+            Require(save.Players.Select((player, seat) => player != null && player.Id == DuckPlayerSeats.Id(seat)).All(valid => valid),
+                "Players must follow the fixed human and AI reveal order.");
+            Require(save.FinalDayCommits != null, "FinalDayCommits are required.");
 
             var physicalIds = new HashSet<int>();
             foreach (var player in save.Players)
@@ -164,6 +175,13 @@ namespace GatheringSeason.Core.Ducks.Persistence
             ValidateGoose(save);
             ValidateFinalResult(save, expectedPlayerIds);
             ValidatePhase(save);
+        }
+
+        private static DuckMatchSettings SettingsFromSave(DuckSaveData save)
+        {
+            return new DuckMatchSettings(save.Settings.PlayerCount == 0 ? 2 : save.Settings.PlayerCount,
+                string.IsNullOrEmpty(save.Settings.WishSetId)
+                    ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId);
         }
 
         private static DuckPlayerSaveData CapturePlayer(DuckPlayerState player)
@@ -335,6 +353,14 @@ namespace GatheringSeason.Core.Ducks.Persistence
             ISet<int> allPhysicalIds,
             DuckRuleDefinitions rules)
         {
+            Require(player.Inventory != null, $"Players[{player.Id}].Inventory is required.");
+            Require(player.BagPhysicalChipIds != null, $"Players[{player.Id}].BagPhysicalChipIds are required.");
+            Require(player.KnownNextPhysicalChipIds != null, $"Players[{player.Id}].KnownNextPhysicalChipIds are required.");
+            Require(player.PlacedChips != null, $"Players[{player.Id}].PlacedChips are required.");
+            Require(player.PlacedHelpfulTypes != null, $"Players[{player.Id}].PlacedHelpfulTypes are required.");
+            Require(player.PurchasedEncounterDefinitionIds != null,
+                $"Players[{player.Id}].PurchasedEncounterDefinitionIds are required.");
+            Require(player.PurchasedShopTypes != null, $"Players[{player.Id}].PurchasedShopTypes are required.");
             Require(!string.IsNullOrWhiteSpace(player.Name), $"Players[{player.Id}].Name is required.");
             NonNegative(player.PermanentFeatherTrail, $"Players[{player.Id}].PermanentFeatherTrail");
             NonNegative(player.TotalTwigs, $"Players[{player.Id}].TotalTwigs");
@@ -377,15 +403,6 @@ namespace GatheringSeason.Core.Ducks.Persistence
             NonNegative(player.DawnTwigDeficit, $"Players[{player.Id}].DawnTwigDeficit");
             Require(player.DawnFeathersAwarded >= 0 && player.DawnFeathersAwarded <= 3,
                 $"Players[{player.Id}].DawnFeathersAwarded is outside the Dawn table.");
-            Require(player.Inventory != null, $"Players[{player.Id}].Inventory is required.");
-            Require(player.BagPhysicalChipIds != null, $"Players[{player.Id}].BagPhysicalChipIds are required.");
-            Require(player.KnownNextPhysicalChipIds != null, $"Players[{player.Id}].KnownNextPhysicalChipIds are required.");
-            Require(player.PlacedChips != null, $"Players[{player.Id}].PlacedChips are required.");
-            Require(player.PlacedHelpfulTypes != null, $"Players[{player.Id}].PlacedHelpfulTypes are required.");
-            Require(player.PurchasedEncounterDefinitionIds != null,
-                $"Players[{player.Id}].PurchasedEncounterDefinitionIds are required.");
-            Require(player.PurchasedShopTypes != null, $"Players[{player.Id}].PurchasedShopTypes are required.");
-
             var inventoryIds = new HashSet<int>();
             var inventoryById = new Dictionary<int, string>();
             foreach (var chip in player.Inventory)
