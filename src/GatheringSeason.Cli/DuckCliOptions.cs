@@ -2,7 +2,7 @@ namespace GatheringSeason.Cli;
 
 internal sealed class DuckCliOptions
 {
-    internal const string Usage = "Usage: GatheringSeason.Cli --profile ducks [--seed integer] [--inspect | --demo-day | --demo-game] [--save path | --no-save] [--continue | --new-game] [--two-player]";
+    internal const string Usage = "Usage: GatheringSeason.Cli [--profile ducks] [--seed integer] [--players 2|3|4] [--wish-set set-1] [--inspect | --demo-day | --demo-game] [--save path | --no-save] [--continue | --new-game] [--two-player]";
     internal int? FixedSeed { get; private set; }
     internal bool InspectOnly { get; private set; }
     internal bool DemoDay { get; private set; }
@@ -11,6 +11,8 @@ internal sealed class DuckCliOptions
     internal bool NewGame { get; private set; }
     internal bool TwoPlayer { get; private set; }
     internal bool NoSave { get; private set; }
+    internal int PlayerCount { get; private set; } = 2;
+    internal string WishSetId { get; private set; } = "set-1";
     internal string? SavePath { get; private set; }
 
     internal bool ShouldSave => !NoSave && !InspectOnly
@@ -47,6 +49,16 @@ internal sealed class DuckCliOptions
                 case "--seed":
                     if (!int.TryParse(Value(), out var seed)) throw new ArgumentException("--seed requires an integer.");
                     options.FixedSeed = seed;
+                    break;
+                case "--players":
+                    if (!int.TryParse(Value(), out var playerCount) || playerCount is < 2 or > 4)
+                        throw new ArgumentException("--players requires 2, 3 or 4.");
+                    options.PlayerCount = playerCount;
+                    break;
+                case "--wish-set":
+                    options.WishSetId = Value();
+                    if (options.WishSetId != "set-1")
+                        throw new ArgumentException("--wish-set currently supports set-1 only.");
                     break;
                 case "--inspect" when parts.Length == 1: options.InspectOnly = true; break;
                 case "--demo-day" when parts.Length == 1: options.DemoDay = true; break;

@@ -32,14 +32,14 @@ internal static class DuckCli
             else
             {
                 seed = options.CreateSeed();
-                match = MatchSession.CreateDuck(seed.Value);
+                match = MatchSession.CreateDuck(seed.Value, new DuckMatchSettings(options.PlayerCount, options.WishSetId));
             }
             if (recoveredBackup)
                 Console.Error.WriteLine("Recovered the previous saved action from backup; the latest primary save could not be read.");
-            Console.WriteLine(resume
-                ? "Gathering Season · 10 Days · continuing saved game"
-                : $"Gathering Season · 10 Days · seed {seed} · all ducks start at the nest");
             var initial = match.GetSnapshot("human");
+            Console.WriteLine(resume
+                ? $"Gathering Season · 10 Days · continuing saved game · {initial.Settings.PlayerCount} players · Wish Set {initial.Settings.WishSetId}"
+                : $"Gathering Season · 10 Days · seed {seed} · {initial.Settings.PlayerCount} players · Wish Set {initial.Settings.WishSetId} · all ducks start at the nest");
             Console.WriteLine($"Rules revision {initial.RulesRevision} · {initial.Economy.CurrencyName}" +
                 (initial.Economy.UsesStars ? " buy Wishes; Obstacles remain in your pouch." : " · legacy economy preserved for this saved game."));
             DuckCliRenderer.ShowStatus(initial);

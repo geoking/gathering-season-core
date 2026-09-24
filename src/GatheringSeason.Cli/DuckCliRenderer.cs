@@ -13,7 +13,8 @@ internal static class DuckCliRenderer
         foreach (var player in view.Players)
         {
             var state = player.IsWornOut ? " · WORN OUT" : player.HasFinishedDay ? " · resting" : string.Empty;
-            Console.WriteLine($"{player.Name}: {Quantity(player.TotalTwigs, "Nest Twig")} · space {player.Position} · Exhaustion {player.Exhaustion}/{player.SafeExhaustionMaximum} · pouch {Quantity(player.BagCount, "chip")}{state}");
+            Console.WriteLine($"{player.Name}: {Quantity(player.TotalTwigs, "Nest Twig")} · space {player.Position} · Exhaustion {player.Exhaustion}/{player.SafeExhaustionMaximum}" +
+                (player.BagCount == 0 ? " · pouch empty" : string.Empty) + state);
             Console.WriteLine($"  Feather trail {Quantity(player.PermanentFeatherTrail, "Feather")} · today's start space {player.EffectiveStart} · active flock {Quantity(player.ActiveFlock, "Companion")}" +
                 (player.ActiveMostRestedStep ? " · Most Rested head start +1" : string.Empty) +
                 (player.PendingMostRestedStep ? " · Most Rested head start tomorrow" : string.Empty));
@@ -38,7 +39,7 @@ internal static class DuckCliRenderer
             ? "Nearest forthcoming shelter: none; the route ends at space 43."
             : $"Nearest forthcoming shelter: {nextShelter.Space} {nextShelter.ShelterName} · printed {Reward(nextShelter, view.Economy)}");
         ShowPreview(view);
-        foreach (var entry in view.History.TakeLast(recentHistory))
+        foreach (var entry in PublicHistory(view).TakeLast(recentHistory))
             Console.WriteLine($"  D{entry.Day} {(string.IsNullOrEmpty(entry.ActorId) ? "match" : entry.ActorId)}: {entry.Message}");
         ShowFinal(view);
         Console.WriteLine();
@@ -52,24 +53,25 @@ internal static class DuckCliRenderer
             : view.Rules.BoardSpaces;
         foreach (var space in spaces)
         {
-            var markers = view.Players.Where(player => player.Position == space.Space).Select(player => player.Id == "human" ? "H" : "AI").ToArray();
+            var markers = view.Players.Where(player => player.Position == space.Space)
+                .Select(player => player.Id == "human" ? "H" : player.Id.ToUpperInvariant()).ToArray();
             var marker = markers.Length == 0 ? "" : " [" + string.Join(",", markers) + "]";
             var shelter = space.IsShelter ? " · SHELTER: " + space.ShelterName : string.Empty;
             Console.WriteLine($"{space.Space,2}. {space.Biome,-9} · {Reward(space, view.Economy)}{shelter}{marker}");
         }
         if (selectedSpace.HasValue && !spaces.Any())
             Console.WriteLine("Choose a board space from 1 to 43.");
-        Console.WriteLine("Markers: H = human, AI = Normal opponent. Rewards pay only where the duck finally rests.");
+        Console.WriteLine("Markers: H = human; AI, AI-2 and AI-3 = Normal opponents. Rewards pay only where the duck finally rests.");
         Console.WriteLine("Twigs are the cumulative board total printed at that final space; do not add every space passed.");
         Console.WriteLine();
     }
 
     internal static void ShowBag(DuckMatchView view)
     {
-        Console.WriteLine($"{Player(view).Name}'s private pouch information");
-        ShowComposition("Remaining pouch", view.OwnBag);
-        ShowComposition("Owned inventory", view.OwnInventory);
-        Console.WriteLine("Remaining entries are counts sorted by name, never shuffled future order.");
+        if (CanShowOpeningRecipe(view))
+            ShowOpeningRecipe(view);
+        else
+            Console.WriteLine("Track your pouch from the opening recipe, placed chips and each Night's purchases.");
         ShowPreview(view);
         Console.WriteLine();
     }
@@ -134,6 +136,16 @@ internal static class DuckCliRenderer
             Console.WriteLine($"  Twigs: printed {night.PrintedTwigs}, Reeds +{night.ReedsTwigs}, event +{night.EventTwigs}, Brambles -{night.BramblesPenalty}.");
             if (night.DreamTwigs > 0) Console.WriteLine($"  Dream Twigs: {Quantity(night.DreamTwigs, "Twig")}.");
         }
+        if (view.Phase is DuckPhase.Night or DuckPhase.DayComplete && nights[0].LastNightOutcome!.Day == view.Day)
+        {
+            Console.WriteLine("Current Night purchases entering tomorrow's pouch:");
+            foreach (var player in view.Players)
+            {
+                var purchases = player.PurchasedEncounterDefinitionIds
+                    .Select(id => view.Rules.ShopOffer(id).Encounter.Name).ToArray();
+                Console.WriteLine($"  {player.Name}: " + (purchases.Length == 0 ? "none yet" : string.Join(", ", purchases)));
+            }
+        }
         Console.WriteLine();
     }
 
@@ -147,26 +159,29 @@ internal static class DuckCliRenderer
     internal static void ShowHistory(DuckMatchView view)
     {
         Console.WriteLine("Public match history");
-        if (view.History.Count == 0) Console.WriteLine("  No completed actions yet.");
-        foreach (var entry in view.History)
+        var history = PublicHistory(view).ToArray();
+        if (history.Length == 0) Console.WriteLine("  No completed actions yet.");
+        foreach (var entry in history)
             Console.WriteLine($"  D{entry.Day} {(string.IsNullOrEmpty(entry.ActorId) ? "match" : entry.ActorId)}: {entry.Message}");
         Console.WriteLine();
     }
 
-    internal static void ShowHelp(bool twoPlayer)
+    internal static void ShowHelp(bool twoPlayer, IReadOnlyList<string> seatIds)
     {
         Console.WriteLine("Commands: action number, help, status, board [1-43], pouch, wishes/tokens, shop, event, night, history, r/restart, q/quit");
         Console.WriteLine(twoPlayer
-            ? "Developer controls: human:N or ai:N executes that duck's issued action; view:human and view:ai select its private observation."
-            : "view:human reviews your observation. The AI's private view is unavailable.");
+            ? $"Developer controls: seat:N executes an issued action; view:seat selects its private observation. Seats: {string.Join(", ", seatIds)}."
+            : "view:human reviews your observation. CPU private views are unavailable.");
         Console.WriteLine("Most Twigs wins. Five Exhaustion is normally safe; use tokens, event and board before deciding to draw again.");
-        Console.WriteLine("Informational commands and invalid input do not advance either duck or write a save.\n");
+        Console.WriteLine("Pouch shows the opening recipe before the first draw. Night shows current purchases; remember earlier additions yourself.");
+        Console.WriteLine("Restart starts a new match using this launch's --players and --wish-set settings (defaults: 2 and set-1).");
+        Console.WriteLine("Informational commands and invalid input do not advance any duck or write a save.\n");
     }
 
     internal static void ShowCatalogue(DuckMatchView view)
     {
         Console.WriteLine($"Catalogue: {Quantity(view.Rules.BoardSpaces.Count, "reward")} · {Quantity(view.Rules.BoardSpaces.Count(space => space.IsShelter), "shelter")} · {Quantity(view.Rules.EncounterDefinitions.Count, "encounter variant")} · {Quantity(view.ShopOffers.Count, "shop offer")} · {Quantity(view.Rules.WorldEvents.Count, "World Event")}");
-        Console.WriteLine("Own inventory: " + string.Join(", ", view.OwnInventory.GroupBy(chip => chip.DefinitionId).Select(group => $"{group.Key} ×{group.Count()}")));
+        ShowOpeningRecipe(view);
         foreach (var offer in view.ShopOffers)
             Console.WriteLine($"  {offer.DefinitionId}: {CurrencyAmount(offer.Price, view.Economy)} · movement {(offer.Encounter.BaseMovement?.ToString() ?? "flock-dependent")} · Twig yield {Quantity(offer.Encounter.TwigYield, "Twig")}");
     }
@@ -184,13 +199,20 @@ internal static class DuckCliRenderer
         Console.WriteLine("  Placed route: " + string.Join(" → ", placed));
     }
 
-    private static void ShowComposition(string title, IReadOnlyList<DuckPhysicalChipView> chips)
+    private static void ShowOpeningRecipe(DuckMatchView view)
     {
-        var groups = chips.GroupBy(chip => chip.DefinitionId)
-            .Select(group => (Name: DuckRules.V1.Encounter(group.Key).Name, Count: group.Count()))
+        if (!CanShowOpeningRecipe(view)) return;
+        var groups = view.Rules.OpeningBag.GroupBy(chip => chip.DefinitionId)
+            .Select(group => (Name: group.First().Name, Count: group.Count()))
             .OrderBy(group => group.Name, StringComparer.Ordinal);
-        Console.WriteLine($"{title} ({Quantity(chips.Count, "chip")}): " + string.Join(", ", groups.Select(group => $"{group.Name} ×{group.Count}")));
+        Console.WriteLine($"Opening recipe ({Quantity(view.Rules.OpeningBag.Count, "chip")}): " + string.Join(", ", groups.Select(group => $"{group.Name} ×{group.Count}")));
     }
+
+    private static bool CanShowOpeningRecipe(DuckMatchView view) => view.Day == 1
+        && view.Players.Single(player => player.Id == view.ViewerId).PlacedChips.Count == 0;
+
+    private static IEnumerable<DuckHistoryEntry> PublicHistory(DuckMatchView view) =>
+        view.History.Where(entry => !entry.Message.Contains(" buys ", StringComparison.Ordinal));
 
     private static void ShowPreview(DuckMatchView view)
     {

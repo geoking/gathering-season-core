@@ -27,14 +27,14 @@ internal sealed class DuckInteractiveCli
 
     internal int Run()
     {
-        Console.WriteLine(_options.TwoPlayer ? "Developer two-duck controls." : "Human versus Normal AI.");
-        DuckCliRenderer.ShowHelp(_options.TwoPlayer);
+        Console.WriteLine(_options.TwoPlayer ? "Developer controls for all ducks." : "Human versus Normal AI.");
+        DuckCliRenderer.ShowHelp(_options.TwoPlayer, SeatIds());
         var advanceAi = !_options.TwoPlayer && (_seed.HasValue || ShouldAdvanceOpponentAfterResume());
         while (true)
         {
             if (advanceAi)
             {
-                AdvanceOpponent();
+                AdvanceOpponents();
                 advanceAi = false;
             }
 
@@ -54,9 +54,9 @@ internal sealed class DuckInteractiveCli
             if (input.Equals("r", StringComparison.OrdinalIgnoreCase) || input.Equals("restart", StringComparison.OrdinalIgnoreCase))
             {
                 _seed = _options.CreateSeed(_seed);
-                _match = MatchSession.CreateDuck(_seed.Value);
+                _match = MatchSession.CreateDuck(_seed.Value, new DuckMatchSettings(_options.PlayerCount, _options.WishSetId));
                 Save();
-                Console.WriteLine("New game · seed " + _seed);
+                Console.WriteLine($"New game · seed {_seed} · {_options.PlayerCount} players · Wish Set {_options.WishSetId}");
                 DuckCliRenderer.ShowStatus(_match.GetSnapshot(_viewer));
                 advanceAi = !_options.TwoPlayer;
                 continue;
@@ -87,7 +87,7 @@ internal sealed class DuckInteractiveCli
     private Dictionary<string, IReadOnlyList<GameAction>> IssueActions()
     {
         var issued = new Dictionary<string, IReadOnlyList<GameAction>>(StringComparer.Ordinal);
-        foreach (var id in _options.TwoPlayer ? new[] { "human", "ai" } : new[] { "human" })
+        foreach (var id in _options.TwoPlayer ? SeatIds() : new[] { "human" })
             issued[id] = _match.GetLegalActions(id);
         return issued;
     }
@@ -107,13 +107,15 @@ internal sealed class DuckInteractiveCli
     {
         var view = _match.GetSnapshot(_viewer);
         var command = input.ToLowerInvariant();
-        if (command is "help" or "h" or "?") DuckCliRenderer.ShowHelp(_options.TwoPlayer);
-        else if (command is "status" or "view:human" || _options.TwoPlayer && command == "view:ai")
+        if (command is "help" or "h" or "?") DuckCliRenderer.ShowHelp(_options.TwoPlayer, SeatIds());
+        else if (command == "status" || command == "view:human" ||
+            _options.TwoPlayer && command.StartsWith("view:", StringComparison.Ordinal) && SeatIds().Contains(command[5..], StringComparer.Ordinal))
         {
             if (command.StartsWith("view:", StringComparison.Ordinal)) _viewer = command.Substring("view:".Length);
             DuckCliRenderer.ShowStatus(_match.GetSnapshot(_viewer));
         }
-        else if (command == "view:ai") Console.WriteLine("The AI's private view is unavailable outside --two-player developer mode.");
+        else if (command.StartsWith("view:", StringComparison.Ordinal))
+            Console.WriteLine("That private view is unavailable outside --two-player developer mode or is not a seat in this match.");
         else if (command == "board") DuckCliRenderer.ShowBoard(view, null);
         else if (command.StartsWith("board ", StringComparison.Ordinal))
         {
@@ -130,25 +132,45 @@ internal sealed class DuckInteractiveCli
         return true;
     }
 
-    private void AdvanceOpponent()
+    private IReadOnlyList<string> SeatIds() => _match.GetSnapshot("human").Players.Select(player => player.Id).ToArray();
+
+    private void AdvanceOpponents()
     {
-        for (var step = 0; step < 256; step++)
+        for (var round = 0; round < 1024; round++)
         {
-            var actions = _match.GetLegalActions("ai");
-            if (actions.Count == 0 || actions.All(action => action.Kind == GameActionKind.NextDay)) return;
-            var before = _match.GetSnapshot("ai");
-            var action = _normal.Choose(before, actions);
-            _match.Execute("ai", action);
-            Save();
-            var after = _match.GetSnapshot("human");
-            Console.WriteLine(before.Day == 10 && before.Phase == DuckPhase.Adventure && after.AwaitingFinalDayDecisions
-                ? "AI committed its hidden final-Day decision."
-                : "AI: " + action.Label);
-            DuckCliRenderer.ShowStatus(after);
-            DuckCliRenderer.ShowNewNight(before, after);
-            if (_match.GetLegalActions("human").Count > 0 || after.Phase == DuckPhase.Finished) return;
+            var choices = new List<(string Id, DuckMatchView Before, GameAction Action)>();
+            foreach (var id in SeatIds().Where(id => id != "human"))
+            {
+                var actions = _match.GetLegalActions(id);
+                if (actions.Count == 0 || actions.All(action => action.Kind == GameActionKind.NextDay)) continue;
+                var before = _match.GetSnapshot(id);
+                // Gather a whole CPU cohort before any final-Day commitment can reveal its beat.
+                if (before.Day == 10 && before.Phase == DuckPhase.Adventure)
+                    choices.Add((id, before, _normal.Choose(before, actions)));
+                else
+                    choices.Add((id, before, null!));
+            }
+            if (choices.Count == 0) return;
+            foreach (var (id, captured, preselected) in choices)
+            {
+                var actions = _match.GetLegalActions(id);
+                if (actions.Count == 0 || actions.All(action => action.Kind == GameActionKind.NextDay)) continue;
+                var before = preselected == null ? _match.GetSnapshot(id) : captured;
+                var action = preselected ?? _normal.Choose(before, actions);
+                _match.Execute(id, action);
+                Save();
+                var after = _match.GetSnapshot("human");
+                var speaker = id == "ai" ? "AI" : id;
+                Console.WriteLine(before.Day == 10 && before.Phase == DuckPhase.Adventure && after.AwaitingFinalDayDecisions
+                    ? speaker + " committed its hidden final-Day decision."
+                    : speaker + ": " + action.Label);
+                DuckCliRenderer.ShowStatus(after);
+                DuckCliRenderer.ShowNewNight(before, after);
+            }
+            var human = _match.GetSnapshot("human");
+            if (_match.GetLegalActions("human").Count > 0 || human.Phase == DuckPhase.Finished) return;
         }
-        throw new InvalidOperationException("Opponent exceeded the action safety limit.");
+        throw new InvalidOperationException("Opponents exceeded the action safety limit.");
     }
 
     private bool ShouldAdvanceOpponentAfterResume()
@@ -157,8 +179,8 @@ internal sealed class DuckInteractiveCli
         if (humanView.Phase == DuckPhase.Finished || _match.GetLegalActions("human").Count > 0)
             return false;
 
-        var aiActions = _match.GetLegalActions("ai");
-        return aiActions.Any(action => action.Kind != GameActionKind.NextDay);
+        return SeatIds().Where(id => id != "human")
+            .Any(id => _match.GetLegalActions(id).Any(action => action.Kind != GameActionKind.NextDay));
     }
 
     private void Save()
