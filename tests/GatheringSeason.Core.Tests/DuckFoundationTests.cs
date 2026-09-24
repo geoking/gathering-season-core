@@ -31,10 +31,13 @@ public sealed class DuckFoundationTests
         Assert.Throws<ArgumentException>(() => match.GetSnapshot("spectator"));
     }
 
-    [Fact]
-    public void Every_duck_starts_at_nest_zero_without_a_configurable_Feather_input()
+    [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void Every_duck_starts_at_nest_zero_without_a_configurable_Feather_input(int playerCount)
     {
-        var settings = new DuckMatchSettings();
+        var settings = new DuckMatchSettings(playerCount);
         var view = MatchSession.CreateDuck(17, settings).GetSnapshot("human");
 
         Assert.Same(settings, view.Settings);
@@ -46,8 +49,8 @@ public sealed class DuckFoundationTests
             Assert.Equal(0, player.EffectiveStart);
             Assert.Equal(0, player.Position);
         });
-        var constructor = Assert.Single(typeof(DuckMatchSettings).GetConstructors());
-        Assert.Empty(constructor.GetParameters());
+        Assert.DoesNotContain(typeof(DuckMatchSettings).GetConstructors().SelectMany(ctor => ctor.GetParameters()),
+            parameter => parameter.Name!.Contains("feather", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]

@@ -52,3 +52,24 @@ The non-generic `MatchSession` provides the `CreateDuck` factory; clients use
 profiles are intentionally unsupported; start a new game. Retained rules
 revision catalogues support internal regression/evaluation and do not imply
 support for a previous product profile.
+
+## Match setup and seats
+
+`DuckMatchSettings` validates two to four players and `WishSetId = "set-1"`.
+Defaults remain two players, ten Days and zero starting Feathers. Set identity
+names the encounter powers; it is distinct from the numeric rules revision.
+The ordered player IDs are `human`, `ai`, `ai-2`, `ai-3`, using as many as the
+setup needs. Every seat uses the same player state and legal-action contracts.
+
+Format-1 `Settings.PlayerCount` and `Settings.WishSetId` are additive fields.
+A missing/zero count means two players; a missing/empty set means Set 1 in the
+recorded rules catalogue. Unknown sets, unsupported counts, mismatched player
+records and invalid command/result references fail validation. Earlier rules
+revisions remain two-player only; revision 7 supports two to four players.
+Continue preserves the recorded setup and catalogue.
+
+Core observations retain the viewer's own private data for policy clients.
+The terminal interface intentionally hides changing pouch composition and
+accumulated purchase lists. The opening recipe is shown before the first draw;
+every player's current-Night purchases remain visible until Dawn clears them.
+Explicit Signpost previews and already placed chips remain available.

@@ -1,6 +1,6 @@
 # Playing Gathering Season in the terminal
 
-The CLI plays the current ten-Day duck game against Normal AI using the Core
+The CLI plays the current ten-Day duck game against one, two or three Normal AI opponents using the Core
 rules. It includes all 43 spaces, encounter powers, ten World Events, shopping,
 Dawn Delivery, final scoring and local Continue.
 
@@ -15,7 +15,9 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release
 
 The duck game is the default. If a save exists, choose `c` to continue, `n` to
 start over or `q` to leave it alone. Otherwise a new game starts. The opening
-text shows the seed and autosave path.
+text shows the seed, player count, Wish Set and autosave path. Add `--players 3`
+or `--players 4` to choose two or three opponents; the default is two players
+(one opponent). `--wish-set set-1` is the supported Wish-set identity.
 
 To see launch options without starting or saving a match:
 
@@ -28,19 +30,20 @@ this guide assume the repository root is your current directory.
 
 ## Your first Day
 
-1. Read the World Event. It affects both ducks for this Day. Type `event` to
+1. Read the World Event. It affects every duck for this Day. Type `event` to
    review its effect, and `tokens` or `wishes` if you do not recognize a chip. On Glorious
    Sunshine choose Fresh Air (+2 safe Exhaustion today) or Warm Dreams (+2 Stars
    tonight); everyone must choose before exploring.
 2. Enter the number beside **Explore**. Core draws a chip, moves your duck and
    resolves its power. You must draw at least once each Day.
-3. Review your position, Exhaustion and the AI's public progress. Use `board`
-   to compare rewards and shelters; `pouch` shows your remaining chip counts.
+3. Review your position, Exhaustion and the CPUs' public progress. Use `board`
+   to compare rewards and shelters. `pouch` shows the opening recipe before your
+   first draw; afterwards, remember your additions from each Night.
 4. Choose **Explore** again or **Settle down** using the current action number.
    You rest on the space you occupy. Its Twig numeral is the total collected
    along the route, added to Nest Twigs once at Night; do not sum the passed numerals.
-5. When both ducks finish, review the Night result. Spend Stars on affordable Wishes using
-   the numbered actions, then choose **Finish Dream**. Once both ducks are
+5. When all ducks finish, review the Night result. Spend Stars on affordable Wishes using
+   the numbered actions, then choose **Finish Dream**. Once all ducks are
    finished, choose the action to start the next Day.
 
 Use the numbers printed at each prompt: available actions and their numbers
@@ -48,9 +51,9 @@ change with the game state. You can quit with `q` at any prompt and Continue
 later. Informational commands and invalid input do not draw chips, advance the
 AI or change the saved game.
 
-Days 1–9 expose completed actions so you can react to the opponent. The CLI
+Days 1–9 expose completed actions so you can react to the other ducks. The CLI
 paces Normal around successful gameplay actions and lets it finish when you
-have settled. On Day 10 only, both active ducks commit privately before each
+have settled. On Day 10 only, all active ducks commit privately before each
 beat is revealed. The AI's hidden commitment and private Signpost preview are
 not shown to you.
 
@@ -60,20 +63,22 @@ not shown to you.
 | --- | --- |
 | An action number, such as `1` | Execute that currently listed action |
 | `help` | Remind yourself of available commands |
-| `status` | Review both ducks' public state and your own information |
+| `status` | Review every duck's public state and your own information |
 | `board` | All 43 spaces, printed rewards and named shelters |
 | `board 4` | Inspect a particular space |
-| `pouch` | Your remaining composition and owned inventory counts |
+| `pouch` | Opening recipe before the first draw, and your explicit Signpost peek |
 | `tokens` or `wishes` | Wish powers and Obstacle nuisances |
 | `shop` | All offers at this match's prices, spending allowance and current availability |
 | `event` | The active World Event and its effect |
-| `night` | The last resolved Night's rewards and deductions |
-| `history` | Public actions and results so far |
+| `night` | Last resolved rewards and, during Night, all ducks' current purchases |
+| `history` | Public play and results, excluding purchase history |
 | `view:human` | Review your own view; retained for existing CLI users |
 | `q` or `quit` | Quit; previously completed actions remain saved |
 | `r` or `restart` | Start over and replace the active save |
 
-The pouch display lists quantities, not the shuffled draw order. Signpost alone
+The changing pouch contents and accumulated purchases are deliberately hidden.
+During Night, `night` shows what every duck has just bought as it enters the
+pouch. That receipt disappears at Dawn. Placed chips remain public. Signpost
 can reveal your actual next chip; weather may alter its preview. Board rewards
 are **printed values**, not a prediction of your final payout: chip effects,
 World Events, shelter bonuses and wear-out are resolved by Core at Night.
@@ -139,7 +144,9 @@ enabled, these replace the selected active save; `--no-save` leaves saved files
 untouched. By default a fresh game uses a new seed; pass `--seed 42`
 if you want the same setup on each new game or restart. Identical results also
 require identical actions. Continue restores its saved random state instead of
-reshuffling; the launch seed matters only if you later restart. Continue pauses
+reshuffling; the launch seed, `--players` and `--wish-set` matter only if you later restart.
+Continue always restores its saved setup. Restart uses the options from the
+current launch (defaults: two players and Set 1). Continue pauses
 at a saved human decision; it only progresses the AI first when the human must
 wait for the opponent to resolve a pending choice or finish.
 
@@ -165,15 +172,17 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release -- --no-sav
 
 | Option | Purpose |
 | --- | --- |
+| `--players 2`, `3` or `4` | Total players, including the human, for new games and restarts |
+| `--wish-set set-1` | Supported Wish set; unknown IDs are rejected |
 | `--seed 42` | Use a fixed seed for new games and restarts |
 | `--inspect` | Print the current catalogue and exit |
 | `--demo-day` | Script Day 1, Night 1 purchases and the transition to Day 2 |
-| `--demo-game` | Let Normal control both ducks for a complete game |
+| `--demo-game` | Let Normal control every duck for a complete game |
 | `--save path` | Select the save; also enables saving a demo |
 | `--no-save` | Disable interactive saves |
 | `--continue` | Restore the selected save without the startup chooser |
 | `--new-game` | Replace the selected save with a fresh match |
-| `--two-player` | Developer mode: manually control both ducks |
+| `--two-player` | Compatibility name for manual control of every configured seat |
 | `--profile ducks` | Explicit alias for the Gathering Season game |
 | `--profile classic` | Rejected; the retired profile is no longer shipped |
 
@@ -188,10 +197,11 @@ Demo modes do not save unless you supply `--save`, or Continue a saved game.
 `--demo-game`; `--continue` and `--new-game` are mutually exclusive. `--no-save`
 cannot accompany `--save` or `--continue`.
 
-Developer mode accepts `human:1` and `ai:1`, and `view:human` / `view:ai` switch
-the observing duck. It exposes that selected duck's private information, so it
-is a testing tool, not a concealed-information local multiplayer interface.
-Normal human-versus-AI mode does not allow the AI's private view.
+Developer mode accepts `human:1`, `ai:1`, `ai-2:1` and `ai-3:1` for seats in
+the current match. `view:human` or `view:ai-2` selects that seat's observation,
+including its private Signpost preview. It is a testing tool rather than a
+concealed-information multiplayer interface. Normal play blocks every CPU
+private view. Neither mode provides changing pouch composition.
 
 The CLI exposes only Gathering Season rules and options. The `ducks` profile
 alias remains for existing scripts; `classic` is reported as unsupported.

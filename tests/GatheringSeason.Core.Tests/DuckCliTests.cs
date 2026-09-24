@@ -63,14 +63,14 @@ public sealed partial class DuckCliTests
         Assert.Contains("3 Stars · 5 Twigs · 1 Feather · SHELTER: Orchard shelter", result.Output);
         Assert.Contains("One free Seed still uses one purchase slot", result.Output);
         Assert.Contains("extra Flowers do not stack", result.Output);
-        Assert.Contains("Remaining pouch", result.Output);
+        Assert.Contains("Opening recipe", result.Output);
         Assert.Contains("All 16 encounter variants", result.Output);
         Assert.Contains("reeds_3: Nesting reeds 3", result.Output);
         Assert.Contains("Dream shop", result.Output);
         Assert.Contains("World Event · Day 1: Thick Morning Mist", result.Output);
         Assert.Contains("No Night has resolved yet", result.Output);
         Assert.Contains("Public match history", result.Output);
-        Assert.Contains("AI's private view is unavailable", result.Output);
+        Assert.Contains("private view is unavailable", result.Output);
         Assert.DoesNotContain("Private Signpost preview for ai", result.Output);
     }
 
@@ -127,7 +127,7 @@ public sealed partial class DuckCliTests
         Assert.Contains("human: Buy Wish Seeds for no Stars", result.Output);
         Assert.Contains("ai: Buy Wish Seeds for no Stars", result.Output);
         Assert.Contains("Day 2/10 · Adventure", result.Output);
-        Assert.Contains("pouch 14", result.Output);
+        Assert.DoesNotContain("pouch 14 chips", result.Output);
         Assert.Contains("Dawn deficit", result.Output);
         Assert.Contains("Day 1 → Night 1 → Day 2", result.Output);
         Assert.DoesNotContain("Day 3/10", result.Output);
@@ -140,7 +140,7 @@ public sealed partial class DuckCliTests
         var result = Run("", "--profile", "ducks", "--seed", "42", "--inspect");
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("43 rewards · 8 shelters · 16 encounter variants · 11 shop offers · 10 World Events", result.Output);
-        Assert.Contains("pouch 13", result.Output);
+        Assert.Contains("Opening recipe (13 chips)", result.Output);
         Assert.Contains("reeds_3: 4 Stars · movement 1 · Twig yield 3 Twigs", result.Output);
         Assert.DoesNotContain("rubies", result.Output);
         Assert.DoesNotContain("coins", result.Output);
@@ -156,7 +156,7 @@ public sealed partial class DuckCliTests
     {
         var result = Run("", "--profile", "ducks", option, value);
         Assert.Equal(2, result.ExitCode);
-        Assert.Contains("Usage: GatheringSeason.Cli --profile ducks", result.Error);
+        Assert.Contains("Usage: GatheringSeason.Cli", result.Error);
         Assert.DoesNotContain("Gathering Season ·", result.Output);
     }
 

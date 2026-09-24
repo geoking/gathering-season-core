@@ -35,6 +35,8 @@ namespace GatheringSeason.Core.Ducks.Persistence
     {
         public int Days;
         public int StartingFeathers;
+        public int PlayerCount;
+        public string? WishSetId;
     }
 
     public sealed class DuckRandomSaveData
