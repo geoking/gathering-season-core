@@ -2,14 +2,14 @@
 
 ## Scope
 
-This repository contains the standalone gameplay backend, playable CLI, rule
-catalogues, tests and evaluation tools. It does not include the Gathering Season
-UI game. Keep changes and documentation focused on the code in this repository.
+This repository powers the Gathering Season gameplay backend and playable CLI.
+It contains the engine-independent rules, rule catalogues, tests and evaluation
+tools. It does not include the Gathering Season UI game.
 
-Document how to run the CLI, the currently implemented gameplay rules and the
-Core API/save contracts. Describe supported behavior, not future product plans.
-UI implementation, screenshots, recordings and artwork are outside this scope.
-Commit messages, pull requests, issues and CI artifacts follow the same scope.
+Keep contributions focused on developing, using and testing this repository.
+Documentation covers running the CLI, currently implemented gameplay rules and
+Core API/save contracts. Apply the same scope to commit messages, pull requests,
+issues and CI artifacts.
 Run tools/check_public_boundary.py against staged files before every commit.
 
 ## Architecture and rules
@@ -31,4 +31,6 @@ delegation. Workers do not stage or commit. The lead owns review and Git.
 Preserve unrelated changes. Use codex/ branches and coherent checkpoints. Run
 focused checks during implementation and full checks at completed steps. Commit
 Core behavior and its regression tests separately, then push each checkpoint.
-Do not force-push or merge to main without a request. New rules need approval.
+After the relevant checks pass, merge completed, authorized work to main without
+another review or permission request. Keep pull requests as change records.
+Do not force-push without a request. New rules need approval.

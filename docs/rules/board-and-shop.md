@@ -6,22 +6,19 @@ total once at Night, alongside Reeds/event Twigs and any Brambles deduction.
 Never add together the Twig numerals of passed spaces. Revisions 1–3 retain
 their recorded Sleep board rewards and prices.
 
-## Collected Twigs and the artwork
+## Cumulative route Twigs
 
-The nest baseline is zero. Show floor twigs only when the cumulative printed
-value increases: one each at **1, 5, 9, 15, 20, 29, 30, 34 and 43**, zero
-elsewhere. A chip can travel past several of these; the destination numeral
-already includes them. A Feather start also uses the destination’s cumulative
-value. This changes the story and floor art, not movement, payouts, or when
-Core awards the rewards. Reeds and event Twigs remain additional to this route
-total.
+The nest baseline is zero. The route total increases by one at each of
+**1, 5, 9, 15, 20, 29, 30, 34 and 43**. A chip can travel past several of
+these spaces; the destination's Twig value already includes them. A Feather
+start also uses the destination's cumulative value. Core awards this total
+once at Night. Reeds and event Twigs remain additional to the route total.
 
 Wetlands occupy 1–14, meadow 15–28, wasteland 29–43. Eight shelters lie at
 4, 10, 17, 21, 25, 32, 36 and 43. Their printed Stars are 2 in wetlands, 3 in
 meadow and 4 in wasteland; ordinary spaces are 1, 2 and 1 respectively. The
 oasis at 43 grants 5 Stars and 2 Feathers. A final-Day shelter adds one
-further Star. The nest is separate and unscored. Space indices are data
-references, not top-of-tile labels.
+further Star. The nest is separate and unscored.
 
 ## Every space
 
