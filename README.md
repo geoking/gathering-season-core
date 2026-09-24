@@ -13,7 +13,8 @@ With the .NET 10 SDK installed, run from this repository:
 dotnet run --project src/GatheringSeason.Cli --configuration Release
 ```
 
-Choose a listed action number. `board`, `wishes`, `event`, `pouch` and `shop`
+Add `-- --players 3` or `-- --players 4` for two or three CPU opponents.
+The default is one opponent. Choose a listed action number. `board`, `wishes`, `event`, `pouch` and `shop`
 show information; `q` quits. Completed actions are saved, and the next launch
 can Continue. For a reproducible automated game:
 

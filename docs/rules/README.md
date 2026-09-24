@@ -1,7 +1,7 @@
 # Gathering Season rules
 
 Play ten Days as a duck adventuring through wetlands, meadow and wasteland.
-One human faces Normal AI. **Most Twigs wins**; tied totals compare retained
+One human faces one to three Normal AI opponents. **Most Twigs wins**; tied totals compare retained
 Stars on the final Night, then a draw. New games use rules revision 7. Saves from
 revisions 1–6 retain their recorded catalogues, including their historical boards
 and exhaustion rewards.
