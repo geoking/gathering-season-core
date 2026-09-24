@@ -134,8 +134,9 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release -- --save "
 dotnet run --project src/GatheringSeason.Cli --configuration Release -- --save "$HOME/GatheringSeason-Saves/my-game.json" --continue
 ```
 
-Start afresh with `--new-game`, or choose `r` during play. These replace the
-selected active save. By default a fresh game uses a new seed; pass `--seed 42`
+Start afresh with `--new-game`, or choose `r` during play. When saving is
+enabled, these replace the selected active save; `--no-save` leaves saved files
+untouched. By default a fresh game uses a new seed; pass `--seed 42`
 if you want the same setup on each new game or restart. Identical results also
 require identical actions. Continue restores its saved random state instead of
 reshuffling; the launch seed matters only if you later restart. Continue pauses
