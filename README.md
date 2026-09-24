@@ -38,6 +38,26 @@ dotnet test GatheringSeason.sln --configuration Release --no-build
 python3 -m unittest discover -s tools/tests -v
 ```
 
+## Evaluate multiplayer strategies
+
+Run complete games with Normal, movement-focused and Reeds-focused shoppers
+rotated through two to four seats. All styles share Normal's Adventure policy;
+Day 10 choices use the same public beat before commitments are submitted.
+
+```sh
+dotnet run --project tools/GatheringSeason.Evaluation --configuration Release -- \
+  --multiplayer --players all --seed-start 0 --seed-count 16 \
+  --source-label YOUR_COMMIT_SHA --output /tmp/gathering-study.jsonl
+python3 tools/GatheringSeason.Evaluation/analyze_multiplayer.py \
+  --input /tmp/gathering-study.jsonl --output /tmp/gathering-study.md
+```
+
+JSONL records outcomes, per-Day rewards/purchases, actions and timing. The
+summary resamples whole matched-seed groups, not individual rotated seats.
+Record the exact source/build used; timing varies between runs. These scripted
+shoppers test specific strategies, not optimal or human play balance. The
+existing pairwise mode remains available without `--multiplayer`.
+
 ## Licence
 
 The source in this repository is available under the [MIT licence](LICENSE).
