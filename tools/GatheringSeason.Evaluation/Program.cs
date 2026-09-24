@@ -15,6 +15,8 @@ public static class EvaluationProgram
     {
         try
         {
+            if (args.Contains("--multiplayer", StringComparer.Ordinal))
+                return MultiplayerStudyProgram.Run(args.Where(arg => arg != "--multiplayer").ToArray());
             var options = EvaluationOptions.Parse(args);
             if (options.ShowHelp)
             {
@@ -177,6 +179,8 @@ public sealed record EvaluationOptions(
 
     public const string Help = """
         Gathering Season reproducible Duck evaluation runner
+
+        Use --multiplayer for separate 2/3/4-player rotated-seat studies.
 
         Required:
           --source-label LABEL          Full source/build label recorded in every match
