@@ -23,7 +23,7 @@ Namespaces and assemblies use Gathering Season consistently.
 
 ## Working method
 
-Use GPT-6 Sol/high for Core changes and complex tests; GPT-6 Luna/medium for
+Use GPT-6.1 Sol/high for Core changes and complex tests; GPT-6 Luna/medium for
 narrow support work. Explicitly select both model and reasoning effort. At most
 two workers may run concurrently, with disjoint file ownership and no further
 delegation. Workers do not stage or commit. The lead owns review and Git.
