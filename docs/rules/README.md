@@ -2,12 +2,12 @@
 
 Play ten Days as a duck adventuring through wetlands, meadow and wasteland.
 One human faces one to three Normal AI opponents. **Most Twigs wins**; tied totals compare retained
-Stars on the final Night, then a draw. New games use rules revision 7. Saves from
-revisions 1–6 retain their recorded catalogues, including their historical boards
+Stars on the final Night, then a draw. New games use rules revision 8. Saves from
+revisions 1–7 retain their recorded catalogues, including their historical boards
 and exhaustion rewards.
 
 The current powers are named **Wish Set 1**; that set name is distinct from
-technical rules revision 7. The standard rules below describe the current setup.
+technical rules revision 8. The standard rules below describe the current setup.
 
 ## A Day and a Night
 

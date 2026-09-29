@@ -6,7 +6,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
     /// <summary>Authoritative, Unity-independent Duck rules catalogues.</summary>
     public static class DuckRules
     {
-        public const int CurrentRulesRevision = 7;
+        public const int CurrentRulesRevision = 8;
 
         private static readonly DuckRuleDefinitions Revision1 = CreateV1(rulesRevision: 1);
         private static readonly DuckRuleDefinitions Revision2 = CreateV1(rulesRevision: 2);
@@ -14,6 +14,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
         private static readonly DuckRuleDefinitions Revision4 = CreateV1(rulesRevision: 4);
         private static readonly DuckRuleDefinitions Revision5 = CreateV1(rulesRevision: 5);
         private static readonly DuckRuleDefinitions Revision6 = CreateV1(rulesRevision: 6);
+        private static readonly DuckRuleDefinitions Revision7 = CreateV1(rulesRevision: 7);
 
         /// <summary>The current catalogue for the Duck v1 product profile.</summary>
         public static DuckRuleDefinitions V1 { get; } = CreateV1(CurrentRulesRevision);
@@ -28,6 +29,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
                 4 => Revision4,
                 5 => Revision5,
                 6 => Revision6,
+                7 => Revision7,
                 CurrentRulesRevision => V1,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(rulesRevision),
                     "Unsupported Duck rules revision.")

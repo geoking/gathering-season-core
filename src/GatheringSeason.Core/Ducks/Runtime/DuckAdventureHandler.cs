@@ -155,7 +155,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 player.PocketDriftwoodAwarded,
                 player.FlowersPlaced,
                 DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
-            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType);
+            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType, runtime.Rules);
             var after = placement.State;
             player.Position = after.Position;
             player.Exhaustion = after.Exhaustion;

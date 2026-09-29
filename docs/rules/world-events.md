@@ -1,6 +1,6 @@
 # Gathering Season World Events
 
-New matches use rules revision 7. This is the complete ten-card deck; revisions 1–6 retain their saved rules.
+New matches use rules revision 8. This is the complete ten-card deck; revisions 1–7 retain their saved rules.
 
 ## Shared deck and timing
 
@@ -79,8 +79,8 @@ penalty, or a Goose from lowering the safe maximum.
 
 This protection is used on the first placed Obstacle even if its nuisance would
 have no effect. If Splash also protects that Obstacle, both protections are used
-there; neither moves to another token. The Guide does not remove a Log that was
-already pending. Its protection expires at Day cleanup if no Obstacle is placed.
+there; neither moves to another token. The draw consumes any older pending Log;
+the Guide suppresses only the newly drawn nuisance. Its protection expires at Day cleanup if no Obstacle is placed.
 
 ### 4. A Pocket of Driftwood
 
@@ -124,7 +124,8 @@ previews are unchanged.
 
 Still Air and Fallen Log never halve the same Tailwind twice. If a Log is
 pending when Tailwind is placed, consume the Log normally but apply only one
-halving. A pending Log still works normally on a non-Tailwind helpful token.
+halving. A pending Log halves a non-Tailwind Wish normally. A white chip consumes the
+pending Log without slowing; peeking at a chip does not consume it.
 Splash and Guide cannot block Still Air because it is weather, not an Obstacle
 nuisance.
 

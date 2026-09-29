@@ -1,6 +1,6 @@
 # Gathering Season encounter rules and timing
 
-The implemented encounter contract for rules revision 7 new matches. Revisions 1–6 retain their saved rules. See [World Events](world-events.md)
+The implemented encounter contract for rules revision 8 new matches. Revisions 1–7 retain their saved rules. See [World Events](world-events.md)
 for shared weather and [board/shop](board-and-shop.md) for exact values.
 
 ## Draw and placement order
@@ -22,8 +22,10 @@ For a Draw action, resolve one encounter at a time:
 1. Reveal the next chip. A Signpost preview is information only, not a reveal
    or placement for encounter rules.
 2. Determine its intrinsic movement and any ability or World Event additions.
-   If a Fallen Log is pending, halve the resulting helpful-chip movement,
-   rounding up to at least one.
+   Consume any incoming Fallen Log on this actual draw. If the chip is helpful,
+   halve its resulting movement, rounding up to at least one; a white chip moves
+   normally. The new chip's nuisance resolves afterwards, so an unprotected new
+   Log arms its own next-chip slowdown.
 3. Place the chip once on its final destination. The printed Twig value is the
    route total collected so far, added to Nest Twigs once at Night; do not sum passed numerals.
 4. Resolve the chip's nonmovement ability or nuisance, including Exhaustion.
@@ -90,8 +92,8 @@ cleanup if no next chip is placed.
   own next chip.
 - If the next chip is an Obstacle, its movement and +1 Exhaustion still resolve,
   and it can still cause wear-out. Only its extra nuisance is suppressed.
-- Suppressing Log prevents that Log from arming a new pending slowdown, but it
-  does not remove a Log already pending.
+- Suppressing Log prevents that new Log from arming a slowdown. An incoming
+  older Log was already consumed by this draw, regardless of protection.
 - Suppressing Mud prevents its active-flock decrement.
 - Suppressing Pebbles or Brambles permanently marks that placement as protected,
   so its final-position penalty remains suppressed if the duck later rests there.
@@ -105,7 +107,8 @@ conditions; those are not obstacle nuisances.
 The **A Friendly Guide** World Event gives equivalent nuisance protection to
 each duck's first placed Obstacle that Day. If Splash also protects that same
 Obstacle, both protections are consumed; neither carries forward. Guide does
-not remove an older pending Log. Like Splash, it never blocks movement or
+not preserve an older pending Log: this draw consumes it normally. Like Splash,
+it never blocks movement or
 Exhaustion.
 
 ## Ordinary white Obstacles
@@ -117,15 +120,22 @@ suppressed.
 
 | Obstacle | Extra nuisance |
 | --- | --- |
-| **Fallen log** | Arm a slowdown that halves the next helpful chip's movement after World Event additions, rounding up to at least 1. Its other ability still resolves. |
+| **Fallen log** | Arm a slowdown consumed by the immediately next drawn chip. A Wish halves its movement after World Event additions, rounding up to at least 1; a white chip moves normally. Other powers still resolve. |
 | **Mud puddle** | Reduce this duck's active Companion flock count by 1, minimum 0. Earlier Companion positions and owned chips do not change. |
 | **Loose pebbles** | If this placement is the duck's final occupied chip, subtract 1 Star that Day, minimum 0. This also applies after wear-out. |
 | **Brambles** | If this placement is the duck's final occupied chip, subtract 1 Twig earned that Day, minimum 0. This also applies after wear-out and never removes an earlier Day's Twig. |
 
-Only one Log slowdown can be pending. Another unprotected Log does not multiply
-or strengthen it. The pending Log clears after the next helpful placement, even
-if the result remains one, or at Day cleanup. Protection against a newly drawn
-Log does not clear an older pending Log.
+Only one Log slowdown can be pending. The immediately next actual draw consumes
+it, even if that chip is white or a Wish's halved result remains one; unused
+slowdown clears at Day cleanup. Log → white → Wish leaves the Wish at full
+movement. Log → unprotected Log → Wish slows the Wish with the new Log.
+Log → protected Log → Wish leaves the Wish at full movement. Protection affects
+only the newly drawn nuisance; there is no stashed slowdown. A Signpost's own
+draw consumes a pending Log, but its private peek and repeated observations do
+not count as draws.
+
+Revisions 1–7 retain their next-Wish behavior: white chips do not consume the
+old pending Log, including a later protected Log.
 
 Pebbles and Brambles attach their penalty to their own placement. Moving beyond
 that chip avoids the penalty. Splash or Guide suppression remains marked on the

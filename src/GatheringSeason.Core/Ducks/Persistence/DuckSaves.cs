@@ -116,7 +116,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(string.Equals(save.ProfileId, DuckRules.V1.ProfileId, StringComparison.Ordinal),
                 "ProfileId must identify the Duck v1 rules profile.");
             Require(save.RulesVersion >= 1 && save.RulesVersion <= CurrentRulesVersion,
-                "RulesVersion must identify supported Duck rules revision 1, 2, 3, 4, 5, 6 or 7.");
+                "RulesVersion must identify supported Duck rules revision 1, 2, 3, 4, 5, 6, 7 or 8.");
             var rules = DuckRules.ForRulesRevision(save.RulesVersion);
             Require(save.Settings != null, "Settings are required.");
             Require(save.Settings.Days == DuckMatchSettings.StandardDays,
@@ -126,7 +126,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             var playerCount = save.Settings.PlayerCount == 0 ? 2 : save.Settings.PlayerCount;
             Require(playerCount >= 2 && playerCount <= 4,
                 "Settings.PlayerCount must be two, three or four.");
-            Require(save.RulesVersion == CurrentRulesVersion || playerCount == 2,
+            Require(save.RulesVersion >= 7 || playerCount == 2,
                 "Earlier rules revisions support two players only.");
             Require(save.Settings.WishSetId == null || save.Settings.WishSetId.Length == 0
                     || save.Settings.WishSetId == DuckMatchSettings.StandardWishSetId,

@@ -55,14 +55,15 @@ namespace GatheringSeason.Core.Ducks.Reference
         public static string Encounter(DuckEncounterDefinition encounter, DuckRuleDefinitions rules)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
-            return Encounter(encounter, rules.Economy, rules.RulesRevision >= 5, rules.FreshAirExhaustionBonus);
+            return Encounter(encounter, rules.Economy, rules.RulesRevision >= 5, rules.FreshAirExhaustionBonus, rules.RulesRevision >= 8);
         }
 
         private static string Encounter(
             DuckEncounterDefinition encounter,
             DuckEconomyDefinition economy,
             bool wornOutKeepsNightRewards,
-            int freshAirExhaustionBonus)
+            int freshAirExhaustionBonus,
+            bool nextChipLog = false)
         {
             if (encounter == null) throw new ArgumentNullException(nameof(encounter));
             if (economy == null) throw new ArgumentNullException(nameof(economy));
@@ -72,7 +73,9 @@ namespace GatheringSeason.Core.Ducks.Reference
                 DuckEncounterType.Seeds => "A nice snack, as simple as that.",
                 DuckEncounterType.Tailwind => $"A gentle breeze carries you {encounter.BaseMovement} spaces total (+{encounter.BaseMovement - 1} extra).",
                 DuckEncounterType.Signpost => "A friendly sign carries you 2 spaces total (+1 extra), then lets you privately peek at the next chip. Settle and return it, or continue with that exact chip; never choose or reorder.",
-                DuckEncounterType.Splash => "A refreshing splash protects only the immediately next placed chip's nuisance; that chip's movement and Exhaustion still happen. It is used even on a Wish, fades at Day's end if unused, marks Pebbles or Brambles for the rest of the route, and cannot clear an older Log slowdown.",
+                DuckEncounterType.Splash => "A refreshing splash protects only the immediately next placed chip's nuisance; that chip's movement and Exhaustion still happen. It is used even on a Wish, fades at Day's end if unused, marks Pebbles or Brambles for the rest of the route, " + (nextChipLog
+                    ? "and protects the new nuisance only. An older Log is consumed by that next draw regardless of protection."
+                    : "and cannot clear an older Log slowdown."),
                 DuckEncounterType.Reeds => $"Gather {encounter.TwigYield} Twig{(encounter.TwigYield == 1 ? "" : "s")} for the nest, kept even if you wear out. Reeds still move the usual 1 space; x{encounter.TwigYield} is the Twig bundle, not movement.",
                 DuckEncounterType.Companion => $"Company quickens your waddle: the first active Companion moves 2 spaces, the second 3, and later ones 4; Mud can lower the flock count. The largest {(wornOutKeepsNightRewards ? "" : "safe ")}positive flock gains {(economy.UsesStars ? "+1 Star total" : "+1 Sleep for one active Companion or +2 Sleep total for two or more")}, with ties included.{(wornOutKeepsNightRewards ? " Worn-out ducks still compete and add the reward before halving Stars." : "")}",
                 DuckEncounterType.Wildflowers => economy.UsesStars
@@ -80,7 +83,9 @@ namespace GatheringSeason.Core.Ducks.Reference
                         ? "A shelter bouquet is worth +1 Star total at Night if you settle at a shelter after placing any Wildflowers, even when worn out. The extra Flowers do not stack the bonus; worn-out ducks add it before halving Stars."
                         : "A shelter bouquet is worth +1 Star total at Night if you settle there safely after placing any Wildflowers. The extra Flowers do not stack the bonus."
                     : "A shelter bouquet grants +2 Sleep at Night for each placed Wildflowers chip, but only if you settle safely at a shelter.",
-                DuckEncounterType.FallenLog => "Hop over it: move 1 space and add 1 Exhaustion. Unless protected, halve the next Wish's total movement after event bonuses, rounding up to at least 1; its power still works, the slowdown clears, and another Log cannot stack it.",
+                DuckEncounterType.FallenLog => nextChipLog
+                    ? "Hop over it: move 1 space and add 1 Exhaustion. Unless protected, the immediately next drawn chip consumes this slowdown: a Wish halves its total movement after event bonuses, rounding up to at least 1, and its power still works; a white Obstacle moves normally. Another unprotected Log then arms a fresh slowdown; a protected Log does not."
+                    : "Hop over it: move 1 space and add 1 Exhaustion. Unless protected, halve the next Wish's total movement after event bonuses, rounding up to at least 1; its power still works, the slowdown clears, and another Log cannot stack it.",
                 DuckEncounterType.MudPuddle => "Squelch through: move 1 space and add 1 Exhaustion. Unless protected, lower the active Companion flock count by 1, to a minimum of 0; Companion chips stay owned and placed, and earlier movement stays put.",
                 DuckEncounterType.LoosePebbles => $"Skitter onward: move 1 space and add 1 Exhaustion. Unless protected, lose 1 {SingularCurrency(economy)} if this is your final occupied chip, even after wear-out, to a minimum of 0.",
                 DuckEncounterType.Brambles => "Push through: move 1 space and add 1 Exhaustion. Unless protected, lose 1 Twig earned today if this is your final occupied chip, even after wear-out, to a minimum of 0; Twigs from earlier Days are safe.",
@@ -97,14 +102,15 @@ namespace GatheringSeason.Core.Ducks.Reference
         public static string Event(DuckWorldEventType type, DuckRuleDefinitions rules)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
-            return Event(type, rules.Economy, rules.RulesRevision >= 5, rules.FreshAirExhaustionBonus);
+            return Event(type, rules.Economy, rules.RulesRevision >= 5, rules.FreshAirExhaustionBonus, rules.RulesRevision >= 8);
         }
 
         private static string Event(
             DuckWorldEventType type,
             DuckEconomyDefinition economy,
             bool wornOutKeepsNightRewards,
-            int freshAirExhaustionBonus)
+            int freshAirExhaustionBonus,
+            bool nextChipLog = false)
         {
             if (economy == null) throw new ArgumentNullException(nameof(economy));
 
@@ -112,14 +118,18 @@ namespace GatheringSeason.Core.Ducks.Reference
             {
                 DuckWorldEventType.RainSoftenedSeeds => "Soft earth gives every placed Seed +1 movement today, so each Seed moves 2 spaces total. It adds no Star or Exhaustion.",
                 DuckWorldEventType.SunlitSignboards => "Sunlight makes every placed Signpost preview up to 2 available chips in their fixed draw order today.",
-                DuckWorldEventType.FriendlyGuide => "A kindly guide protects each duck's first placed Obstacle from its nuisance; movement and +1 Exhaustion still happen. It is used even when the nuisance would do nothing, Splash used there is spent too, and an older Log slowdown remains.",
+                DuckWorldEventType.FriendlyGuide => "A kindly guide protects each duck's first placed Obstacle from its nuisance; movement and +1 Exhaustion still happen. It is used even when the nuisance would do nothing, Splash used there is spent too, " + (nextChipLog
+                    ? "and an older Log is consumed by that draw; protection affects only the new nuisance."
+                    : "and an older Log slowdown remains."),
                 DuckWorldEventType.PocketOfDriftwood => "The first time each duck places 3 different Wish types today, it gathers +1 Twig, kept even if it later wears out; award this at most once. Tailwind and Reeds variants still count as one type each.",
                 DuckWorldEventType.AllTuckedIn => wornOutKeepsNightRewards
                     ? $"If every duck finishes at a shelter, everyone gains +{Reward(economy.AllTuckedInReward, economy)}; different shelters are fine, and worn-out ducks still qualify and add it before halving Stars. One unsheltered duck means no reward."
                     : $"If every duck finishes safely at a shelter, everyone gains +{Reward(economy.AllTuckedInReward, economy)}; different shelters are fine. One unsafe or unsheltered duck means no reward.",
                 DuckWorldEventType.HomeBeforeDark => $"If every duck finishes safely, everyone gains +{Reward(economy.HomeBeforeDarkReward, economy)}. Shelters are not required, but one worn-out duck means no reward.",
                 DuckWorldEventType.SharedSupper => $"If every duck physically places at least 1 Seed today, everyone gains +{Reward(economy.SharedSupperReward, economy)}. Worn-out ducks still qualify and add it before their {economy.CurrencyName} are halved.",
-                DuckWorldEventType.StillAir => "The breeze is sleepy: Tailwind 2 moves 1, Tailwind 4 moves 2, and Tailwind 6 moves 3 today; their other powers are unchanged. A pending Log is used but never halves that Tailwind twice; if the Log's next Wish is not a Tailwind, it works normally.",
+                DuckWorldEventType.StillAir => "The breeze is sleepy: Tailwind 2 moves 1, Tailwind 4 moves 2, and Tailwind 6 moves 3 today; their other powers are unchanged. A pending Log is used but never halves that Tailwind twice; " + (nextChipLog
+                    ? "the Log affects only the immediately next drawn chip, and a white Obstacle consumes it without slowing."
+                    : "if the Log's next Wish is not a Tailwind, it works normally."),
                 DuckWorldEventType.ThickMorningMist => "The path is misty: Signposts still move 2 spaces total but preview no chip today, and no preview is saved for later.",
                 DuckWorldEventType.RestlessNight => wornOutKeepsNightRewards
                     ? $"A duck that finishes at a shelter receives 1 less shelter-related {SingularCurrency(economy)}, to a minimum of 0 (printed shelter reward, Flowers, and Final Night shelter bonus together). Apply it to worn-out ducks before halving Stars. Twigs, Feathers, flock rewards, and other event rewards stay untouched."

@@ -19,7 +19,8 @@ wire fields without changing runtime terminology.
 | 4 | Stars and Wishes: Seeds 0; Tailwinds 1/2/3; Reeds 2/3/4; older safe-only reward gates | Glorious Sunshine deck |
 | 5 | Same Stars, prices and board; exhausted ducks keep Flock, shelter bonuses and Feathers before Star halving | Same ten events; All Tucked In/Restless Night include exhausted shelter occupants |
 | 6 | Same Star prices; meadow shelters are 16/22/25 and space 28 has five Twigs | Same ten events; Fresh Air is +2 safe Exhaustion |
-| 7 (new games) | Same Star prices; meadow shelters are 17/21/25, with current 15–25 reward values | Same ten events; Fresh Air is +2 safe Exhaustion |
+| 7 | Same Star prices; meadow shelters are 17/21/25, with current 15–25 reward values; Log waits for the next Wish | Same ten events; Fresh Air is +2 safe Exhaustion |
+| 8 (new games) | Same economy and board as revision 7; Log is consumed by the immediately next drawn chip, slowing only a Wish | Same ten events; protection suppresses only the newly drawn nuisance |
 
 Continue restores the recorded catalogue. It never retroactively changes
 purchases, paid Sleep/Stars, event order or already-earned rewards. Sunlit Signboards’
@@ -27,7 +28,7 @@ two-token preview survives only for old matches. New games have ten events,
 not eleven. Exact pending weather choices and final-Day commitments are saved.
 
 Format-1 saves retain their established `Sleep` wire names. `RulesVersion`
-distinguishes whether those values mean legacy Sleep or revision 4–7 Stars. The
+distinguishes whether those values mean legacy Sleep or revision 4–8 Stars. The
 public API remains neutral for current clients: board `Reward`/`Stars` retains
 legacy `Sleep`; shop `Price`/`StarsPrice` retains `SleepPrice`; player
 `FrozenReward`/`FrozenStars` retain `FrozenSleep`, and
@@ -65,7 +66,7 @@ Format-1 `Settings.PlayerCount` and `Settings.WishSetId` are additive fields.
 A missing/zero count means two players; a missing/empty set means Set 1 in the
 recorded rules catalogue. Unknown sets, unsupported counts, mismatched player
 records and invalid command/result references fail validation. Earlier rules
-revisions remain two-player only; revision 7 supports two to four players.
+revisions remain two-player only; revisions 7–8 support two to four players.
 Continue preserves the recorded setup and catalogue.
 
 Core observations retain the viewer's own private data for policy clients.
@@ -90,3 +91,13 @@ Clients must not present a possible bonus as earned. The property is absent
 before a first placement and outside Adventure; resolved Night outcomes remain
 the authority after settlement. Retained catalogues use their original currency
 and conversion rules despite the current `Stars` property names.
+
+## Pending Fallen Log
+
+`LogSlowdownPending` retains its format-1 wire name. In revision 8 it is consumed
+by the immediately next actual chip draw: a Wish moves half its total, rounded
+up, and a white Obstacle moves normally. A new unprotected Log then arms a fresh
+pending slowdown; a protected Log does not. Signpost previews and detached
+observations do not consume it. Revisions 1–7 retain the next-Wish behavior,
+including a pending Log surviving white chips and protection against a later Log.
+Restore selects this behavior from `RulesVersion`; no save-field migration occurs.

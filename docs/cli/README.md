@@ -90,13 +90,13 @@ Your Night summary separates frozen earned Stars from the amount still
 available to spend. Shopping does not change who won Most Rested. Helpful chips are Wishes;
 ordinary white hazards are Obstacles, while chip and token still name physical pieces.
 
-In revision 7, Stars are that Night's currency. Normally five Exhaustion is safe; drawing a sixth obstacle wears you out.
+In revision 8, Stars are that Night's currency. Normally five Exhaustion is safe; drawing a sixth obstacle wears you out.
 Fresh Air adds two to the safe limit for its Day. From Day 5 each pouch gains one Grumpy Goose. An unprotected Goose lowers the
 safe maximum to four for that Day. Worn-out ducks keep earned Twigs and receive
 half their total Stars, rounded down, and cannot win
 Most Rested. Splash blocks the next obstacle's nuisance, not its Exhaustion.
 
-Current revision 7 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishing there grants
+Current revision 8 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishing there grants
 Feathers, which permanently move your later starts forward one step each.
 Dawn Delivery grants catch-up Feathers from the gap to the Twig leader:
 0 for a 0–2 gap, 1 for 3–6, 2 for 7–10 and 3 for 11 or more.
@@ -155,7 +155,7 @@ read but the backup can, Continue explicitly reports that it recovered the
 previous action. If neither is valid, it reports an error instead of silently
 starting over. A write failure stops play to preserve the preceding save.
 
-Revisions 1–6 keep their recorded rules. New games use revision 7 with Stars
+Revisions 1–7 keep their recorded rules. New games use revision 8 with Stars
 and Wishes and the current meadow catalogue. Existing paid Sleep or Stars and
 random order are preserved. Always use the in-game `shop` display for the
 running match.
@@ -220,3 +220,9 @@ alias remains for existing scripts; `classic` is reported as unsupported.
   and what you expected. A copy of the save helps reproduce the exact state.
 
 For retained save and API names, see [compatibility](../architecture/compatibility.md).
+
+A pending Fallen Log in revision 8 affects the immediately next drawn chip. A
+Wish halves its total movement, rounded up; a white chip consumes the slowdown
+without slowing. A new unprotected Log arms a fresh slowdown, while a protected
+Log does not. Signpost previews and `status`/`help` reads never consume it.
+Continued revision 1–7 matches keep their original next-Wish behavior.

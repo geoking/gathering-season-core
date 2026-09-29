@@ -24,7 +24,9 @@ internal static class DuckCliRenderer
                     : $"Warm Dreams (+{CurrencyAmount(view.Economy.WarmDreamsReward, view.Economy)} tonight)"));
             var activeEffects = new List<string>();
             if (player.SplashProtectionArmed) activeEffects.Add("Splash protects the next placed chip");
-            if (player.LogSlowdownPending) activeEffects.Add("Log will slow the next Wish");
+            if (player.LogSlowdownPending) activeEffects.Add(view.RulesRevision >= 8
+                ? "Log affects the next drawn chip: halve a Wish; a white chip consumes it without slowing"
+                : "Log will slow the next Wish");
             if (player.GuideProtectionAvailable) activeEffects.Add("Guide protects the first obstacle nuisance");
             if (activeEffects.Count > 0) Console.WriteLine("  Active: " + string.Join(" · ", activeEffects));
             if (view.Day > 1)
