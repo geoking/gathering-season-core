@@ -10,6 +10,41 @@ public sealed partial class DuckCliTests
 {
     private static readonly JsonSerializerOptions SaveJson = new() { IncludeFields = true };
 
+    [Theory]
+    [InlineData(7)]
+    [InlineData(8)]
+    public void Continued_pending_log_status_and_help_use_the_saved_catalogue_without_consuming_it(int revision)
+    {
+        var runtime = DuckMatchRuntime.Create(901, rulesRevision: revision);
+        var home = runtime.State.WorldEventDeckDefinitionIds.IndexOf("home_before_dark");
+        (runtime.State.WorldEventDeckDefinitionIds[0], runtime.State.WorldEventDeckDefinitionIds[home]) =
+            (runtime.State.WorldEventDeckDefinitionIds[home], runtime.State.WorldEventDeckDefinitionIds[0]);
+        var player = runtime.Player("human");
+        var log = player.Inventory.First(c => c.DefinitionId == "fallen_log").PhysicalChipId;
+        player.BagPhysicalChipIds.Remove(log); player.BagPhysicalChipIds.Insert(0, log);
+        player.GuideProtectionAvailable = false;
+        var match = new MatchSession<DuckMatchView>(runtime);
+        match.Execute("human", match.GetLegalActions("human").Single(a => a.Kind == GameActionKind.Explore));
+        using var files = new SaveFiles();
+        files.Write(DuckSaves.Capture(match));
+        var original = File.ReadAllBytes(files.Path);
+        var result = Run("status\ntokens\nevent\nhelp\nq\n", "--continue", "--two-player", "--save", files.Path);
+        Assert.Equal(0, result.ExitCode);
+        if (revision == 8)
+        {
+            Assert.Contains("Log affects the next drawn chip", result.Output);
+            Assert.Contains("white chip consumes it without slowing", result.Output);
+            Assert.Contains("immediately next drawn chip consumes this slowdown", result.Output);
+        }
+        else
+        {
+            Assert.Contains("Log will slow the next Wish", result.Output);
+            Assert.Contains("halve the next Wish's total movement", result.Output);
+        }
+        Assert.Equal(original, File.ReadAllBytes(files.Path));
+        Assert.True(files.Read().Players.Single(p => p.Id == "human").LogSlowdownPending);
+    }
+
     [Fact]
     public void Continue_pauses_at_an_existing_human_decision_and_read_only_commands_do_not_change_state()
     {

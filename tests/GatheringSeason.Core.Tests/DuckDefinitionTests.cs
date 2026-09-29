@@ -126,9 +126,9 @@ public sealed class DuckDefinitionTests
     }
 
     [Fact]
-    public void Current_catalogue_uses_revision_seven_with_the_approved_Stars_economy()
+    public void Current_catalogue_uses_revision_eight_with_the_approved_Stars_economy()
     {
-        Assert.Equal(7, DuckRules.CurrentRulesRevision);
+        Assert.Equal(8, DuckRules.CurrentRulesRevision);
         Assert.Equal(new Dictionary<string, int>
         {
             ["seeds"] = 0,
@@ -144,13 +144,14 @@ public sealed class DuckDefinitionTests
             ["wildflowers"] = 1
         }, DuckRules.V1.ShopOffers.ToDictionary(offer => offer.DefinitionId, offer => offer.Price));
 
-        Assert.Equal(7, DuckRules.V1.RulesRevision);
+        Assert.Equal(8, DuckRules.V1.RulesRevision);
         Assert.Equal(2, DuckRules.V1.FreshAirExhaustionBonus);
         Assert.Equal(7, DuckRules.V1.FreshAirSafeExhaustionMaximum);
         Assert.Equal(6, DuckRules.V1.FreshAirGooseSafeExhaustionMaximum);
         Assert.Equal("Stars", DuckRules.V1.Economy.CurrencyName);
         Assert.True(DuckRules.V1.Economy.UsesStars);
-        Assert.Same(DuckRules.V1, DuckRules.ForRulesRevision(7));
+        Assert.Same(DuckRules.V1, DuckRules.ForRulesRevision(8));
+        Assert.Equal(7, DuckRules.ForRulesRevision(7).RulesRevision);
         Assert.Equal(6, DuckRules.ForRulesRevision(6).RulesRevision);
         Assert.Equal(5, DuckRules.ForRulesRevision(5).RulesRevision);
         Assert.Equal(4, DuckRules.ForRulesRevision(4).RulesRevision);
@@ -341,7 +342,7 @@ public sealed class DuckDefinitionTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new DuckShopOffer("seeds", DuckRules.V1.Encounter("seeds"), -1));
         Assert.Throws<ArgumentOutOfRangeException>(() => DuckRules.ForRulesRevision(0));
-        Assert.Throws<ArgumentOutOfRangeException>(() => DuckRules.ForRulesRevision(8));
+        Assert.Throws<ArgumentOutOfRangeException>(() => DuckRules.ForRulesRevision(9));
     }
 
     private static JsonDocument ReadReferenceJson(string fileName)

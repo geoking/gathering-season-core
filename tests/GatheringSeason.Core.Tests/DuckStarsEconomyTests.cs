@@ -15,7 +15,7 @@ public sealed class DuckStarsEconomyTests
         var view = MatchSession.CreateDuck(seed: 4001).GetSnapshot("human");
         var rules = view.Rules;
 
-        Assert.Equal(7, view.RulesRevision);
+        Assert.Equal(8, view.RulesRevision);
         Assert.Same(rules.Economy, view.Economy);
         Assert.Equal("Stars", view.Economy.CurrencyName);
         Assert.True(view.Economy.UsesStars);

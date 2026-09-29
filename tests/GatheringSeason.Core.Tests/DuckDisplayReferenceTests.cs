@@ -13,13 +13,13 @@ public sealed class DuckDisplayReferenceTests
         { "tailwind_4", ["4 spaces total", "+3 extra"] },
         { "tailwind_6", ["6 spaces total", "+5 extra"] },
         { "signpost", ["2 spaces total", "+1 extra", "privately peek", "that exact chip", "never choose or reorder"] },
-        { "splash", ["immediately next placed chip", "movement and Exhaustion still happen", "used even on a Wish", "fades at Day's end if unused", "Pebbles or Brambles for the rest of the route", "cannot clear an older Log slowdown"] },
+        { "splash", ["immediately next placed chip", "movement and Exhaustion still happen", "used even on a Wish", "fades at Day's end if unused", "Pebbles or Brambles for the rest of the route", "older Log is consumed by that next draw regardless of protection"] },
         { "reeds_1", ["Gather 1 Twig", "usual 1 space", "x1 is the Twig bundle, not movement", "even if you wear out"] },
         { "reeds_2", ["Gather 2 Twigs", "usual 1 space", "x2 is the Twig bundle, not movement", "even if you wear out"] },
         { "reeds_3", ["Gather 3 Twigs", "usual 1 space", "x3 is the Twig bundle, not movement", "even if you wear out"] },
         { "companion", ["first active Companion moves 2", "second 3", "later ones 4", "Mud can lower", "+1 Star total", "ties included", "Worn-out ducks still compete", "before halving Stars"] },
         { "wildflowers", ["+1 Star total", "settle at a shelter", "even when worn out", "do not stack", "before halving Stars"] },
-        { "fallen_log", ["move 1 space", "add 1 Exhaustion", "halve the next Wish's total movement after event bonuses", "rounding up to at least 1", "power still works", "slowdown clears", "cannot stack"] },
+        { "fallen_log", ["move 1 space", "add 1 Exhaustion", "immediately next drawn chip", "a Wish halves its total movement after event bonuses", "rounding up to at least 1", "power still works", "white Obstacle moves normally", "unprotected Log then arms a fresh slowdown", "protected Log does not"] },
         { "mud_puddle", ["move 1 space", "add 1 Exhaustion", "lower the active Companion flock count by 1", "minimum of 0", "chips stay owned and placed", "earlier movement stays put"] },
         { "loose_pebbles", ["move 1 space", "add 1 Exhaustion", "lose 1 Star", "final occupied chip", "even after wear-out", "minimum of 0"] },
         { "brambles", ["move 1 space", "add 1 Exhaustion", "lose 1 Twig earned today", "final occupied chip", "even after wear-out", "minimum of 0", "earlier Days are safe"] },
@@ -30,12 +30,12 @@ public sealed class DuckDisplayReferenceTests
     {
         { DuckWorldEventType.RainSoftenedSeeds, ["every placed Seed +1 movement", "2 spaces total", "no Star or Exhaustion"] },
         { DuckWorldEventType.GloriousSunshine, ["publicly chooses", "+2", "7 is safe", "6 after an unprotected Goose", "+2 Stars", "before Pebbles, wear-out halving, Most Rested, and Final Night conversion", "before anyone draws"] },
-        { DuckWorldEventType.FriendlyGuide, ["first placed Obstacle", "movement and +1 Exhaustion still happen", "even when the nuisance would do nothing", "Splash used there is spent too", "older Log slowdown remains"] },
+        { DuckWorldEventType.FriendlyGuide, ["first placed Obstacle", "movement and +1 Exhaustion still happen", "even when the nuisance would do nothing", "Splash used there is spent too", "older Log is consumed by that draw", "protection affects only the new nuisance"] },
         { DuckWorldEventType.PocketOfDriftwood, ["3 different Wish types", "+1 Twig", "kept even if it later wears out", "at most once", "one type each"] },
         { DuckWorldEventType.AllTuckedIn, ["every duck finishes at a shelter", "+1 Star", "different shelters are fine", "worn-out ducks still qualify", "One unsheltered duck"] },
         { DuckWorldEventType.HomeBeforeDark, ["every duck finishes safely", "+1 Star", "Shelters are not required", "one worn-out duck"] },
         { DuckWorldEventType.SharedSupper, ["every duck physically places at least 1 Seed", "+1 Star", "Worn-out ducks still qualify", "before their Stars are halved"] },
-        { DuckWorldEventType.StillAir, ["Tailwind 2 moves 1", "Tailwind 4 moves 2", "Tailwind 6 moves 3", "other powers are unchanged", "never halves that Tailwind twice", "next Wish is not a Tailwind, it works normally"] },
+        { DuckWorldEventType.StillAir, ["Tailwind 2 moves 1", "Tailwind 4 moves 2", "Tailwind 6 moves 3", "other powers are unchanged", "never halves that Tailwind twice", "immediately next drawn chip", "white Obstacle consumes it without slowing"] },
         { DuckWorldEventType.ThickMorningMist, ["move 2 spaces total", "preview no chip", "no preview is saved for later"] },
         { DuckWorldEventType.RestlessNight, ["finishes at a shelter", "1 less shelter-related Star", "minimum of 0", "printed shelter reward, Flowers, and Final Night shelter bonus together", "worn-out ducks before halving Stars", "Twigs, Feathers, flock rewards, and other event rewards stay untouched"] }
     };
@@ -48,6 +48,7 @@ public sealed class DuckDisplayReferenceTests
     [InlineData(5)]
     [InlineData(6)]
     [InlineData(7)]
+    [InlineData(8)]
     public void Every_encounter_variant_has_reference_text_for_each_supported_revision(int rulesRevision)
     {
         var rules = DuckRules.ForRulesRevision(rulesRevision);
@@ -122,6 +123,7 @@ public sealed class DuckDisplayReferenceTests
     [InlineData(5)]
     [InlineData(6)]
     [InlineData(7)]
+    [InlineData(8)]
     public void Offer_reference_uses_the_running_catalogue_price_currency_and_power(int rulesRevision)
     {
         var rules = DuckRules.ForRulesRevision(rulesRevision);

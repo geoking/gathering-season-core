@@ -25,11 +25,13 @@ public sealed class DuckMultiplayerTests
     }
 
     [Theory]
-    [InlineData(3)]
-    [InlineData(4)]
-    public void Every_seat_completes_ten_days_and_restores_the_final_standings(int count)
+    [InlineData(7, 3)]
+    [InlineData(7, 4)]
+    [InlineData(8, 3)]
+    [InlineData(8, 4)]
+    public void Every_seat_completes_ten_days_and_restores_the_final_standings(int revision, int count)
     {
-        var match = MatchSession.CreateDuck(721, new DuckMatchSettings(count));
+        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(721, new DuckMatchSettings(count), revision));
         Assert.Equal(new[] { "human", "ai", "ai-2", "ai-3" }.Take(count),
             match.GetSnapshot("human").Players.Select(player => player.Id));
         Assert.Equal(new[] { "Human", "AI", "AI 2", "AI 3" }.Take(count),
@@ -47,10 +49,12 @@ public sealed class DuckMultiplayerTests
         Assert.All(finished.Players, player => Assert.Empty(restored.GetLegalActions(player.Id)));
     }
 
-    [Fact]
-    public void Partial_four_seat_final_beat_restores_without_exposing_or_replaying_commits()
+    [Theory]
+    [InlineData(7)]
+    [InlineData(8)]
+    public void Partial_four_seat_final_beat_restores_without_exposing_or_replaying_commits(int revision)
     {
-        var match = MatchSession.CreateDuck(722, new DuckMatchSettings(4));
+        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(722, new DuckMatchSettings(4), revision));
         PlayToDay(match, 10);
         ChooseSunshineForAll(match);
         Execute(match, "human", GameActionKind.Explore);
