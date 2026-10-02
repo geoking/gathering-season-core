@@ -228,7 +228,7 @@ public sealed partial class DuckCliTests
         var result = Run("", "--profile", "ducks", "--continue", "--inspect", "--save", files.Path);
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("Recovered the previous saved action from backup", result.Error);
-        Assert.Contains("Human: 0 Nest Twigs · space 0", result.Output);
+        Assert.Contains("Human: No Nest Twigs · space 0", result.Output);
         Assert.Equal("not a save", File.ReadAllText(files.Path));
     }
 

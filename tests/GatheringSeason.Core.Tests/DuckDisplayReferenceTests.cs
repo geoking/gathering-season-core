@@ -196,8 +196,8 @@ public sealed class DuckDisplayReferenceTests
         Assert.Contains("each 4 retained Sleep becomes 1 Dream Twig", legacyGlossary);
         Assert.Contains("Stars: Tonight's Wish-buying budget", currentGlossary);
         Assert.Contains("each retained Star becomes 1 Dream Twig", currentGlossary);
-        Assert.Contains("Feathers: Permanent head starts, one space each", currentGlossary);
-        Assert.Contains("wearing out does not prevent a shelter Feather", currentGlossary);
+        Assert.Contains("Trail Feathers: Head starts that stay for later Days, one space each", currentGlossary);
+        Assert.Contains("wearing out does not prevent a shelter Trail Feather", currentGlossary);
         Assert.Contains("Most Rested marker: A one-Day head start for every eligible duck tied for Most Rested", currentGlossary);
     }
 

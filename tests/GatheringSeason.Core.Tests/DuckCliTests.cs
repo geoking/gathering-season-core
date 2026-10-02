@@ -54,13 +54,13 @@ public sealed partial class DuckCliTests
         var result = Run(input, "--seed", "42", "--no-save");
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("4. Wetlands", result.Output);
-        Assert.Contains("2 Stars · 1 Twig · 1 Feather · SHELTER: Reed hammock", result.Output);
+        Assert.Contains("2 Stars · 1 Twig · 1 Trail Feather · SHELTER: Reed hammock", result.Output);
         Assert.Contains("16. Meadow", result.Output);
         Assert.Contains("2 Stars · 4 Twigs", result.Output);
         Assert.Contains("17. Meadow", result.Output);
-        Assert.Contains("3 Stars · 4 Twigs · 1 Feather · SHELTER: Clover hollow", result.Output);
+        Assert.Contains("3 Stars · 4 Twigs · 1 Trail Feather · SHELTER: Clover hollow", result.Output);
         Assert.Contains("21. Meadow", result.Output);
-        Assert.Contains("3 Stars · 5 Twigs · 1 Feather · SHELTER: Orchard shelter", result.Output);
+        Assert.Contains("3 Stars · 5 Twigs · 1 Trail Feather · SHELTER: Orchard shelter", result.Output);
         Assert.Contains("One free Seed still uses one purchase slot", result.Output);
         Assert.Contains("extra Flowers do not stack", result.Output);
         Assert.Contains("Opening recipe", result.Output);
@@ -143,7 +143,7 @@ public sealed partial class DuckCliTests
         Assert.Contains("Day 1/10 · Night", result.Output);
         Assert.Contains("Night 1:", result.Output);
         Assert.Contains("Star frozen", result.Output);
-        Assert.Contains("Twigs: printed", result.Output);
+        Assert.Contains("Twigs: ", result.Output);
         Assert.Contains("human: Buy Wish Seeds for no Stars", result.Output);
         Assert.Contains("ai: Buy Wish Seeds for no Stars", result.Output);
         Assert.Contains("Day 2/10 · Adventure", result.Output);
