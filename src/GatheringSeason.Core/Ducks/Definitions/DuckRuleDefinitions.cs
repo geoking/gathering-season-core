@@ -53,12 +53,15 @@ namespace GatheringSeason.Core.Ducks.Definitions
         public IReadOnlyList<DuckEncounterDefinition> EncounterDefinitions { get; }
         public IReadOnlyList<DuckShopOffer> ShopOffers { get; }
         public IReadOnlyList<DuckWorldEventDefinition> WorldEvents { get; }
+        public IReadOnlyList<DuckWorldEventDefinition> WeatherReports => WorldEvents;
         public IReadOnlyList<DuckEncounterDefinition> OpeningBag { get; }
 
         public DuckBoardSpace BoardSpace(string definitionId) => Find(_boardById, definitionId, "board space");
         public DuckEncounterDefinition Encounter(string definitionId) => Find(_encounterById, definitionId, "encounter");
         public DuckShopOffer ShopOffer(string definitionId) => Find(_shopOfferById, definitionId, "shop offer");
-        public DuckWorldEventDefinition WorldEvent(string definitionId) => Find(_worldEventById, definitionId, "World Event");
+        public DuckWorldEventDefinition WorldEvent(string definitionId) => Find(_worldEventById, definitionId, "weather report");
+
+        public DuckWorldEventDefinition WeatherReport(string definitionId) => WorldEvent(definitionId);
 
         public DuckBoardSpace BoardSpaceAt(int space)
         {
@@ -87,7 +90,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
                 || !ReferenceEquals(encounter, offer.Encounter)))
                 throw new ArgumentException("Every shop offer must reference a registered encounter definition.");
             if (WorldEvents.Count != 10 || WorldEvents.Select(item => item.EventType).Distinct().Count() != 10)
-                throw new ArgumentException("Duck v1 requires exactly ten distinct World Events.");
+                throw new ArgumentException("Duck v1 requires exactly ten distinct weather reports.");
             if (OpeningBag.Count != 13 || OpeningBag.Any(item => !_encounterById.TryGetValue(item.DefinitionId, out var encounter)
                 || !ReferenceEquals(encounter, item)))
                 throw new ArgumentException("The opening pouch must contain 13 registered encounter definitions.");

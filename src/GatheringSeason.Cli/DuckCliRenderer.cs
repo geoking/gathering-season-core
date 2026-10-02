@@ -8,7 +8,7 @@ internal static class DuckCliRenderer
 {
     internal static void ShowStatus(DuckMatchView view, int recentHistory = 3)
     {
-        Console.WriteLine($"Day {view.Day}/10 · {view.Phase} · Nest level {view.NestLevel} · World Event: {view.CurrentEvent.Name}");
+        Console.WriteLine($"Day {view.Day}/10 · {view.Phase} · Nest level {view.NestLevel} · Weather report: {view.CurrentEvent.Name}");
         Console.WriteLine("  " + DuckReferenceText.Event(view.CurrentEvent.EventType, view.Rules));
         foreach (var player in view.Players)
         {
@@ -27,7 +27,7 @@ internal static class DuckCliRenderer
             if (player.LogSlowdownPending) activeEffects.Add(view.RulesRevision >= 8
                 ? "Log affects the next drawn chip: halve a Wish; a white chip consumes it without slowing"
                 : "Log will slow the next Wish");
-            if (player.GuideProtectionAvailable) activeEffects.Add("Guide protects the first obstacle nuisance");
+            if (player.GuideProtectionAvailable) activeEffects.Add("Clearing Breeze protects the first Obstacle nuisance");
             if (activeEffects.Count > 0) Console.WriteLine("  Active: " + string.Join(" · ", activeEffects));
             if (view.Day > 1)
                 Console.WriteLine($"  Dawn deficit {Quantity(player.DawnTwigDeficit, "Twig")} · Dawn delivery {Quantity(player.DawnFeathersAwarded, "Feather")}");
@@ -49,7 +49,7 @@ internal static class DuckCliRenderer
 
     internal static void ShowBoard(DuckMatchView view, int? selectedSpace)
     {
-        Console.WriteLine("Board rewards are printed values only; Core applies events, encounter bonuses, penalties and wear-out at Night.");
+        Console.WriteLine("Board rewards are printed values only; Core applies weather, encounter bonuses, penalties and wear-out at Night.");
         var spaces = selectedSpace.HasValue
             ? view.Rules.BoardSpaces.Where(space => space.Space == selectedSpace.Value)
             : view.Rules.BoardSpaces;
@@ -112,11 +112,11 @@ internal static class DuckCliRenderer
 
     internal static void ShowEvent(DuckMatchView view)
     {
-        Console.WriteLine($"World Event · Day {view.Day}: {view.CurrentEvent.Name}");
+        Console.WriteLine($"Weather report · Day {view.Day}: {view.CurrentEvent.Name}");
         Console.WriteLine(DuckReferenceText.Event(view.CurrentEvent.EventType, view.Rules));
         Console.WriteLine(view.CurrentEvent.EventType == DuckWorldEventType.GloriousSunshine
-            ? "Both ducks publicly choose one benefit before either Adventure begins. The choice lasts only today."
-            : "It applies to both ducks for this Day; collective conditions resolve after both finish.");
+            ? "Every duck publicly chooses one benefit before any Adventure begins. The choice lasts only today."
+            : "It applies to every duck for this Day; collective conditions resolve after all finish.");
         Console.WriteLine();
     }
 
@@ -134,8 +134,8 @@ internal static class DuckCliRenderer
             var night = player.LastNightOutcome!;
             Console.WriteLine($"{player.Name}: {CurrencyAmount(night.FrozenReward, view.Economy)} frozen; {CurrencyAmount(player.RemainingReward, view.Economy)} available now. Added to nest {Quantity(night.TotalTwigsEarned, "Twig")}; {Quantity(night.FeathersAwarded, "Feather")} awarded" +
                 (night.IsMostRested ? " · Most Rested" : string.Empty));
-            Console.WriteLine($"  {view.Economy.CurrencyName}: printed {night.PrintedReward}, Flowers +{night.FlowerReward}, final shelter +{night.FinalShelterReward}, collective event +{night.CollectiveEventReward}, Glorious Sunshine +{night.GloriousSunshineReward}, flock +{night.FlockReward}, Restless Night -{night.RestlessNightPenalty}, Pebbles -{night.PebblesPenalty}; before wear {night.RewardBeforeWear}.");
-            Console.WriteLine($"  Twigs: printed {night.PrintedTwigs}, Reeds +{night.ReedsTwigs}, event +{night.EventTwigs}, Brambles -{night.BramblesPenalty}.");
+            Console.WriteLine($"  {view.Economy.CurrencyName}: printed {night.PrintedReward}, Flowers +{night.FlowerReward}, final shelter +{night.FinalShelterReward}, collective weather +{night.CollectiveEventReward}, Glorious Sunshine +{night.GloriousSunshineReward}, flock +{night.FlockReward}, Thundery Skies -{night.RestlessNightPenalty}, Pebbles -{night.PebblesPenalty}; before wear {night.RewardBeforeWear}.");
+            Console.WriteLine($"  Twigs: printed {night.PrintedTwigs}, Reeds +{night.ReedsTwigs}, weather +{night.EventTwigs}, Brambles -{night.BramblesPenalty}.");
             if (night.DreamTwigs > 0) Console.WriteLine($"  Dream Twigs: {Quantity(night.DreamTwigs, "Twig")}.");
         }
         if (view.Phase is DuckPhase.Night or DuckPhase.DayComplete && nights[0].LastNightOutcome!.Day == view.Day)
@@ -174,7 +174,7 @@ internal static class DuckCliRenderer
         Console.WriteLine(twoPlayer
             ? $"Developer controls: seat:N executes an issued action; view:seat selects its private observation. Seats: {string.Join(", ", seatIds)}."
             : "view:human reviews your observation. CPU private views are unavailable.");
-        Console.WriteLine("Most Twigs wins. Five Exhaustion is normally safe; use tokens, event and board before deciding to draw again.");
+        Console.WriteLine("Most Twigs wins. Five Exhaustion is normally safe; use tokens, the weather report and board before deciding to draw again.");
         Console.WriteLine("Pouch shows the opening recipe before the first draw. Night shows current purchases; remember earlier additions yourself.");
         Console.WriteLine("Restart starts a new match using this launch's --players and --wish-set settings (defaults: 2 and set-1).");
         Console.WriteLine("Informational commands and invalid input do not advance any duck or write a save.\n");
@@ -182,7 +182,7 @@ internal static class DuckCliRenderer
 
     internal static void ShowCatalogue(DuckMatchView view)
     {
-        Console.WriteLine($"Catalogue: {Quantity(view.Rules.BoardSpaces.Count, "reward")} · {Quantity(view.Rules.BoardSpaces.Count(space => space.IsShelter), "shelter")} · {Quantity(view.Rules.EncounterDefinitions.Count, "encounter variant")} · {Quantity(view.ShopOffers.Count, "shop offer")} · {Quantity(view.Rules.WorldEvents.Count, "World Event")}");
+        Console.WriteLine($"Catalogue: {Quantity(view.Rules.BoardSpaces.Count, "reward")} · {Quantity(view.Rules.BoardSpaces.Count(space => space.IsShelter), "shelter")} · {Quantity(view.Rules.EncounterDefinitions.Count, "encounter variant")} · {Quantity(view.ShopOffers.Count, "shop offer")} · {Quantity(view.Rules.WorldEvents.Count, "weather report")}");
         ShowOpeningRecipe(view);
         foreach (var offer in view.ShopOffers)
             Console.WriteLine($"  {offer.DefinitionId}: {CurrencyAmount(offer.Price, view.Economy)} · movement {(offer.Encounter.BaseMovement?.ToString() ?? "flock-dependent")} · Twig yield {Quantity(offer.Encounter.TwigYield, "Twig")}");

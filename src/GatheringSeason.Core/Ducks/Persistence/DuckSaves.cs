@@ -526,7 +526,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(outcome.RestlessNightPenalty == 0
                     || outcomeEvent == DuckWorldEventType.RestlessNight
                     && outcome.RestlessNightPenalty == economy.RestlessNightPenalty,
-                $"Players[{player.Id}] has an invalid Restless Night penalty.");
+                $"Players[{player.Id}] has an invalid Thundery Skies penalty.");
             var expectedCollectiveReward = outcomeEvent == DuckWorldEventType.AllTuckedIn ? economy.AllTuckedInReward
                 : outcomeEvent == DuckWorldEventType.HomeBeforeDark ? economy.HomeBeforeDarkReward
                 : outcomeEvent == DuckWorldEventType.SharedSupper ? economy.SharedSupperReward

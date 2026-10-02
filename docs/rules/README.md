@@ -11,7 +11,7 @@ technical rules revision 8. The standard rules below describe the current setup.
 
 ## A Day and a Night
 
-1. Reveal one shared World Event from the shuffled ten-card deck. Each appears
+1. Reveal one shared Weather report from the shuffled ten-card deck. Each appears
    once per game. Glorious Sunshine asks every duck to choose a benefit first.
 2. Explore by drawing physical chips from your own pouch. Move and resolve the
    complete chip. Draw at least once, then continue or settle on your occupied
@@ -20,7 +20,7 @@ technical rules revision 8. The standard rules below describe the current setup.
 3. Days 1–9 publish actions immediately so players can react. On Day 10 only,
    all active ducks privately commit Draw/Settle and reveal each beat together.
 4. Once everyone finishes, bank the destination’s cumulative route Twigs plus
-   Reeds/event Twigs, after any Brambles deduction. Compute Stars and bonuses.
+   Reeds/weather Twigs, after any Brambles deduction. Compute Stars and bonuses.
    Worn-out ducks retain earned Twigs and half their Stars, rounded down.
 5. Compare frozen Stars among safe ducks. All tied Most Rested ducks receive a
    Most Rested marker: one temporary extra starting step tomorrow, never a Feather.
@@ -57,7 +57,7 @@ Shelter finishes give Feathers and, when at least one Wildflowers chip was
 placed, +1 Star total, even when exhausted. Positive flock leaders gain +1 Star,
 with tied leaders and exhausted ducks qualifying. Exhaustion ends the adventure,
 halves the complete Star total (rounded down), and prevents Most Rested; it does
-not remove Twigs, Feathers or ordinary bonuses. Home Before Dark retains its
+not remove Twigs, Feathers or ordinary bonuses. Golden Sunset retains its
 special requirement that everyone finish without exhaustion.
 
 Every duck starts at nest zero with zero Feathers. Each Feather permanently
@@ -73,7 +73,7 @@ Dawn Delivery are the only sources. Snapshot all Twig scores before Dawn:
 
 Most Rested’s temporary step is separate. Final-Day Feathers are recorded but
 there is no Day 11 or exchange into victory points. [Exact board and prices](board-and-shop.md)
-and [ten World Events](world-events.md) are the current numeric authorities.
+and [ten weather reports](world-events.md) are the current numeric authorities.
 
 An available Signpost can be read without drawing. Core reveals the private
 preview and preserves that exact chip as the next draw.

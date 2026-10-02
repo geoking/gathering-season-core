@@ -176,7 +176,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (placement.EncounterType == DuckEncounterType.Signpost)
                 RefreshSignpostPreview(runtime, player);
             if (placement.EventTwigsAwarded > 0)
-                runtime.AddHistory(player.Id, player.Name + " gained 1 Twig from A Pocket of Driftwood.");
+                runtime.AddHistory(player.Id, player.Name + " gained 1 Twig from Windfall Gusts.");
             var encounterLabel = runtime.Rules.Economy.UsesStars
                 ? definition.IsWish ? "Wish " : "Obstacle "
                 : string.Empty;

@@ -13,18 +13,18 @@ wire fields without changing runtime terminology.
 
 | Rules revision | Economy | Shared deck |
 | --- | --- | --- |
-| 1 | Original Sleep prices: Tailwind 5/10/15, Reeds 6/11/16 | Original deck with Sunlit Signboards |
-| 2 | Sleep prices: Tailwind 4/8/12, Reeds 8/14/20 | Original deck with Sunlit Signboards |
-| 3 | Same Sleep prices as revision 2 | Glorious Sunshine replaces Sunlit Signboards |
+| 1 | Original Sleep prices: Tailwind 5/10/15, Reeds 6/11/16 | Original deck with Clear Sunlight |
+| 2 | Sleep prices: Tailwind 4/8/12, Reeds 8/14/20 | Original deck with Clear Sunlight |
+| 3 | Same Sleep prices as revision 2 | Glorious Sunshine replaces Clear Sunlight |
 | 4 | Stars and Wishes: Seeds 0; Tailwinds 1/2/3; Reeds 2/3/4; older safe-only reward gates | Glorious Sunshine deck |
-| 5 | Same Stars, prices and board; exhausted ducks keep Flock, shelter bonuses and Feathers before Star halving | Same ten events; All Tucked In/Restless Night include exhausted shelter occupants |
-| 6 | Same Star prices; meadow shelters are 16/22/25 and space 28 has five Twigs | Same ten events; Fresh Air is +2 safe Exhaustion |
-| 7 | Same Star prices; meadow shelters are 17/21/25, with current 15–25 reward values; Log waits for the next Wish | Same ten events; Fresh Air is +2 safe Exhaustion |
-| 8 (new games) | Same economy and board as revision 7; Log is consumed by the immediately next drawn chip, slowing only a Wish | Same ten events; protection suppresses only the newly drawn nuisance |
+| 5 | Same Stars, prices and board; exhausted ducks keep Flock, shelter bonuses and Feathers before Star halving | Same ten weather reports; Evening Chill/Thundery Skies include exhausted shelter occupants |
+| 6 | Same Star prices; meadow shelters are 16/22/25 and space 28 has five Twigs | Same ten weather reports; Fresh Air is +2 safe Exhaustion |
+| 7 | Same Star prices; meadow shelters are 17/21/25, with current 15–25 reward values; Log waits for the next Wish | Same ten weather reports; Fresh Air is +2 safe Exhaustion |
+| 8 (new games) | Same economy and board as revision 7; Log is consumed by the immediately next drawn chip, slowing only a Wish | Same ten weather reports; protection suppresses only the newly drawn nuisance |
 
 Continue restores the recorded catalogue. It never retroactively changes
-purchases, paid Sleep/Stars, event order or already-earned rewards. Sunlit Signboards’
-two-token preview survives only for old matches. New games have ten events,
+purchases, paid Sleep/Stars, weather order or already-earned rewards. Clear Sunlight’s
+two-token preview survives only for old matches. New games have ten weather reports,
 not eleven. Exact pending weather choices and final-Day commitments are saved.
 
 Format-1 saves retain their established `Sleep` wire names. `RulesVersion`
@@ -53,6 +53,50 @@ The non-generic `MatchSession` provides the `CreateDuck` factory; clients use
 profiles are intentionally unsupported; start a new game. Retained rules
 revision catalogues support internal regression/evaluation and do not imply
 support for a previous product profile.
+
+## Weather reports and retained event identities
+
+Weather naming is a display change within revision 8. All supported catalogues
+use the following names; the established IDs, enum names and numeric values,
+shuffle order, save fields and command IDs/kinds remain stable. The enum type
+remains `DuckWorldEventType`.
+
+| Definition ID | Retained enum value | Weather report |
+| --- | --- | --- |
+| `rain_softened_seeds` | `RainSoftenedSeeds = 0` | Gentle Rain |
+| `sunlit_signboards` (revisions 1–2 only) | `SunlitSignboards = 1` | Clear Sunlight |
+| `a_friendly_guide` | `FriendlyGuide = 2` | Clearing Breeze |
+| `a_pocket_of_driftwood` | `PocketOfDriftwood = 3` | Windfall Gusts |
+| `all_tucked_in` | `AllTuckedIn = 4` | Evening Chill |
+| `home_before_dark` | `HomeBeforeDark = 5` | Golden Sunset |
+| `shared_supper` | `SharedSupper = 6` | Morning Dew |
+| `still_air` | `StillAir = 7` | Still Air |
+| `thick_morning_mist` | `ThickMorningMist = 8` | Thick Morning Mist |
+| `restless_night` | `RestlessNight = 9` | Thundery Skies |
+| `glorious_sunshine` (revisions 3–8) | `GloriousSunshine = 10` | Glorious Sunshine |
+
+`DuckRuleDefinitions.WeatherReports` and `WeatherReport(id)` alias the retained
+`WorldEvents` and `WorldEvent(id)` APIs. `DuckMatchView.CurrentWeatherReport`
+aliases `CurrentEvent`, and `DuckDisplayReference.WeatherReport` overloads alias
+`Event` and require `DuckRuleDefinitions` from the running catalogue. Retained
+economy-only `Event` overloads keep their original legacy defaults; use the
+catalogue overloads when displaying a match. Clients may adopt these weather-facing
+entry points without translating IDs. Format-1 saves continue using
+`WorldEventDeckDefinitionIds`, `CurrentEventIndex`, existing reward/penalty
+fields and protection flags. The `event` CLI command remains available.
+Previously recorded history text is preserved; new history uses weather names.
+
+Only names and reference prose change. Clear Sunlight still previews two chips
+in revisions 1–2. Glorious Sunshine keeps +3 Fresh Air through revision 5 and
++2 from revision 6; Warm Dreams keeps +8 Sleep in revision 3 and +2 Stars from
+revision 4. Evening Chill requires safe shelter occupants through revision 4;
+Thundery Skies applies only to safe shelter occupants through revision 4. Both
+include worn-out shelter occupants from revision 5, before halving the complete
+Star total. Golden Sunset always requires every duck to finish safely; Morning
+Dew always counts physical Seed placements, including worn-out ducks. Thundery
+Skies reduces only the combined printed shelter, Wildflowers and Final Night
+shelter subtotal, with a floor of zero. Clearing Breeze and Still Air retain
+each catalogue's Log consumption and protection rules described below.
 
 ## Match setup and seats
 

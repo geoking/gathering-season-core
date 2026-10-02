@@ -270,18 +270,18 @@ namespace GatheringSeason.Core.Ducks.Definitions
         {
             return new[]
             {
-                Event("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Rain-Softened Seeds"),
+                Event("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Gentle Rain"),
                 rulesRevision >= 3
                     ? Event("glorious_sunshine", DuckWorldEventType.GloriousSunshine, "Glorious Sunshine")
-                    : Event("sunlit_signboards", DuckWorldEventType.SunlitSignboards, "Sunlit Signboards"),
-                Event("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "A Friendly Guide"),
-                Event("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "A Pocket of Driftwood"),
-                Event("all_tucked_in", DuckWorldEventType.AllTuckedIn, "All Tucked In"),
-                Event("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Home Before Dark"),
-                Event("shared_supper", DuckWorldEventType.SharedSupper, "Shared Supper"),
+                    : Event("sunlit_signboards", DuckWorldEventType.SunlitSignboards, "Clear Sunlight"),
+                Event("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "Clearing Breeze"),
+                Event("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "Windfall Gusts"),
+                Event("all_tucked_in", DuckWorldEventType.AllTuckedIn, "Evening Chill"),
+                Event("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Golden Sunset"),
+                Event("shared_supper", DuckWorldEventType.SharedSupper, "Morning Dew"),
                 Event("still_air", DuckWorldEventType.StillAir, "Still Air"),
                 Event("thick_morning_mist", DuckWorldEventType.ThickMorningMist, "Thick Morning Mist"),
-                Event("restless_night", DuckWorldEventType.RestlessNight, "Restless Night")
+                Event("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies")
             };
         }
 

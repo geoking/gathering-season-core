@@ -1,6 +1,6 @@
 # Gathering Season encounter rules and timing
 
-The implemented encounter contract for rules revision 8 new matches. Revisions 1–7 retain their saved rules. See [World Events](world-events.md)
+The implemented encounter contract for rules revision 8 new matches. Revisions 1–7 retain their saved rules. See [Weather reports](world-events.md)
 for shared weather and [board/shop](board-and-shop.md) for exact values.
 
 ## Draw and placement order
@@ -8,7 +8,7 @@ for shared weather and [board/shop](board-and-shop.md) for exact values.
 Days 1–9 resolve each duck's complete Draw or Settle action independently and
 publish it immediately. Other ducks may react to those completed actions. There
 is no paired wait, frozen multi-player cohort or forced alternating turn order
-on these Days. Signpost previews stay private, and Night/shared-event scoring
+on these Days. Signpost previews stay private, and Night/shared-weather scoring
 still waits for everyone to finish.
 
 On Day 10 only, freeze the active cohort and its preceding public state for
@@ -21,7 +21,7 @@ For a Draw action, resolve one encounter at a time:
 
 1. Reveal the next chip. A Signpost preview is information only, not a reveal
    or placement for encounter rules.
-2. Determine its intrinsic movement and any ability or World Event additions.
+2. Determine its intrinsic movement and any ability or weather additions.
    Consume any incoming Fallen Log on this actual draw. If the chip is helpful,
    halve its resulting movement, rounding up to at least one; a white chip moves
    normally. The new chip's nuisance resolves afterwards, so an unprotected new
@@ -38,9 +38,8 @@ Day. An empty pouch ends exploration only after its final chip fully resolves. I
 movement reaches or overshoots space 43, place the chip at 43, fully resolve it
 including Exhaustion, then finish with no further placements. The duck
 eventually rests on its final occupied space, not the next empty space. On Glorious Sunshine, every duck first makes its public Dawn choice before
-anyone can draw. World
-Event movement is added before Log halves the total unless that event explicitly
-says otherwise. The Still Air event and pending
+anyone can draw. Weather movement is added before Log halves the total unless that weather report explicitly
+says otherwise. The Still Air report and pending
 Log halve Tailwind movement only once together; the Log is consumed normally.
 
 ## Helpful encounters
@@ -101,12 +100,12 @@ cleanup if no next chip is placed.
   and adds one Exhaustion; the current safe maximum stays unchanged.
 
 Splash never cancels a chip, refunds a draw, settles the duck or rescues it from
-lethal Exhaustion. It does not block World Event weather or other shared
+lethal Exhaustion. It does not block shared weather or other shared
 conditions; those are not obstacle nuisances.
 
-The **A Friendly Guide** World Event gives equivalent nuisance protection to
+The **Clearing Breeze** weather report gives equivalent nuisance protection to
 each duck's first placed Obstacle that Day. If Splash also protects that same
-Obstacle, both protections are consumed; neither carries forward. Guide does
+Obstacle, both protections are consumed; neither carries forward. Clearing Breeze does
 not preserve an older pending Log: this draw consumes it normally. Like Splash,
 it never blocks movement or
 Exhaustion.
@@ -120,7 +119,7 @@ suppressed.
 
 | Obstacle | Extra nuisance |
 | --- | --- |
-| **Fallen log** | Arm a slowdown consumed by the immediately next drawn chip. A Wish halves its movement after World Event additions, rounding up to at least 1; a white chip moves normally. Other powers still resolve. |
+| **Fallen log** | Arm a slowdown consumed by the immediately next drawn chip. A Wish halves its movement after weather additions, rounding up to at least 1; a white chip moves normally. Other powers still resolve. |
 | **Mud puddle** | Reduce this duck's active Companion flock count by 1, minimum 0. Earlier Companion positions and owned chips do not change. |
 | **Loose pebbles** | If this placement is the duck's final occupied chip, subtract 1 Star that Day, minimum 0. This also applies after wear-out. |
 | **Brambles** | If this placement is the duck's final occupied chip, subtract 1 Twig earned that Day, minimum 0. This also applies after wear-out and never removes an earlier Day's Twig. |
@@ -138,7 +137,7 @@ Revisions 1–7 retain their next-Wish behavior: white chips do not consume the
 old pending Log, including a later protected Log.
 
 Pebbles and Brambles attach their penalty to their own placement. Moving beyond
-that chip avoids the penalty. Splash or Guide suppression remains marked on the
+that chip avoids the penalty. Splash or Clearing Breeze suppression remains marked on the
 placement for the rest of the adventure, rather than becoming deferred
 protection.
 
@@ -162,7 +161,7 @@ During Day 5 preparation, add exactly one Goose to each duck's pouch. It remains
 for Days 5–10; do not add another each dawn. Goose is a white Obstacle, moves one
 and adds one Exhaustion.
 
-Unless its nuisance is protected by Splash or Friendly Guide, Goose also sets
+Unless its nuisance is protected by Splash or Clearing Breeze, Goose also sets
 that Day's safe Exhaustion maximum to four before checking for wear-out. The
 maximum stays four for the rest of that Day and resets to five next dawn.
 Fresh Air adds two to both limits: seven normally, six after an unprotected
@@ -178,22 +177,22 @@ suppression rule, and Companion provides no protection against it.
 
 ## Settlement and Night order
 
-After every player has finished, evaluate any collective event condition once.
-Night and shared-event conditions always wait for every active duck to finish;
+After every player has finished, evaluate any collective weather condition once.
+Night and shared-weather conditions always wait for every active duck to finish;
 the Day 1–9 public placement rhythm does not award them early.
 Settlement uses the final occupied chip, including the white chip that caused
-wear-out. Include each eligible event payout once in the following order:
+wear-out. Include each eligible weather payout once in the following order:
 
 1. Record the final space's printed Star/Twigs, Reeds Twigs and all earned
-   event rewards, including Warm Dreams +2 Stars when chosen. Exhausted ducks
-   retain earned Twigs. Home Before Dark is the explicit event exception: its
+   weather rewards, including Warm Dreams +2 Stars when chosen. Exhausted ducks
+   retain earned Twigs. Golden Sunset is the explicit weather exception: its
    shared bonus requires every duck to finish without exhaustion.
 2. If the final chip is unsuppressed Brambles, subtract one from today's earned
    Twigs, floor zero. Previously collected Nest Twigs cannot be lost.
 3. Ducks on shelters receive the printed Feathers and +1 Star total if they
    placed one or more Wildflowers, even when exhausted. On Day 10 a shelter
-   adds one further Star. Restless Night reduces the shelter subtotal by one.
-   Count each earned event reward once, not again here if already included.
+   adds one further Star. Thundery Skies reduces the shelter subtotal by one.
+   Count each earned weather reward once, not again here if already included.
 4. After everyone finishes, award the active-flock Star bonus across all ducks.
 5. Apply any unsuppressed final Pebbles deduction to total earned Star, floor
    zero. Safe ducks retain this total. Exhausted ducks retain `floor(Stars / 2)`,
