@@ -26,7 +26,7 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release -- --seed 4
 
 - [CLI guide](docs/cli/README.md): commands, examples, saves and troubleshooting
 - [Gameplay rules](docs/rules/README.md): Days, Wishes, Obstacles, rewards and scoring
-- [Board and shop](docs/rules/board-and-shop.md), [encounters](docs/rules/encounters.md) and [World Events](docs/rules/world-events.md)
+- [Board and shop](docs/rules/board-and-shop.md), [encounters](docs/rules/encounters.md) and [Weather reports](docs/rules/world-events.md)
 - [Core save compatibility](docs/architecture/compatibility.md)
 
 ## Verify

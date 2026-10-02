@@ -58,10 +58,10 @@ public sealed class DuckGloriousSunshineTests
         var rules = DuckRules.V1;
         var goose = rules.Encounter("grumpy_goose");
         var before = new DuckAdventureState(0, 7, 8, 0, false, false, false, false, 0, 0);
-        var unprotected = DuckAdventureRules.ApplyEncounter(before, goose, DuckWorldEventType.GloriousSunshine);
+        var unprotected = DuckAdventureRules.ApplyEncounter(before, goose, DuckWorldEventType.GloriousSunshine, DuckRules.V1);
         var protectedState = new DuckAdventureState(0, 7, 8, 0, true, false, false, false, 0, 0);
         var protectedGoose = DuckAdventureRules.ApplyEncounter(
-            protectedState, goose, DuckWorldEventType.GloriousSunshine);
+            protectedState, goose, DuckWorldEventType.GloriousSunshine, DuckRules.V1);
 
         Assert.Equal(8, unprotected.State.Exhaustion);
         Assert.Equal(7, unprotected.State.SafeExhaustionMaximum);
@@ -118,11 +118,11 @@ public sealed class DuckGloriousSunshineTests
         var unprotected = DuckAdventureRules.ApplyEncounter(
             new DuckAdventureState(0, 6, 7, 0, false, false, false, false, 0, 0),
             goose,
-            DuckWorldEventType.GloriousSunshine);
+            DuckWorldEventType.GloriousSunshine, DuckRules.V1);
         var protectedGoose = DuckAdventureRules.ApplyEncounter(
             new DuckAdventureState(0, 6, 7, 0, true, false, false, false, 0, 0),
             goose,
-            DuckWorldEventType.GloriousSunshine);
+            DuckWorldEventType.GloriousSunshine, DuckRules.V1);
 
         Assert.Equal(6, unprotected.State.SafeExhaustionMaximum);
         Assert.True(unprotected.WearsOut);

@@ -75,7 +75,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 runtime.AddHistory(player.Id,
                     $"{player.Name} starts Day {nextDay} at {player.EffectiveStart}: trail {player.PermanentFeatherTrail}, temporary Most Rested {(player.ActiveMostRestedStep ? 1 : 0)}; Dawn deficit {player.DawnTwigDeficit} gave {player.DawnFeathersAwarded} {(player.DawnFeathersAwarded == 1 ? "Feather" : "Feathers")}.");
             }
-            runtime.AddHistory(string.Empty, "World Event: " + runtime.CurrentEvent.Name + ".");
+            runtime.AddHistory(string.Empty, "Weather report: " + runtime.CurrentEvent.Name + ".");
             state.Phase = DuckPhase.Adventure;
         }
 

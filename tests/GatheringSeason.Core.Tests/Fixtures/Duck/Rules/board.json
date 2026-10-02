@@ -1,5 +1,5 @@
 {
-  "status": "Current Gathering Season specification; Stars/Wishes economy; shelter terminology. Rules revision 7.",
+  "status": "Current Gathering Season specification; Stars/Wishes economy; shelter terminology. Rules revision 8.",
   "version": 1,
   "nest": {
     "index": 0,
@@ -783,5 +783,5 @@
       "stars": 5
     }
   ],
-  "rules_revision": 7
+  "rules_revision": 8
 }

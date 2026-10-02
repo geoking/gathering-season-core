@@ -9,7 +9,7 @@ internal static class DuckReferenceText
         DuckDisplayReference.Encounter(encounter, rules);
 
     internal static string Event(DuckWorldEventType type, DuckRuleDefinitions rules) =>
-        DuckDisplayReference.Event(type, rules);
+        DuckDisplayReference.WeatherReport(type, rules);
 
     internal static string Encounter(DuckEncounterDefinition encounter, DuckEconomyDefinition economy) =>
         GatheringSeason.Core.Ducks.Reference.DuckDisplayReference.Encounter(encounter, economy);

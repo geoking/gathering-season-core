@@ -1,8 +1,8 @@
 # Board and Dream shop
 
-Rules revision 7 uses **Stars** as the Night currency. The Twig numeral is the
+Rules revision 8 uses **Stars** as the Night currency. The Twig numeral is the
 cumulative amount collected along the route by that space. Core adds that route
-total once at Night, alongside Reeds/event Twigs and any Brambles deduction.
+total once at Night, alongside Reeds/weather Twigs and any Brambles deduction.
 Never add together the Twig numerals of passed spaces. Revisions 1–3 retain
 their recorded Sleep board rewards and prices.
 
@@ -12,7 +12,7 @@ The nest baseline is zero. The route total increases by one at each of
 **1, 5, 9, 15, 20, 29, 30, 34 and 43**. A chip can travel past several of
 these spaces; the destination's Twig value already includes them. A Feather
 start also uses the destination's cumulative value. Core awards this total
-once at Night. Reeds and event Twigs remain additional to the route total.
+once at Night. Reeds and weather Twigs remain additional to the route total.
 
 Wetlands occupy 1–14, meadow 15–28, wasteland 29–43. Eight shelters lie at
 4, 10, 17, 21, 25, 32, 36 and 43. Their printed Stars are 2 in wetlands, 3 in
@@ -99,7 +99,7 @@ player ducks, Feathers and the Most Rested award are not shop offers. Reeds are 
 retroactively upgraded: each variant is a separate owned chip and pays only when
 placed on a later Day.
 
-New games use revision 7. [Compatibility](../architecture/compatibility.md)
+New games use revision 8. [Compatibility](../architecture/compatibility.md)
 explains why Continue never silently changes an existing game. Detailed payout
 order belongs to [encounters](encounters.md); shared weather is specified in
-[World Events](world-events.md).
+[Weather reports](world-events.md).

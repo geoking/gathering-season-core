@@ -59,6 +59,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
         public DuckPhase Phase { get; }
         public string ViewerId { get; }
         public DuckWorldEventDefinition CurrentEvent { get; }
+        public DuckWorldEventDefinition CurrentWeatherReport => CurrentEvent;
         public IReadOnlyList<DuckPlayerView> Players { get; }
         /// <summary>Remaining chips sorted by physical ID; this never exposes their private draw order.</summary>
         public IReadOnlyList<DuckPhysicalChipView> OwnBag { get; }

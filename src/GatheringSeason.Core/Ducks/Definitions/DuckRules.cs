@@ -6,7 +6,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
     /// <summary>Authoritative, Unity-independent Duck rules catalogues.</summary>
     public static class DuckRules
     {
-        public const int CurrentRulesRevision = 7;
+        public const int CurrentRulesRevision = 8;
 
         private static readonly DuckRuleDefinitions Revision1 = CreateV1(rulesRevision: 1);
         private static readonly DuckRuleDefinitions Revision2 = CreateV1(rulesRevision: 2);
@@ -14,6 +14,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
         private static readonly DuckRuleDefinitions Revision4 = CreateV1(rulesRevision: 4);
         private static readonly DuckRuleDefinitions Revision5 = CreateV1(rulesRevision: 5);
         private static readonly DuckRuleDefinitions Revision6 = CreateV1(rulesRevision: 6);
+        private static readonly DuckRuleDefinitions Revision7 = CreateV1(rulesRevision: 7);
 
         /// <summary>The current catalogue for the Duck v1 product profile.</summary>
         public static DuckRuleDefinitions V1 { get; } = CreateV1(CurrentRulesRevision);
@@ -28,6 +29,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
                 4 => Revision4,
                 5 => Revision5,
                 6 => Revision6,
+                7 => Revision7,
                 CurrentRulesRevision => V1,
                 _ => throw new System.ArgumentOutOfRangeException(nameof(rulesRevision),
                     "Unsupported Duck rules revision.")
@@ -268,18 +270,18 @@ namespace GatheringSeason.Core.Ducks.Definitions
         {
             return new[]
             {
-                Event("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Rain-Softened Seeds"),
+                Event("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Gentle Rain"),
                 rulesRevision >= 3
                     ? Event("glorious_sunshine", DuckWorldEventType.GloriousSunshine, "Glorious Sunshine")
-                    : Event("sunlit_signboards", DuckWorldEventType.SunlitSignboards, "Sunlit Signboards"),
-                Event("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "A Friendly Guide"),
-                Event("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "A Pocket of Driftwood"),
-                Event("all_tucked_in", DuckWorldEventType.AllTuckedIn, "All Tucked In"),
-                Event("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Home Before Dark"),
-                Event("shared_supper", DuckWorldEventType.SharedSupper, "Shared Supper"),
+                    : Event("sunlit_signboards", DuckWorldEventType.SunlitSignboards, "Clear Sunlight"),
+                Event("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "Clearing Breeze"),
+                Event("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "Windfall Gusts"),
+                Event("all_tucked_in", DuckWorldEventType.AllTuckedIn, "Evening Chill"),
+                Event("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Golden Sunset"),
+                Event("shared_supper", DuckWorldEventType.SharedSupper, "Morning Dew"),
                 Event("still_air", DuckWorldEventType.StillAir, "Still Air"),
                 Event("thick_morning_mist", DuckWorldEventType.ThickMorningMist, "Thick Morning Mist"),
-                Event("restless_night", DuckWorldEventType.RestlessNight, "Restless Night")
+                Event("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies")
             };
         }
 

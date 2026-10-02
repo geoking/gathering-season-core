@@ -193,7 +193,7 @@ public sealed class DuckPersistenceTests
 
         var restored = DuckSaves.Restore(save);
 
-        Assert.Equal(7, DuckSaves.Capture(restored).RulesVersion);
+        Assert.Equal(8, DuckSaves.Capture(restored).RulesVersion);
         Assert.Equal(1, restored.GetSnapshot("human").ShopOffers.Single(offer => offer.DefinitionId == "tailwind_2").Price);
         Assert.Equal(4, restored.GetSnapshot("human").ShopOffers.Single(offer => offer.DefinitionId == "reeds_3").Price);
         AssertEquivalent(save, DuckSaves.Capture(restored));
@@ -283,7 +283,7 @@ public sealed class DuckPersistenceTests
         AssertInvalid(save => save.ProfileId = string.Empty);
         AssertInvalid(save => save.ProfileId = "unsupported.duck.v1");
         AssertInvalid(save => save.RulesVersion = 0);
-        AssertInvalid(save => save.RulesVersion = 8);
+        AssertInvalid(save => save.RulesVersion = 9);
         AssertInvalid(save => save.Settings = null!);
         AssertInvalid(save => save.Random.Algorithm = string.Empty);
         AssertInvalid(save => save.CommandRevisions.Clear());
