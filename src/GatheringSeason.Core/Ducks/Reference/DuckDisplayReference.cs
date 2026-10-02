@@ -33,7 +33,7 @@ namespace GatheringSeason.Core.Ducks.Reference
                 + "Obstacles and Exhaustion: White chips move 1 space and add 1 Exhaustion. Protection hushes only their nuisance; movement and Exhaustion still happen.\n"
                 + currencyExplanation + "\n"
                 + "Nest Twigs: Your victory score. The Twig number at your resting space is the whole route total; Reeds and weather Twigs are added to your nest.\n"
-                + "Feathers: Permanent head starts, one space each and never spent. Safe shelters and Dawn Delivery can award them.\n"
+                + "Trail Feathers: Head starts that stay for later Days, one space each and never spent. Safe shelters and Dawn Delivery can award them.\n"
                 + "Most Rested marker: A one-Day head start for every eligible duck tied for Most Rested. On Final Night, it becomes 1 Dream Twig instead.";
         }
 
@@ -44,7 +44,7 @@ namespace GatheringSeason.Core.Ducks.Reference
                 ? Glossary(rules.Economy)
                 : Glossary(rules.Economy).Replace(
                     "Safe shelters and Dawn Delivery can award them.",
-                    "Shelters and Dawn Delivery can award them; wearing out does not prevent a shelter Feather.");
+                    "Shelters and Dawn Delivery can award them; wearing out does not prevent a shelter Trail Feather.");
         }
 
         public static string Encounter(DuckEncounterDefinition encounter, DuckEconomyDefinition economy)

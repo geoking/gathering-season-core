@@ -13,9 +13,9 @@ internal static class DuckCliRenderer
         foreach (var player in view.Players)
         {
             var state = player.IsWornOut ? " · WORN OUT" : player.HasFinishedDay ? " · resting" : string.Empty;
-            Console.WriteLine($"{player.Name}: {Quantity(player.TotalTwigs, "Nest Twig")} · space {player.Position} · Exhaustion {player.Exhaustion}/{player.SafeExhaustionMaximum}" +
+            Console.WriteLine($"{player.Name}: {Quantity(player.TotalTwigs, "Nest Twig")} · space {player.Position} · {(player.Exhaustion == 0 ? "No Exhaustion" : $"Exhaustion {player.Exhaustion}/{player.SafeExhaustionMaximum}")}" +
                 (player.BagCount == 0 ? " · pouch empty" : string.Empty) + state);
-            Console.WriteLine($"  Feather trail {Quantity(player.PermanentFeatherTrail, "Feather")} · today's start space {player.EffectiveStart} · active flock {Quantity(player.ActiveFlock, "Companion")}" +
+            Console.WriteLine($"  {Quantity(player.PermanentFeatherTrail, "Trail Feather")} · today's start space {player.EffectiveStart} · active flock {Quantity(player.ActiveFlock, "Companion")}" +
                 (player.ActiveMostRestedStep ? " · Most Rested head start +1" : string.Empty) +
                 (player.PendingMostRestedStep ? " · Most Rested head start tomorrow" : string.Empty));
             if (player.HasGloriousSunshineChoice)
@@ -30,7 +30,7 @@ internal static class DuckCliRenderer
             if (player.GuideProtectionAvailable) activeEffects.Add("Clearing Breeze protects the first Obstacle nuisance");
             if (activeEffects.Count > 0) Console.WriteLine("  Active: " + string.Join(" · ", activeEffects));
             if (view.Day > 1)
-                Console.WriteLine($"  Dawn deficit {Quantity(player.DawnTwigDeficit, "Twig")} · Dawn delivery {Quantity(player.DawnFeathersAwarded, "Feather")}");
+                Console.WriteLine($"  Dawn deficit {Quantity(player.DawnTwigDeficit, "Twig")} · Dawn delivery {Quantity(player.DawnFeathersAwarded, "Trail Feather")}");
             ShowPlaced(player);
         }
 
@@ -92,7 +92,7 @@ internal static class DuckCliRenderer
         var available = legalActions.Where(action => action.Kind == GameActionKind.BuyEncounter)
             .Select(action => action.DefinitionId).ToHashSet(StringComparer.Ordinal);
         var slots = Math.Max(0, player.PurchaseLimit - player.PurchasedEncounterDefinitionIds.Count);
-        Console.WriteLine($"Dream shop · {CurrencyAmount(player.RemainingReward, view.Economy)} remaining · {slots}/{player.PurchaseLimit} {Plural(slots, "purchase slot")} remaining");
+        Console.WriteLine($"Dream shop · {CurrencyAmount(player.RemainingReward, view.Economy)} remaining · {(slots == 0 ? "No purchase slots remaining" : $"{slots}/{player.PurchaseLimit} {Plural(slots, "purchase slot")} remaining")}");
         foreach (var offer in view.ShopOffers)
         {
             var shopClosed = view.Phase != DuckPhase.Night || player.HasFinishedDream;
@@ -102,7 +102,7 @@ internal static class DuckCliRenderer
                 : slots == 0 ? "no purchase slots remaining"
                 : offer.Price > player.RemainingReward ? $"not enough {view.Economy.CurrencyName}"
                 : "not currently offered as a legal action";
-            Console.WriteLine($"{offer.DefinitionId}: {CurrencyAmount(offer.Price, view.Economy)} · {offer.Encounter.Name} · {status}");
+            Console.WriteLine($"{offer.DefinitionId}: {Price(offer.Price, view.Economy)} · {offer.Encounter.Name} · {status}");
             Console.WriteLine("  " + DuckReferenceText.Encounter(offer.Encounter, view.Rules));
         }
         if (view.Economy.UsesStars) Console.WriteLine("Choose Wishes with Stars. One free Seed still uses one purchase slot and your Seed choice for tonight.");
@@ -132,10 +132,21 @@ internal static class DuckCliRenderer
         foreach (var player in nights)
         {
             var night = player.LastNightOutcome!;
-            Console.WriteLine($"{player.Name}: {CurrencyAmount(night.FrozenReward, view.Economy)} frozen; {CurrencyAmount(player.RemainingReward, view.Economy)} available now. Added to nest {Quantity(night.TotalTwigsEarned, "Twig")}; {Quantity(night.FeathersAwarded, "Feather")} awarded" +
+            Console.WriteLine($"{player.Name}: {CurrencyAmount(night.FrozenReward, view.Economy)} frozen; {CurrencyAmount(player.RemainingReward, view.Economy)} available now. Added to nest {Quantity(night.TotalTwigsEarned, "Twig")}; {Quantity(night.FeathersAwarded, "Trail Feather")} awarded" +
                 (night.IsMostRested ? " · Most Rested" : string.Empty));
-            Console.WriteLine($"  {view.Economy.CurrencyName}: printed {night.PrintedReward}, Flowers +{night.FlowerReward}, final shelter +{night.FinalShelterReward}, collective weather +{night.CollectiveEventReward}, Glorious Sunshine +{night.GloriousSunshineReward}, flock +{night.FlockReward}, Thundery Skies -{night.RestlessNightPenalty}, Pebbles -{night.PebblesPenalty}; before wear {night.RewardBeforeWear}.");
-            Console.WriteLine($"  Twigs: printed {night.PrintedTwigs}, Reeds +{night.ReedsTwigs}, weather +{night.EventTwigs}, Brambles -{night.BramblesPenalty}.");
+            Console.WriteLine($"  {view.Economy.CurrencyName}: " + string.Join(", ",
+                Ledger(night.PrintedReward, "printed", view.Economy.CurrencyName),
+                Ledger(night.FlowerReward, "Wildflowers", view.Economy.CurrencyName, "+"),
+                Ledger(night.FinalShelterReward, "final shelter", view.Economy.CurrencyName, "+"),
+                Ledger(night.CollectiveEventReward, "collective weather", view.Economy.CurrencyName, "+"),
+                Ledger(night.GloriousSunshineReward, "Glorious Sunshine", view.Economy.CurrencyName, "+"),
+                Ledger(night.FlockReward, "flock", view.Economy.CurrencyName, "+"),
+                Ledger(night.RestlessNightPenalty, "Thundery Skies penalty", view.Economy.CurrencyName, "-"),
+                Ledger(night.PebblesPenalty, "Pebbles penalty", view.Economy.CurrencyName, "-"))
+                + $"; before wear {CurrencyAmount(night.RewardBeforeWear, view.Economy)}.");
+            Console.WriteLine("  Twigs: " + string.Join(", ", Ledger(night.PrintedTwigs, "printed", "Twigs"),
+                Ledger(night.ReedsTwigs, "Reeds", "Twigs", "+"), Ledger(night.EventTwigs, "weather", "Twigs", "+"),
+                Ledger(night.BramblesPenalty, "Brambles penalty", "Twigs", "-")) + ".");
             if (night.DreamTwigs > 0) Console.WriteLine($"  Dream Twigs: {Quantity(night.DreamTwigs, "Twig")}.");
         }
         if (view.Phase is DuckPhase.Night or DuckPhase.DayComplete && nights[0].LastNightOutcome!.Day == view.Day)
@@ -185,7 +196,7 @@ internal static class DuckCliRenderer
         Console.WriteLine($"Catalogue: {Quantity(view.Rules.BoardSpaces.Count, "reward")} · {Quantity(view.Rules.BoardSpaces.Count(space => space.IsShelter), "shelter")} · {Quantity(view.Rules.EncounterDefinitions.Count, "encounter variant")} · {Quantity(view.ShopOffers.Count, "shop offer")} · {Quantity(view.Rules.WorldEvents.Count, "weather report")}");
         ShowOpeningRecipe(view);
         foreach (var offer in view.ShopOffers)
-            Console.WriteLine($"  {offer.DefinitionId}: {CurrencyAmount(offer.Price, view.Economy)} · movement {(offer.Encounter.BaseMovement?.ToString() ?? "flock-dependent")} · Twig yield {Quantity(offer.Encounter.TwigYield, "Twig")}");
+            Console.WriteLine($"  {offer.DefinitionId}: {Price(offer.Price, view.Economy)} · movement {(offer.Encounter.BaseMovement?.ToString() ?? "flock-dependent")} · Twig yield {Quantity(offer.Encounter.TwigYield, "Twig")}");
     }
 
     private static DuckPlayerView Player(DuckMatchView view) => view.Players.Single(player => player.Id == view.ViewerId);
@@ -225,7 +236,7 @@ internal static class DuckCliRenderer
 
     private static string Reward(DuckBoardSpace space, DuckEconomyDefinition economy) =>
         $"{CurrencyAmount(space.Reward, economy)} · {Quantity(space.Twigs, "Twig")}" +
-        (space.Feathers > 0 ? $" · {Quantity(space.Feathers, "Feather")}" : string.Empty);
+        (space.Feathers > 0 ? $" · {Quantity(space.Feathers, "Trail Feather")}" : string.Empty);
 
     private static void ShowPrintedReward(DuckBoardSpace space, string title, DuckEconomyDefinition economy) =>
         Console.WriteLine($"{title}: space {space.Space} {space.ShelterName ?? space.Biome.ToString()} · {Reward(space, economy)} (bonuses and wear-out excluded)");
@@ -242,11 +253,16 @@ internal static class DuckCliRenderer
     }
 
     private static string CurrencyAmount(int amount, DuckEconomyDefinition economy) =>
-        amount == 0 && economy.UsesStars
-            ? "no Stars"
+        amount == 0
+            ? "No " + economy.CurrencyName
             : $"{amount} {(amount == 1 && economy.UsesStars ? "Star" : economy.CurrencyName)}";
 
-    private static string Quantity(int amount, string singular) => $"{amount} {Plural(amount, singular)}";
+    private static string Price(int amount, DuckEconomyDefinition economy) => amount == 0 ? "Free" : CurrencyAmount(amount, economy);
+
+    private static string Ledger(int amount, string label, string currency, string sign = "")
+        => label + ": " + (amount == 0 ? "No " + currency : sign + amount + " " + (amount == 1 && currency.EndsWith("s", StringComparison.Ordinal) ? currency[..^1] : currency));
+
+    private static string Quantity(int amount, string singular) => amount == 0 ? "No " + Plural(0, singular) : $"{amount} {Plural(amount, singular)}";
 
     private static string Plural(int amount, string singular) => amount == 1 ? singular : singular + "s";
 }

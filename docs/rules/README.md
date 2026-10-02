@@ -49,7 +49,7 @@ Tailwind →2 and →6 are still Tailwinds. Default movement one is unprinted;
 arrows show movement, Reeds ×1/×2/×3 show Twig yield, always moving one. See
 [all powers and timing](encounters.md).
 
-## Shelters, Feathers and catch-up
+## Shelters, Trail Feathers and catch-up
 
 The 43 spaces have eight shelters at **4, 10, 17, 21, 25, 32, 36 and 43**.
 Revisions 4–5 retain shelters at 16/21/26; revision 6 retains 16/22/25.
@@ -60,7 +60,7 @@ halves the complete Star total (rounded down), and prevents Most Rested; it does
 not remove Twigs, Feathers or ordinary bonuses. Golden Sunset retains its
 special requirement that everyone finish without exhaustion.
 
-Every duck starts at nest zero with zero Feathers. Each Feather permanently
+Every duck starts at nest zero with no Trail Feathers. Each Trail Feather permanently
 advances later starts one step; Feathers are never spent. Shelters and
 Dawn Delivery are the only sources. Snapshot all Twig scores before Dawn:
 

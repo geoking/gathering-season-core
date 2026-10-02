@@ -97,10 +97,10 @@ half their total Stars, rounded down, and cannot win
 Most Rested. Splash blocks the next obstacle's nuisance, not its Exhaustion.
 
 Current revision 8 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishing there grants
-Feathers, which permanently move your later starts forward one step each.
-Dawn Delivery grants catch-up Feathers from the gap to the Twig leader:
+Trail Feathers, which permanently move your later starts forward one step each.
+Dawn Delivery grants catch-up Trail Feathers from the gap to the Twig leader:
 0 for a 0–2 gap, 1 for 3–6, 2 for 7–10 and 3 for 11 or more.
-Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
+Trail Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Trail Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
 
 At Night, buy at most one chip of each helpful type: two Tailwind variants
 still count as the same type. Nest capacity allows one purchase on Nights 1–3,
