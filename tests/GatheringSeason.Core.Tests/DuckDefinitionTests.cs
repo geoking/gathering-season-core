@@ -283,16 +283,16 @@ public sealed class DuckDefinitionTests
     {
         var expected = new[]
         {
-            ("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Rain-Softened Seeds"),
+            ("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Gentle Rain"),
             ("glorious_sunshine", DuckWorldEventType.GloriousSunshine, "Glorious Sunshine"),
-            ("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "A Friendly Guide"),
-            ("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "A Pocket of Driftwood"),
-            ("all_tucked_in", DuckWorldEventType.AllTuckedIn, "All Tucked In"),
-            ("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Home Before Dark"),
-            ("shared_supper", DuckWorldEventType.SharedSupper, "Shared Supper"),
+            ("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "Clearing Breeze"),
+            ("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "Windfall Gusts"),
+            ("all_tucked_in", DuckWorldEventType.AllTuckedIn, "Evening Chill"),
+            ("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Golden Sunset"),
+            ("shared_supper", DuckWorldEventType.SharedSupper, "Morning Dew"),
             ("still_air", DuckWorldEventType.StillAir, "Still Air"),
             ("thick_morning_mist", DuckWorldEventType.ThickMorningMist, "Thick Morning Mist"),
-            ("restless_night", DuckWorldEventType.RestlessNight, "Restless Night")
+            ("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies")
         };
         var actual = DuckRules.V1.WorldEvents
             .Select(item => (item.DefinitionId, item.EventType, item.Name))

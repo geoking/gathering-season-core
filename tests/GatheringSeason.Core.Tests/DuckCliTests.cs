@@ -67,7 +67,7 @@ public sealed partial class DuckCliTests
         Assert.Contains("All 16 encounter variants", result.Output);
         Assert.Contains("reeds_3: Nesting reeds 3", result.Output);
         Assert.Contains("Dream shop", result.Output);
-        Assert.Contains("World Event · Day 1: Thick Morning Mist", result.Output);
+        Assert.Contains("Weather report · Day 1: Thick Morning Mist", result.Output);
         Assert.Contains("No Night has resolved yet", result.Output);
         Assert.Contains("Public match history", result.Output);
         Assert.Contains("private view is unavailable", result.Output);
@@ -80,12 +80,32 @@ public sealed partial class DuckCliTests
         var result = Run("2\nq\n", "--seed", "10", "--no-save");
 
         Assert.Equal(0, result.ExitCode);
-        Assert.Contains("World Event: Glorious Sunshine", result.Output);
+        Assert.Contains("Weather report: Glorious Sunshine", result.Output);
         Assert.Contains("AI: Fresh Air (+2 safe Exhaustion today)", result.Output);
         Assert.Contains("1. Fresh Air (+2 safe Exhaustion today)", result.Output);
         Assert.Contains("2. Warm Dreams (+2 Stars tonight)", result.Output);
         Assert.Contains("Glorious Sunshine: Warm Dreams (+2 Stars tonight)", result.Output);
         Assert.Contains("Glorious Sunshine: Fresh Air (+2 safe Exhaustion today)", result.Output);
+    }
+
+    [Theory]
+    [InlineData(2, 42)]
+    [InlineData(3, 42)]
+    [InlineData(4, 42)]
+    [InlineData(2, 10)]
+    [InlineData(3, 10)]
+    [InlineData(4, 10)]
+    public void Weather_command_describes_every_duck_and_keeps_the_event_command(int players, int seed)
+    {
+        var result = Run("event\nq\n", "--seed", seed.ToString(), "--players", players.ToString(), "--no-save");
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Weather report · Day 1:", result.Output);
+        Assert.Contains(seed == 10
+            ? "Every duck publicly chooses one benefit before any Adventure begins"
+            : "It applies to every duck for this Day; collective conditions resolve after all finish", result.Output);
+        Assert.DoesNotContain("World Event", result.Output);
+        Assert.DoesNotContain("Both ducks", result.Output);
+        Assert.DoesNotContain("both ducks", result.Output);
     }
 
     [Fact]
@@ -139,7 +159,7 @@ public sealed partial class DuckCliTests
     {
         var result = Run("", "--profile", "ducks", "--seed", "42", "--inspect");
         Assert.Equal(0, result.ExitCode);
-        Assert.Contains("43 rewards · 8 shelters · 16 encounter variants · 11 shop offers · 10 World Events", result.Output);
+        Assert.Contains("43 rewards · 8 shelters · 16 encounter variants · 11 shop offers · 10 weather reports", result.Output);
         Assert.Contains("Opening recipe (13 chips)", result.Output);
         Assert.Contains("reeds_3: 4 Stars · movement 1 · Twig yield 3 Twigs", result.Output);
         Assert.DoesNotContain("rubies", result.Output);
