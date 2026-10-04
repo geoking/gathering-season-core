@@ -17,7 +17,8 @@ public static class EvaluationPolicies
     public static IReadOnlyList<string> Ids { get; } = Array.AsReadOnly(new[]
     {
         "baseline", "normal", "cautious", "adventurous",
-        "movement-heavy", "reeds-heavy", "flowers-first", "seeds-first", "sunshine-fresh", "sunshine-warm", "sandbag-day3"
+        "movement-heavy", "reeds-heavy", "movement-first-mixed", "cautious-stop", "adventurous-stop",
+        "flowers-first", "seeds-first", "sunshine-fresh", "sunshine-warm", "sandbag-day3"
     });
 
     public static IEvaluationPolicy Create(string id) => id switch
@@ -28,6 +29,9 @@ public static class EvaluationPolicies
         "adventurous" => new AdventurousPolicy(),
         "movement-heavy" => new PurchasePreferencePolicy(PurchasePreference.Movement),
         "reeds-heavy" => new PurchasePreferencePolicy(PurchasePreference.Reeds),
+        "movement-first-mixed" => new MovementFirstMixedPolicy(),
+        "cautious-stop" => new StoppingPolicy(false),
+        "adventurous-stop" => new StoppingPolicy(true),
         "sandbag-day3" => new SandbagPolicy(),
         "flowers-first" => new TypeFirstPolicy(DuckEncounterType.Wildflowers, id),
         "seeds-first" => new TypeFirstPolicy(DuckEncounterType.Seeds, id),
@@ -171,6 +175,51 @@ public static class EvaluationPolicies
 
         private static int Movement(DuckEncounterDefinition encounter) =>
             encounter.EncounterType == DuckEncounterType.Companion ? 4 : encounter.BaseMovement ?? 0;
+    }
+
+    private sealed class MovementFirstMixedPolicy : IEvaluationPolicy
+    {
+        private readonly NormalAdapter _normal = new();
+        public string Id => "movement-first-mixed";
+        public string Description => "Buys the largest affordable Tailwind, then Reeds after a Tailwind purchase; otherwise uses Normal.";
+        public EvaluationPolicyDecision Decide(DuckMatchView observation, IReadOnlyList<GameAction> legalActions)
+        {
+            Validate(observation, legalActions);
+            var player = observation.Players.Single(candidate => candidate.Id == observation.ViewerId);
+            var type = player.PurchasedShopTypes.Contains(DuckEncounterType.Tailwind)
+                ? DuckEncounterType.Reeds : DuckEncounterType.Tailwind;
+            var preferred = legalActions.Where(action => action.Kind == GameActionKind.BuyEncounter
+                    && observation.Rules.ShopOffer(action.DefinitionId).ShopType == type)
+                .OrderByDescending(action => type == DuckEncounterType.Reeds
+                    ? observation.Rules.ShopOffer(action.DefinitionId).Encounter.TwigYield
+                    : observation.Rules.ShopOffer(action.DefinitionId).Encounter.BaseMovement ?? 0)
+                .ThenBy(action => action.DefinitionId, StringComparer.Ordinal).FirstOrDefault();
+            return preferred == null ? _normal.Decide(observation, legalActions)
+                : Decision(preferred, $"The movement-first mixed diagnostic prioritises {type} this Night.");
+        }
+    }
+
+    private sealed class StoppingPolicy(bool adventurous) : IEvaluationPolicy
+    {
+        private readonly NormalAdapter _normal = new();
+        public string Id => adventurous ? "adventurous-stop" : "cautious-stop";
+        public string Description => adventurous
+            ? "Explores below the current safe Exhaustion maximum; known previews and all other decisions use Normal."
+            : "Settles at Exhaustion 3 or at a shelter from 2; known previews and all other decisions use Normal.";
+        public EvaluationPolicyDecision Decide(DuckMatchView observation, IReadOnlyList<GameAction> legalActions)
+        {
+            Validate(observation, legalActions);
+            var explore = Action(legalActions, GameActionKind.Explore);
+            var settle = Action(legalActions, GameActionKind.Settle);
+            if (explore == null || settle == null || observation.KnownNextChips.Count > 0)
+                return _normal.Decide(observation, legalActions);
+            var player = observation.Players.Single(candidate => candidate.Id == observation.ViewerId);
+            var shouldStop = adventurous ? player.Exhaustion >= player.SafeExhaustionMaximum
+                : player.Exhaustion >= 3 || (observation.Rules.BoardSpaceAt(player.Position).IsShelter && player.Exhaustion >= 2);
+            return Decision(shouldStop ? settle : explore, shouldStop
+                ? $"The {Id} diagnostic protects the current rest."
+                : $"The {Id} diagnostic continues below its stopping threshold.");
+        }
     }
 
     private sealed class TypeFirstPolicy(DuckEncounterType type, string id) : IEvaluationPolicy

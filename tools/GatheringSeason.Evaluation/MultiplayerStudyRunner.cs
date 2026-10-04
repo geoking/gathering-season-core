@@ -19,7 +19,10 @@ public sealed record MultiplayerStudyPlayer(
 public sealed record MultiplayerStudyDayPlayer(
     string PlayerId, int StartTwigs, int DawnLeaderDeficit, int EndTwigs, int EndLeaderDeficit,
     int Draws, int RestSpace, bool WornOut, bool OasisReached, bool OasisSafe,
-    bool OasisWorn, int ReedsTwigs, int FrozenStars, IReadOnlyList<string> Purchases);
+    bool OasisWorn, int ReedsTwigs, int FrozenStars, IReadOnlyList<string> Purchases,
+    int Exhaustion, int SafeExhaustionMaximum, int EffectiveStart, int PermanentFeatherTrail,
+    int DawnFeathersAwarded, int SuppressedNuisances, DuckGloriousSunshineBenefit? SunshineChoice,
+    EvaluationNightMetrics Night, IReadOnlyDictionary<string, int> PlacedComposition);
 
 public sealed record MultiplayerStudyDay(
     int Day, string EventId, bool CollectiveAttempt, bool CollectiveTriggered,
@@ -36,13 +39,19 @@ public sealed class MultiplayerStudyRunner
 {
     private const int MaximumActions = 8000;
 
-    public static IReadOnlyList<MultiplayerStudyAssignment> Assignments(int playerCount)
+    public static IReadOnlyList<MultiplayerStudyAssignment> Assignments(int playerCount,
+        IReadOnlyList<string>? focalStyles = null, bool allMixedSeats = false)
     {
         var ids = SeatIds(playerCount);
+        var selected = focalStyles ?? new[] { "movement-heavy", "reeds-heavy" };
+        if (selected.Count == 0 || selected.Distinct(StringComparer.Ordinal).Count() != selected.Count
+            || selected.Any(style => style == "normal"))
+            throw new ArgumentException("Focal styles must be distinct non-Normal policies.", nameof(focalStyles));
+        foreach (var style in selected) _ = EvaluationPolicies.Create(style);
         var assignments = new List<MultiplayerStudyAssignment>();
         var normal = ids.ToDictionary(id => id, _ => "normal", StringComparer.Ordinal);
         assignments.Add(new MultiplayerStudyAssignment("all-normal", normal));
-        foreach (var style in new[] { "movement-heavy", "reeds-heavy" })
+        foreach (var style in selected)
             foreach (var focal in ids)
             {
                 var styles = new Dictionary<string, string>(normal, StringComparer.Ordinal) { [focal] = style };
@@ -50,7 +59,7 @@ public sealed class MultiplayerStudyRunner
             }
         var mixed = new HashSet<string>(StringComparer.Ordinal);
         for (var movement = 0; movement < ids.Length; movement++)
-            foreach (var offset in new[] { 1, ids.Length - 1 })
+            foreach (var offset in allMixedSeats ? Enumerable.Range(1, ids.Length - 1) : new[] { 1, ids.Length - 1 })
             {
                 var reeds = (movement + offset) % ids.Length;
                 var key = ids[movement] + ":" + ids[reeds];
@@ -73,8 +82,6 @@ public sealed class MultiplayerStudyRunner
         if (assignment.Styles.Count != ids.Length || ids.Any(id => !assignment.Styles.ContainsKey(id)))
             throw new ArgumentException("Assignment must specify every configured seat once.", nameof(assignment));
         var policies = ids.ToDictionary(id => id, id => EvaluationPolicies.Create(assignment.Styles[id]), StringComparer.Ordinal);
-        if (policies.Values.Any(policy => policy.Id is not ("normal" or "movement-heavy" or "reeds-heavy")))
-            throw new ArgumentException("Multiplayer styles must share Normal adventure choices.", nameof(assignment));
 
         var match = MatchSession.CreateDuck(seed, new DuckMatchSettings(playerCount));
         var days = new SortedDictionary<int, DayAccumulator>();
@@ -128,7 +135,7 @@ public sealed class MultiplayerStudyRunner
                 days.Values.Count(day => day.Players[id].OasisWorn),
                 observed.PolicyMicroseconds, observed.ExecuteMicroseconds);
         }).OrderBy(player => Array.IndexOf(ids, player.PlayerId)).ToArray();
-        return new MultiplayerStudyResult(1, sourceLabel,
+        return new MultiplayerStudyResult(2, sourceLabel,
             typeof(MatchSession).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? typeof(MatchSession).Assembly.GetName().Version?.ToString() ?? "unknown",
             final.RulesRevision, seed, playerCount, assignment.Scenario,
@@ -180,7 +187,8 @@ public sealed class MultiplayerStudyRunner
         if (view.Phase != DuckPhase.Adventure || days.ContainsKey(view.Day)) return;
         var day = new DayAccumulator(view.Day, view.CurrentEvent.DefinitionId, view.CurrentEvent.EventType);
         foreach (var player in view.Players)
-            day.Players.Add(player.Id, new DayPlayerAccumulator(player.TotalTwigs, player.DawnTwigDeficit));
+            day.Players.Add(player.Id, new DayPlayerAccumulator(player.TotalTwigs, player.DawnTwigDeficit,
+                player.EffectiveStart, player.PermanentFeatherTrail, player.DawnFeathersAwarded));
         days.Add(view.Day, day);
     }
 
@@ -203,6 +211,13 @@ public sealed class MultiplayerStudyRunner
             metric.OasisWorn = metric.OasisReached && player.IsWornOut;
             metric.ReedsTwigs = player.LastNightOutcome!.ReedsTwigs;
             metric.FrozenStars = player.LastNightOutcome.FrozenReward;
+            metric.Exhaustion = player.Exhaustion;
+            metric.SafeExhaustionMaximum = player.SafeExhaustionMaximum;
+            metric.SuppressedNuisances = player.PlacedChips.Count(chip => chip.NuisanceSuppressed);
+            metric.SunshineChoice = player.HasGloriousSunshineChoice ? player.GloriousSunshineBenefit : null;
+            metric.Night = EvaluationRunner.Night(player.LastNightOutcome);
+            metric.PlacedComposition = player.PlacedChips.GroupBy(chip => chip.DefinitionId)
+                .ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal);
         }
         day.CollectiveTriggered = day.CollectiveAttempt
             && view.Players.All(player => player.LastNightOutcome!.CollectiveEventReward > 0);
@@ -251,18 +266,32 @@ public sealed class MultiplayerStudyRunner
 
     private sealed class DayPlayerAccumulator
     {
-        internal DayPlayerAccumulator(int startTwigs, int dawnDeficit)
+        internal DayPlayerAccumulator(int startTwigs, int dawnDeficit, int effectiveStart,
+            int permanentFeatherTrail, int dawnFeathersAwarded)
         {
             StartTwigs = startTwigs;
             DawnDeficit = dawnDeficit;
+            EffectiveStart = effectiveStart;
+            PermanentFeatherTrail = permanentFeatherTrail;
+            DawnFeathersAwarded = dawnFeathersAwarded;
         }
         internal int StartTwigs { get; }
         internal int DawnDeficit { get; }
+        internal int EffectiveStart { get; }
+        internal int PermanentFeatherTrail { get; }
+        internal int DawnFeathersAwarded { get; }
         internal int EndTwigs, EndLeaderDeficit, Draws, RestSpace, ReedsTwigs, FrozenStars;
+        internal int Exhaustion, SafeExhaustionMaximum, SuppressedNuisances;
+        internal DuckGloriousSunshineBenefit? SunshineChoice;
+        internal EvaluationNightMetrics? Night;
+        internal IReadOnlyDictionary<string, int> PlacedComposition = new Dictionary<string, int>();
         internal bool WornOut, OasisReached, OasisSafe, OasisWorn;
         internal List<string> Purchases { get; } = new();
         internal MultiplayerStudyDayPlayer Build(string id) => new(id, StartTwigs, DawnDeficit,
             EndTwigs, EndLeaderDeficit, Draws, RestSpace, WornOut, OasisReached,
-            OasisSafe, OasisWorn, ReedsTwigs, FrozenStars, Purchases.ToArray());
+            OasisSafe, OasisWorn, ReedsTwigs, FrozenStars, Purchases.ToArray(),
+            Exhaustion, SafeExhaustionMaximum, EffectiveStart, PermanentFeatherTrail, DawnFeathersAwarded,
+            SuppressedNuisances, SunshineChoice, Night ?? throw new InvalidOperationException("Missing Night telemetry."),
+            PlacedComposition);
     }
 }
