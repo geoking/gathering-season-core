@@ -89,8 +89,9 @@ namespace GatheringSeason.Core.Ducks.Definitions
             if (ShopOffers.Any(offer => !_encounterById.TryGetValue(offer.EncounterDefinitionId, out var encounter)
                 || !ReferenceEquals(encounter, offer.Encounter)))
                 throw new ArgumentException("Every shop offer must reference a registered encounter definition.");
-            if (WorldEvents.Count != 10 || WorldEvents.Select(item => item.EventType).Distinct().Count() != 10)
-                throw new ArgumentException("Duck v1 requires exactly ten distinct weather reports.");
+            var weatherCount = RulesRevision >= 8 ? 15 : 10;
+            if (WorldEvents.Count != weatherCount || WorldEvents.Select(item => item.EventType).Distinct().Count() != weatherCount)
+                throw new ArgumentException($"Duck v1 requires exactly {weatherCount} distinct weather reports.");
             if (OpeningBag.Count != 13 || OpeningBag.Any(item => !_encounterById.TryGetValue(item.DefinitionId, out var encounter)
                 || !ReferenceEquals(encounter, item)))
                 throw new ArgumentException("The opening pouch must contain 13 registered encounter definitions.");

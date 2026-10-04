@@ -85,7 +85,7 @@ public sealed class DuckDisplayReferenceTests
         for (var rulesRevision = 1; rulesRevision <= DuckRules.CurrentRulesRevision; rulesRevision++)
         {
             var rules = DuckRules.ForRulesRevision(rulesRevision);
-            Assert.Equal(10, rules.WorldEvents.Count);
+            Assert.Equal(rulesRevision >= 8 ? 15 : 10, rules.WorldEvents.Count);
 
             foreach (var worldEvent in rules.WorldEvents)
             {
@@ -95,7 +95,7 @@ public sealed class DuckDisplayReferenceTests
         }
 
         var enumTypes = Enum.GetValues<DuckWorldEventType>();
-        Assert.Equal(11, enumTypes.Length);
+        Assert.Equal(16, enumTypes.Length);
         Assert.Equal(enumTypes.Order(), supportedTypes.Order());
         Assert.All(enumTypes, type =>
             Assert.False(string.IsNullOrWhiteSpace(DuckDisplayReference.Event(type, DuckRules.V1))));
@@ -199,6 +199,19 @@ public sealed class DuckDisplayReferenceTests
         Assert.Contains("Trail Feathers: Head starts that stay for later Days, one space each", currentGlossary);
         Assert.Contains("wearing out does not prevent a shelter Trail Feather", currentGlossary);
         Assert.Contains("Most Rested marker: A one-Day head start for every eligible duck tied for Most Rested", currentGlossary);
+    }
+
+    [Fact]
+    public void Glossary_includes_Low_Cloud_exception_only_for_the_current_rules_catalogue()
+    {
+        var current = DuckDisplayReference.Glossary(DuckRules.V1);
+        Assert.Contains("Low Cloud recognizes Most Rested winners and ties", current);
+        Assert.Contains("no next-Day head start or Final Night Most Rested Dream Twig", current);
+        for (var revision = 1; revision < DuckRules.CurrentRulesRevision; revision++)
+            Assert.DoesNotContain("Low Cloud", DuckDisplayReference.Glossary(DuckRules.ForRulesRevision(revision)));
+        Assert.DoesNotContain("Low Cloud", DuckDisplayReference.Glossary(DuckRules.V1.Economy));
+        Assert.Contains("On Final Night, it becomes 1 Dream Twig instead.",
+            DuckDisplayReference.Glossary(DuckRules.V1.Economy));
     }
 
     [Fact]

@@ -268,7 +268,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
 
         private static IEnumerable<DuckWorldEventDefinition> CreateWorldEvents(int rulesRevision)
         {
-            return new[]
+            var retained = new[]
             {
                 Event("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Gentle Rain"),
                 rulesRevision >= 3
@@ -283,6 +283,14 @@ namespace GatheringSeason.Core.Ducks.Definitions
                 Event("thick_morning_mist", DuckWorldEventType.ThickMorningMist, "Thick Morning Mist"),
                 Event("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies")
             };
+            return rulesRevision < 8 ? retained : retained.Concat(new[]
+            {
+                Event("golden_morning", DuckWorldEventType.GoldenMorning, "Golden Morning"),
+                Event("refreshing_showers", DuckWorldEventType.RefreshingShowers, "Refreshing Showers"),
+                Event("favourable_winds", DuckWorldEventType.FavourableWinds, "Favourable Winds"),
+                Event("crosswinds", DuckWorldEventType.Crosswinds, "Crosswinds"),
+                Event("low_cloud", DuckWorldEventType.LowCloud, "Low Cloud")
+            });
         }
 
         private static DuckWorldEventDefinition Event(string id, DuckWorldEventType type, string name)

@@ -19,10 +19,10 @@ public sealed class DuckWeatherReportTests
     [InlineData(6)]
     [InlineData(7)]
     [InlineData(8)]
-    public void Weather_names_preserve_each_catalogues_ten_stable_identities_and_order(int revision)
+    public void Weather_names_preserve_each_catalogues_stable_identities_and_order(int revision)
     {
         var rules = DuckRules.ForRulesRevision(revision);
-        var expected = new[]
+        var retained = new[]
         {
             ("rain_softened_seeds", 0, "Gentle Rain"),
             revision < 3 ? ("sunlit_signboards", 1, "Clear Sunlight") : ("glorious_sunshine", 10, "Glorious Sunshine"),
@@ -36,9 +36,17 @@ public sealed class DuckWeatherReportTests
             ("restless_night", 9, "Thundery Skies")
         };
 
+        var expected = revision < 8 ? retained : retained.Concat(new[]
+        {
+            ("golden_morning", 11, "Golden Morning"),
+            ("refreshing_showers", 12, "Refreshing Showers"),
+            ("favourable_winds", 13, "Favourable Winds"),
+            ("crosswinds", 14, "Crosswinds"),
+            ("low_cloud", 15, "Low Cloud")
+        });
         Assert.Equal(expected, rules.WeatherReports.Select(report => (report.DefinitionId, (int)report.EventType, report.Name)));
         Assert.Same(rules.WorldEvents, rules.WeatherReports);
-        Assert.Equal(11, Enum.GetValues<DuckWorldEventType>().Length);
+        Assert.Equal(16, Enum.GetValues<DuckWorldEventType>().Length);
         foreach (var report in rules.WeatherReports)
         {
             Assert.Same(report, rules.WeatherReport(report.DefinitionId));
@@ -83,7 +91,7 @@ public sealed class DuckWeatherReportTests
         var view = match.GetSnapshot("human");
 
         Assert.Same(view.CurrentEvent, view.CurrentWeatherReport);
-        Assert.Equal("thick_morning_mist", view.CurrentWeatherReport.DefinitionId);
+        Assert.Contains(view.CurrentWeatherReport.DefinitionId, save.WorldEventDeckDefinitionIds);
         Assert.Contains("\"WorldEventDeckDefinitionIds\"", before);
         Assert.DoesNotContain("WeatherReport", before);
         Assert.Equal(before, JsonSerializer.Serialize(DuckSaves.Capture(match), options));

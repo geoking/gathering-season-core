@@ -102,7 +102,7 @@ public sealed partial class DuckCliTests
     public void Continue_advances_Normal_when_a_pending_Sunshine_choice_blocks_the_human()
     {
         using var files = new SaveFiles();
-        var match = MatchSession.CreateDuck(10);
+        var match = MatchSession.CreateDuck(17);
         var warmDreams = match.GetLegalActions("human")
             .Single(action => action.Label.StartsWith("Starry Night", StringComparison.Ordinal));
         match.Execute("human", warmDreams);

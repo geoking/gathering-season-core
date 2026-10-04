@@ -200,12 +200,12 @@ wear-out. Include each eligible weather payout once in the following order:
 6. Freeze retained earned Star and compare Most Rested among safe ducks only.
    All tied eligible leaders win; if none are safe, nobody wins.
 
-On Nights 1–9, each Most Rested winner places their own **Most Rested marker** for a
+Except during Low Cloud, on Nights 1–9 each Most Rested winner places their own **Most Rested marker** for a
 temporary Start +1 on the next Day. It is used once, never becomes a Feather and
 is not stored for a later Day.
 
 On Day 10, a duck that finishes at a shelter gains an additional +1 Star
-before Most Rested. After Stars are frozen, each retained Star becomes one Dream Twig. Every safe duck tied for Most Rested
+before Most Rested. After Stars are frozen, each retained Star becomes one Dream Twig. Except during Low Cloud, every safe duck tied for Most Rested
 also gains +1 Dream Twig instead of a tomorrow-start bonus. Worn-out ducks can
 convert their retained, already-halved Star but cannot win Most Rested. Brambles has already deducted from adventure-earned Twigs; it does not take a
 second deduction or remove Dream Twigs created later. There is no Night 10 shopping.

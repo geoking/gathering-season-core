@@ -221,7 +221,7 @@ public sealed class DuckPersistenceTests
     [Fact]
     public void Legacy_mid_Dream_restore_keeps_paid_Sleep_purchases_and_revision_one_prices()
     {
-        var atNight = MatchSession.CreateDuck(seed: 810);
+        var atNight = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(seed: 810, rulesRevision: 7));
         AdvanceToDay(atNight, 4);
         FinishAdventureAfterOneDraw(atNight);
         var legacy = DuckSaves.Capture(atNight);

@@ -42,7 +42,7 @@ public sealed class DuckCalendarTests
 
         Assert.Equal(Enumerable.Range(1, 10), first.DayStarts.Select(start => start.Day));
         Assert.Equal(10, first.DayStarts.Select(start => start.EventId).Distinct(StringComparer.Ordinal).Count());
-        Assert.Equal(Rules.WorldEvents.Select(item => item.DefinitionId).OrderBy(id => id),
+        Assert.Equal(DuckRules.V1.WorldEvents.Select(item => item.DefinitionId).Intersect(first.DayStarts.Select(start => start.EventId)).OrderBy(id => id),
             first.DayStarts.Select(start => start.EventId).OrderBy(id => id));
         Assert.All(first.DayStarts.Where(start => start.Day < 5), start => Assert.Equal(0, start.GooseCount));
         Assert.All(first.DayStarts.Where(start => start.Day >= 5), start => Assert.Equal(1, start.GooseCount));

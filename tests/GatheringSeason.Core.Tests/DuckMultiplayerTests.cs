@@ -191,6 +191,7 @@ public sealed class DuckMultiplayerTests
     public void Four_seat_observations_reveal_only_the_viewers_private_bag_and_preview()
     {
         var runtime = DuckMatchRuntime.Create(726, new DuckMatchSettings(4));
+        PutEventFirst(runtime, "rain_softened_seeds");
         PutDefinitionFirst(runtime.Player("ai-2"), "signpost");
         var match = new MatchSession<DuckMatchView>(runtime);
         ChooseSunshineForAll(match);

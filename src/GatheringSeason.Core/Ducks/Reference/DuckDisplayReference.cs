@@ -40,11 +40,14 @@ namespace GatheringSeason.Core.Ducks.Reference
         public static string Glossary(DuckRuleDefinitions rules)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
-            return rules.RulesRevision < 5
+            var glossary = rules.RulesRevision < 5
                 ? Glossary(rules.Economy)
                 : Glossary(rules.Economy).Replace(
                     "Safe shelters and Dawn Delivery can award them.",
                     "Shelters and Dawn Delivery can award them; wearing out does not prevent a shelter Trail Feather.");
+            return rules.RulesRevision == DuckRules.CurrentRulesRevision
+                ? glossary + " Low Cloud recognizes Most Rested winners and ties but grants no next-Day head start or Final Night Most Rested Dream Twig."
+                : glossary;
         }
 
         public static string Encounter(DuckEncounterDefinition encounter, DuckEconomyDefinition economy)
@@ -140,6 +143,11 @@ namespace GatheringSeason.Core.Ducks.Reference
                     ? $"Thunder keeps shelter ducks awake. A duck that finishes at a shelter receives 1 less shelter-related {SingularCurrency(economy)}, to a minimum of 0 (printed shelter reward, Flowers, and Final Night shelter bonus together). Apply it to worn-out ducks before halving Stars. Twigs, Feathers, flock rewards, and other weather rewards stay untouched."
                     : $"Thunder keeps shelter ducks awake. A duck that finishes safely at a shelter receives 1 less shelter-related {SingularCurrency(economy)}, to a minimum of 0 (printed shelter reward, Flowers, and Final Night shelter bonus together). Twigs, Feathers, flock rewards, and other weather rewards stay untouched.",
                 DuckWorldEventType.GloriousSunshine => $"Before exploring, every duck publicly chooses Fresh Air (+{freshAirExhaustionBonus} to today's safe Exhaustion maximum: {5 + freshAirExhaustionBonus} is safe, or {4 + freshAirExhaustionBonus} after an unprotected Goose) or Starry Night (+{Reward(economy.WarmDreamsReward, economy)} before Pebbles, wear-out halving, Most Rested, and Final Night conversion). Everyone chooses before anyone draws.",
+                DuckWorldEventType.GoldenMorning => "Each duck immediately gathers +1 Twig on its first placed Wish today. White Obstacles and previews do not use this bonus. Keep it if worn out; an unsuppressed final Brambles can deduct it as part of today's Twigs.",
+                DuckWorldEventType.RefreshingShowers => "Each placed Splash recovers 1 current Exhaustion, to a minimum of 0, and still protects the next chip from its nuisance. The safe Exhaustion maximum is unchanged; a worn-out duck cannot resume drawing.",
+                DuckWorldEventType.FavourableWinds => "Every placed Wish gains +1 movement after its normal movement and Companion flock calculation, before a pending Log halves it. White Obstacles move normally.",
+                DuckWorldEventType.Crosswinds => "Each duck's first placed Tailwind today loses 1 movement, to a minimum of 1, before a pending Log halves it. All Tailwind variants share this first trigger; previews do not use it. Later Tailwinds move normally.",
+                DuckWorldEventType.LowCloud => "Most Rested winners and ties are recognized normally, but gain no temporary start step next Day and no Most Rested Dream Twig on Day 10. Normal Stars, final conversion and Feathers still apply.",
                 _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
         }

@@ -152,7 +152,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         internal static void Resolve(DuckMatchState state, DuckRuleDefinitions rules)
         {
-            // Calculate the complete cohort before awarding anything. Immediate Reeds/Pocket Twigs
+            // Calculate the complete cohort before awarding anything. Immediate Reeds/weather Twigs
             // are already in the nest; add only the printed amount less final Brambles here.
             var outcomes = Calculate(state, rules);
             foreach (var player in state.Players)
@@ -202,6 +202,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             internal readonly DuckPlayerState Player;
             internal readonly int FrozenSleep;
             private readonly DuckEconomyDefinition _economy;
+            private readonly bool _mostRestedBenefit;
             private readonly int _day, _printedSleep, _printedTwigs, _brambles, _flowers, _finalShelter, _restless,
                 _eventSleep, _sunshineSleep, _flock, _pebbles, _beforeWear, _totalTwigs, _feathers;
 
@@ -210,6 +211,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             {
                 Player = player;
                 _economy = rules.Economy;
+                _mostRestedBenefit = worldEvent != DuckWorldEventType.LowCloud;
                 _day = day;
                 var final = player.PlacedChips.Last();
                 if (final.Position != player.Position) throw new InvalidOperationException("Rest must use the final occupied space.");
@@ -247,9 +249,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 _day, _printedSleep, _printedTwigs, Player.DayReedsTwigs, Player.DayEventTwigs,
                 _brambles, _flowers, _finalShelter, _restless, _eventSleep, _sunshineSleep, _flock, _pebbles,
                 _beforeWear, FrozenSleep, _totalTwigs, _feathers, mostRested,
-                mostRested && _day < DuckMatchSettings.StandardDays ? 1 : 0,
+                mostRested && _mostRestedBenefit && _day < DuckMatchSettings.StandardDays ? 1 : 0,
                 _day == DuckMatchSettings.StandardDays
-                    ? _economy.ConvertFinalRewardToDreamTwigs(FrozenSleep) + (mostRested ? 1 : 0)
+                    ? _economy.ConvertFinalRewardToDreamTwigs(FrozenSleep) + (mostRested && _mostRestedBenefit ? 1 : 0)
                     : 0);
         }
     }
