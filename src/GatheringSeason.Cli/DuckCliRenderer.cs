@@ -21,7 +21,7 @@ internal static class DuckCliRenderer
             if (player.HasGloriousSunshineChoice)
                 Console.WriteLine("  Glorious Sunshine: " + (player.GloriousSunshineBenefit == DuckGloriousSunshineBenefit.FreshAir
                     ? $"Fresh Air (+{view.Rules.FreshAirExhaustionBonus} safe Exhaustion today)"
-                    : $"Warm Dreams (+{CurrencyAmount(view.Economy.WarmDreamsReward, view.Economy)} tonight)"));
+                    : $"Starry Night (+{CurrencyAmount(view.Economy.WarmDreamsReward, view.Economy)} tonight)"));
             var activeEffects = new List<string>();
             if (player.SplashProtectionArmed) activeEffects.Add("Splash protects the next placed chip");
             if (player.LogSlowdownPending) activeEffects.Add(view.RulesRevision >= 8

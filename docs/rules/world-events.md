@@ -61,7 +61,7 @@ Star and does not add Exhaustion.
 - **Fresh Air:** +2 safe Exhaustion for this Day. Seven is safe instead of five.
   An unprotected Goose reduces that to six; a protected Goose leaves it seven.
   Obstacles still add Exhaustion and apply any unprotected nuisance.
-- **Warm Dreams:** +2 Stars at Night. Add it before Pebbles and worn-out halving,
+- **Starry Night:** +2 Stars at Night. Add it before Pebbles and worn-out halving,
   before frozen Most Rested comparison, and before final-Day Dream Twig conversion.
   A worn-out duck keeps the bonus as part of its halved total.
 
@@ -71,7 +71,7 @@ private Draw/Settle beats begin. The choice and any pending choices survive
 Continue. The effect expires at the next Dawn; it grants no movement or Feather.
 
 This is deliberately the deck’s unusually generous weather day. Fresh Air
-encourages a longer adventure; Warm Dreams guarantees a larger Night budget.
+encourages a longer adventure; Starry Night guarantees a larger Night budget.
 Normal uses a bounded heuristic, not a solved optimal choice.
 
 ### 3. Clearing Breeze

@@ -184,7 +184,7 @@ Settlement uses the final occupied chip, including the white chip that caused
 wear-out. Include each eligible weather payout once in the following order:
 
 1. Record the final space's printed Star/Twigs, Reeds Twigs and all earned
-   weather rewards, including Warm Dreams +2 Stars when chosen. Exhausted ducks
+   weather rewards, including Starry Night +2 Stars when chosen. Exhausted ducks
    retain earned Twigs. Golden Sunset is the explicit weather exception: its
    shared bonus requires every duck to finish without exhaustion.
 2. If the final chip is unsuppressed Brambles, subtract one from today's earned

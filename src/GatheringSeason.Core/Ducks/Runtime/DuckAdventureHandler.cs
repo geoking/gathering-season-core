@@ -29,7 +29,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                         new GameAction(FreshAirActionId, GameActionKind.ChooseEventBenefit,
                             $"Fresh Air (+{runtime.Rules.FreshAirExhaustionBonus} safe Exhaustion today)"),
                         new GameAction(WarmDreamsActionId, GameActionKind.ChooseEventBenefit,
-                            $"Warm Dreams (+{runtime.Rules.Economy.WarmDreamsReward} {runtime.Rules.Economy.CurrencyName} tonight)")
+                            $"Starry Night (+{runtime.Rules.Economy.WarmDreamsReward} {runtime.Rules.Economy.CurrencyName} tonight)")
                     });
                 if (runtime.State.Players.Any(candidate => !candidate.HasGloriousSunshineChoice))
                     return EmptyActions();
@@ -88,7 +88,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (benefit == DuckGloriousSunshineBenefit.FreshAir)
                 player.SafeExhaustionMaximum += runtime.Rules.FreshAirExhaustionBonus;
             runtime.AddHistory(player.Id, player.Name + " chose " +
-                (benefit == DuckGloriousSunshineBenefit.FreshAir ? "Fresh Air" : "Warm Dreams") +
+                (benefit == DuckGloriousSunshineBenefit.FreshAir ? "Fresh Air" : "Starry Night") +
                 " for Glorious Sunshine.");
         }
 

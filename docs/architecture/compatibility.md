@@ -88,7 +88,7 @@ Previously recorded history text is preserved; new history uses weather names.
 
 Only names and reference prose change. Clear Sunlight still previews two chips
 in revisions 1–2. Glorious Sunshine keeps +3 Fresh Air through revision 5 and
-+2 from revision 6; Warm Dreams keeps +8 Sleep in revision 3 and +2 Stars from
++2 from revision 6; Starry Night keeps +8 Sleep in revision 3 and +2 Stars from
 revision 4. Evening Chill requires safe shelter occupants through revision 4;
 Thundery Skies applies only to safe shelter occupants through revision 4. Both
 include worn-out shelter occupants from revision 5, before halving the complete
@@ -97,6 +97,10 @@ Dew always counts physical Seed placements, including worn-out ducks. Thundery
 Skies reduces only the combined printed shelter, Wildflowers and Final Night
 shelter subtotal, with a floor of zero. Clearing Breeze and Still Air retain
 each catalogue's Log consumption and protection rules described below.
+
+The Sunshine benefit is displayed as **Starry Night**. Its existing
+`duck.event.glorious-sunshine.warm-dreams` action ID, `WarmDreams` enum value and
+reward fields remain unchanged. Previously saved history remains verbatim.
 
 ## Match setup and seats
 

@@ -104,7 +104,7 @@ public sealed partial class DuckCliTests
         using var files = new SaveFiles();
         var match = MatchSession.CreateDuck(10);
         var warmDreams = match.GetLegalActions("human")
-            .Single(action => action.Label.StartsWith("Warm Dreams", StringComparison.Ordinal));
+            .Single(action => action.Label.StartsWith("Starry Night", StringComparison.Ordinal));
         match.Execute("human", warmDreams);
         files.Write(DuckSaves.Capture(match));
 
