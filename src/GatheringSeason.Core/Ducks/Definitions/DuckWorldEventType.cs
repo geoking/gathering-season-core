@@ -1,6 +1,6 @@
 namespace GatheringSeason.Core.Ducks.Definitions
 {
-    /// <summary>Stable rules identity for one card in the v1 World Event deck.</summary>
+    /// <summary>Stable rules identity for one card in the retained weather deck.</summary>
     public enum DuckWorldEventType
     {
         RainSoftenedSeeds,

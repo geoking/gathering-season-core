@@ -212,7 +212,7 @@ public sealed class DuckAdventureTests
         Assert.True(player.PocketDriftwoodAwarded);
         Assert.Equal(1, player.FlowersPlaced);
         Assert.Equal(3, player.PlacedHelpfulTypes.Count);
-        Assert.Single(runtime.State.History, entry => entry.Message.Contains("Pocket of Driftwood", StringComparison.Ordinal));
+        Assert.Single(runtime.State.History, entry => entry.Message.Contains("Windfall Gusts", StringComparison.Ordinal));
     }
 
     [Fact]

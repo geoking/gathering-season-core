@@ -10,13 +10,14 @@ namespace GatheringSeason.Core.Tests;
 public sealed class DuckPlanningTests
 {
     public static IEnumerable<object[]> EncounterDefinitionIds =>
-        DuckRules.V1.EncounterDefinitions.Select(definition => new object[] { definition.DefinitionId });
+        new[] { 7, 8 }.SelectMany(revision => DuckRules.ForRulesRevision(revision).EncounterDefinitions
+            .Select(definition => new object[] { revision, definition.DefinitionId }));
 
     [Theory]
     [MemberData(nameof(EncounterDefinitionIds))]
-    public void Runtime_applies_every_shared_encounter_transition_without_changing_draw_ownership(string definitionId)
+    public void Runtime_applies_every_shared_encounter_transition_without_changing_draw_ownership(int revision, string definitionId)
     {
-        var runtime = DuckMatchRuntime.Create(seed: 733);
+        var runtime = DuckMatchRuntime.Create(seed: 733, rulesRevision: revision);
         runtime.State.WorldEventDeckDefinitionIds[runtime.State.CurrentEventIndex] = "a_pocket_of_driftwood";
         var player = runtime.Player("human");
         player.Inventory.Clear();
@@ -60,8 +61,8 @@ public sealed class DuckPlanningTests
             DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
         var expected = DuckAdventureRules.ApplyEncounter(
             before,
-            DuckRules.V1.Encounter(definitionId),
-            DuckWorldEventType.PocketOfDriftwood);
+            runtime.Rules.Encounter(definitionId),
+            DuckWorldEventType.PocketOfDriftwood, runtime.Rules);
         var reedsBefore = player.DayReedsTwigs;
         var eventBefore = player.DayEventTwigs;
         var twigsBefore = player.TotalTwigs;
@@ -95,7 +96,7 @@ public sealed class DuckPlanningTests
         var tailwind = DuckAdventureRules.ApplyEncounter(
             slowed,
             DuckRules.V1.Encounter("tailwind_4"),
-            DuckWorldEventType.StillAir);
+            DuckWorldEventType.StillAir, DuckRules.V1);
 
         Assert.Equal(2, tailwind.Movement);
         Assert.Equal(5, tailwind.State.Position);
@@ -104,7 +105,7 @@ public sealed class DuckPlanningTests
         var companion = DuckAdventureRules.ApplyEncounter(
             State(position: 3, activeFlock: 1),
             DuckRules.V1.Encounter("companion"),
-            DuckWorldEventType.HomeBeforeDark);
+            DuckWorldEventType.HomeBeforeDark, DuckRules.V1);
         Assert.Equal(2, companion.State.ActiveFlock);
         Assert.Equal(3, companion.Movement);
     }
@@ -115,7 +116,7 @@ public sealed class DuckPlanningTests
         var suppressedLog = DuckAdventureRules.ApplyEncounter(
             State(position: 3, exhaustion: 4, splashProtectionArmed: true),
             DuckRules.V1.Encounter("fallen_log"),
-            DuckWorldEventType.HomeBeforeDark);
+            DuckWorldEventType.HomeBeforeDark, DuckRules.V1);
         Assert.True(suppressedLog.NuisanceSuppressed);
         Assert.Equal(5, suppressedLog.State.Exhaustion);
         Assert.False(suppressedLog.State.LogSlowdownPending);
@@ -124,7 +125,7 @@ public sealed class DuckPlanningTests
         var goose = DuckAdventureRules.ApplyEncounter(
             State(position: 3, exhaustion: 4),
             DuckRules.V1.Encounter("grumpy_goose"),
-            DuckWorldEventType.HomeBeforeDark);
+            DuckWorldEventType.HomeBeforeDark, DuckRules.V1);
         Assert.Equal(4, goose.State.SafeExhaustionMaximum);
         Assert.True(goose.WearsOut);
 
@@ -133,7 +134,7 @@ public sealed class DuckPlanningTests
                 position: 3,
                 helpfulTypes: new[] { DuckEncounterType.Seeds, DuckEncounterType.Tailwind }),
             DuckRules.V1.Encounter("wildflowers"),
-            DuckWorldEventType.PocketOfDriftwood);
+            DuckWorldEventType.PocketOfDriftwood, DuckRules.V1);
         Assert.True(driftwood.State.PocketDriftwoodAwarded);
         Assert.Equal(1, driftwood.EventTwigsAwarded);
     }

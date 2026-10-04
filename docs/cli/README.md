@@ -1,7 +1,7 @@
 # Playing Gathering Season in the terminal
 
 The CLI plays the current ten-Day duck game against one, two or three Normal AI opponents using the Core
-rules. It includes all 43 spaces, encounter powers, ten World Events, shopping,
+rules. It includes all 43 spaces, encounter powers, ten weather reports, shopping,
 Dawn Delivery, final scoring and local Continue.
 
 ## Start a game
@@ -30,7 +30,7 @@ this guide assume the repository root is your current directory.
 
 ## Your first Day
 
-1. Read the World Event. It affects every duck for this Day. Type `event` to
+1. Read the weather report. It affects every duck for this Day. Type `event` to
    review its effect, and `tokens` or `wishes` if you do not recognize a chip. On Glorious
    Sunshine choose Fresh Air (+2 safe Exhaustion today) or Warm Dreams (+2 Stars
    tonight); everyone must choose before exploring.
@@ -69,7 +69,7 @@ not shown to you.
 | `pouch` | Opening recipe before the first draw, and your explicit Signpost peek |
 | `tokens` or `wishes` | Wish powers and Obstacle nuisances |
 | `shop` | All offers at this match's prices, spending allowance and current availability |
-| `event` | The active World Event and its effect |
+| `event` | The active Weather report and its effect |
 | `night` | Last resolved rewards and, during Night, all ducks' current purchases |
 | `history` | Public play and results, excluding purchase history |
 | `view:human` | Review your own view; retained for existing CLI users |
@@ -81,7 +81,7 @@ During Night, `night` shows what every duck has just bought as it enters the
 pouch. That receipt disappears at Dawn. Placed chips remain public. Signpost
 can reveal your actual next chip; weather may alter its preview. Board rewards
 are **printed values**, not a prediction of your final payout: chip effects,
-World Events, shelter bonuses and wear-out are resolved by Core at Night.
+Weather reports, shelter bonuses and wear-out are resolved by Core at Night.
 
 ## What the scores mean
 
@@ -90,17 +90,17 @@ Your Night summary separates frozen earned Stars from the amount still
 available to spend. Shopping does not change who won Most Rested. Helpful chips are Wishes;
 ordinary white hazards are Obstacles, while chip and token still name physical pieces.
 
-In revision 7, Stars are that Night's currency. Normally five Exhaustion is safe; drawing a sixth obstacle wears you out.
+In revision 8, Stars are that Night's currency. Normally five Exhaustion is safe; drawing a sixth obstacle wears you out.
 Fresh Air adds two to the safe limit for its Day. From Day 5 each pouch gains one Grumpy Goose. An unprotected Goose lowers the
 safe maximum to four for that Day. Worn-out ducks keep earned Twigs and receive
 half their total Stars, rounded down, and cannot win
 Most Rested. Splash blocks the next obstacle's nuisance, not its Exhaustion.
 
-Current revision 7 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishing there grants
-Feathers, which permanently move your later starts forward one step each.
-Dawn Delivery grants catch-up Feathers from the gap to the Twig leader:
+Current revision 8 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishing there grants
+Trail Feathers, which permanently move your later starts forward one step each.
+Dawn Delivery grants catch-up Trail Feathers from the gap to the Twig leader:
 0 for a 0–2 gap, 1 for 3–6, 2 for 7–10 and 3 for 11 or more.
-Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day. Pebbles and shelter Restless Night each deduct 1 Star, to a minimum of zero. Home Before Dark keeps its special condition that no duck is exhausted.
+Trail Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Trail Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
 
 At Night, buy at most one chip of each helpful type: two Tailwind variants
 still count as the same type. Nest capacity allows one purchase on Nights 1–3,
@@ -114,13 +114,13 @@ wins; tied Twigs use final frozen Stars, then a draw.
 
 The [full rules recap](../rules/README.md),
 [encounter timing](../rules/encounters.md) and
-[World Events](../rules/world-events.md) explain the edge cases.
+[Weather reports](../rules/world-events.md) explain the edge cases.
 The CLI's legal-action list remains authoritative for what you can do now.
 
 ## Saving, Continue and restart
 
 Interactive games autosave after each completed action, including an unrevealed
-Day 10 commitment or pending World Event choice. The default file is `GatheringSeason/ducks-save.json` beneath the
+Day 10 commitment or pending weather choice. The default file is `GatheringSeason/ducks-save.json` beneath the
 platform's local application-data directory; **the CLI prints the exact path**.
 Quitting with `q` does not start a new game. To open a save from this baseline stored
 elsewhere, provide its explicit `--save` path; automatic discovery is limited
@@ -155,7 +155,7 @@ read but the backup can, Continue explicitly reports that it recovered the
 previous action. If neither is valid, it reports an error instead of silently
 starting over. A write failure stops play to preserve the preceding save.
 
-Revisions 1–6 keep their recorded rules. New games use revision 7 with Stars
+Revisions 1–7 keep their recorded rules. New games use revision 8 with Stars
 and Wishes and the current meadow catalogue. Existing paid Sleep or Stars and
 random order are preserved. Always use the in-game `shop` display for the
 running match.
@@ -216,7 +216,13 @@ alias remains for existing scripts; `classic` is reported as unsupported.
 - For save errors, read the printed path and error. Use a different `--save`
   location or `--no-save` for a separate test; preserve the original save if you
   want to investigate it.
-- To report a gameplay issue, record the seed, Day, World Event, recent actions
+- To report a gameplay issue, record the seed, Day, weather report, recent actions
   and what you expected. A copy of the save helps reproduce the exact state.
 
 For retained save and API names, see [compatibility](../architecture/compatibility.md).
+
+A pending Fallen Log in revision 8 affects the immediately next drawn chip. A
+Wish halves its total movement, rounded up; a white chip consumes the slowdown
+without slowing. A new unprotected Log arms a fresh slowdown, while a protected
+Log does not. Signpost previews and `status`/`help` reads never consume it.
+Continued revision 1–7 matches keep their original next-Wish behavior.

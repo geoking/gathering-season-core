@@ -180,7 +180,7 @@ public sealed class DuckEvaluationTests
     {
         var outcome = Run(10, "sunshine-fresh", "sunshine-warm");
         Assert.Equal(2, outcome.Result.SchemaVersion);
-        Assert.Equal(7, outcome.Result.RulesVersion);
+        Assert.Equal(8, outcome.Result.RulesVersion);
         Assert.Equal("Stars", outcome.Result.Currency);
         var sunshine = Assert.Single(outcome.Result.Days, day => day.EventDefinitionId == "glorious_sunshine");
         var fresh = sunshine.Players.Single(player => player.PolicyId == "sunshine-fresh");

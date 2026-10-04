@@ -155,7 +155,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 player.PocketDriftwoodAwarded,
                 player.FlowersPlaced,
                 DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
-            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType);
+            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType, runtime.Rules);
             var after = placement.State;
             player.Position = after.Position;
             player.Exhaustion = after.Exhaustion;
@@ -176,7 +176,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (placement.EncounterType == DuckEncounterType.Signpost)
                 RefreshSignpostPreview(runtime, player);
             if (placement.EventTwigsAwarded > 0)
-                runtime.AddHistory(player.Id, player.Name + " gained 1 Twig from A Pocket of Driftwood.");
+                runtime.AddHistory(player.Id, player.Name + " gained 1 Twig from Windfall Gusts.");
             var encounterLabel = runtime.Rules.Economy.UsesStars
                 ? definition.IsWish ? "Wish " : "Obstacle "
                 : string.Empty;

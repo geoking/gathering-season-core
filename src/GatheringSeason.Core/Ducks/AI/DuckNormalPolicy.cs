@@ -163,14 +163,14 @@ namespace GatheringSeason.Core.Ducks.AI
                 var placement = DuckAdventureRules.ApplyEncounter(
                     state.State,
                     definitions[index],
-                    observation.CurrentEvent.EventType);
+                    observation.CurrentEvent.EventType, observation.Rules);
                 firstWeight += weight;
                 if (placement.WearsOut) firstWearWeight += weight;
             }
 
             var knownFirst = known.Length == 0
                 ? (DuckAdventurePlacement?)null
-                : DuckAdventureRules.ApplyEncounter(state.State, definitions[known[0]], observation.CurrentEvent.EventType);
+                : DuckAdventureRules.ApplyEncounter(state.State, definitions[known[0]], observation.CurrentEvent.EventType, observation.Rules);
             var currentRestProvablyLoses = IsProvablyLosingFinalRest(observation, player, state);
             return new AdventurePlan(
                 currentValue,
@@ -775,7 +775,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 var placement = DuckAdventureRules.ApplyEncounter(
                     state.State,
                     definition,
-                    _observation.CurrentEvent.EventType);
+                    _observation.CurrentEvent.EventType, _observation.Rules);
                 var after = new PlannedAdventureState(
                     placement.State,
                     ScoringFinalType(placement.EncounterType),

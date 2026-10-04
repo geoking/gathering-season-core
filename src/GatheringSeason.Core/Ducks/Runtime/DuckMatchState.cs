@@ -18,7 +18,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
         {
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
             DuckRules.ForRulesRevision(rulesRevision);
-            if (settings.PlayerCount > 2 && rulesRevision != DuckRules.CurrentRulesRevision)
+            if (settings.PlayerCount > 2 && rulesRevision < 7)
                 throw new ArgumentException("Earlier rules revisions support two players only.", nameof(rulesRevision));
             RulesRevision = rulesRevision;
         }

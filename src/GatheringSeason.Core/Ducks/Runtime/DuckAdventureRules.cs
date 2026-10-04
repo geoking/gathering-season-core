@@ -14,8 +14,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
         internal static DuckAdventurePlacement ApplyEncounter(
             DuckAdventureState state,
             DuckEncounterDefinition definition,
-            DuckWorldEventType worldEvent)
+            DuckWorldEventType worldEvent,
+            DuckRuleDefinitions rules)
         {
+            if (rules == null) throw new ArgumentNullException(nameof(rules));
             if (definition == null) throw new ArgumentNullException(nameof(definition));
 
             var type = definition.EncounterType;
@@ -41,14 +43,18 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (worldEvent == DuckWorldEventType.RainSoftenedSeeds && type == DuckEncounterType.Seeds)
                 movement++;
 
-            var logSlowdownPending = state.LogSlowdownPending;
+            var incomingLog = state.LogSlowdownPending;
+            // Revision 8 spends the previous Log on this draw, even on a white
+            // chip. Resolve the newly drawn nuisance afterwards so a fresh Log
+            // can arm its own independent next-chip slowdown.
+            var logSlowdownPending = rules.RulesRevision >= 8 ? false : incomingLog;
             var alreadyHalved = false;
             if (worldEvent == DuckWorldEventType.StillAir && type == DuckEncounterType.Tailwind)
             {
                 movement = HalveMovement(movement);
                 alreadyHalved = true;
             }
-            if (definition.IsHelpful && logSlowdownPending)
+            if (definition.IsHelpful && incomingLog)
             {
                 if (!alreadyHalved) movement = HalveMovement(movement);
                 logSlowdownPending = false;

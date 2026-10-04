@@ -2,7 +2,7 @@ using System;
 
 namespace GatheringSeason.Core.Ducks.Definitions
 {
-    /// <summary>Immutable identity and display data for one World Event card.</summary>
+    /// <summary>Immutable identity and display data for one weather report.</summary>
     public sealed class DuckWorldEventDefinition
     {
         public DuckWorldEventDefinition(string definitionId, DuckWorldEventType eventType, string name)
