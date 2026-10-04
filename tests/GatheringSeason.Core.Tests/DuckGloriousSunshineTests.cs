@@ -10,7 +10,7 @@ namespace GatheringSeason.Core.Tests;
 public sealed class DuckGloriousSunshineTests
 {
     [Fact]
-    public void Normal_explains_an_early_Fresh_Air_and_late_Warm_Dreams_choice()
+    public void Normal_explains_an_early_Fresh_Air_and_late_Starry_Night_choice()
     {
         var policy = new DuckNormalPolicy();
         var earlyRuntime = SunshineRuntime(day: 1);
@@ -22,7 +22,7 @@ public sealed class DuckGloriousSunshineTests
         var lateRuntime = SunshineRuntime(day: 10);
         var late = new MatchSession<DuckMatchView>(lateRuntime);
         var lateDecision = policy.Evaluate(late.GetSnapshot("ai"), late.GetLegalActions("ai"));
-        Assert.StartsWith("Warm Dreams", lateDecision.Action.Label);
+        Assert.StartsWith("Starry Night", lateDecision.Action.Label);
         Assert.Contains("final conversion", lateDecision.Reason);
     }
 
@@ -42,7 +42,7 @@ public sealed class DuckGloriousSunshineTests
         Assert.True(publicHuman.HasGloriousSunshineChoice);
         Assert.Equal(DuckGloriousSunshineBenefit.FreshAir, publicHuman.GloriousSunshineBenefit);
 
-        var aiChoice = match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Warm Dreams"));
+        var aiChoice = match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Starry Night"));
         match.Execute("ai", aiChoice);
 
         Assert.Single(match.GetLegalActions("human"), action => action.Kind == GameActionKind.Explore);
@@ -91,7 +91,7 @@ public sealed class DuckGloriousSunshineTests
         var match = new MatchSession<DuckMatchView>(runtime);
 
         match.Execute("human", match.GetLegalActions("human").Single(action => action.Label.StartsWith("Fresh Air")));
-        match.Execute("ai", match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Warm Dreams")));
+        match.Execute("ai", match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Starry Night")));
 
         Assert.Equal(1, runtime.State.Day);
         Assert.Equal(7, human.SafeExhaustionMaximum);
@@ -211,7 +211,7 @@ public sealed class DuckGloriousSunshineTests
     {
         var runtime = SunshineRuntime();
         var match = new MatchSession<DuckMatchView>(runtime);
-        match.Execute("human", match.GetLegalActions("human").Single(action => action.Label.StartsWith("Warm Dreams")));
+        match.Execute("human", match.GetLegalActions("human").Single(action => action.Label.StartsWith("Starry Night")));
 
         var restored = DuckSaves.Restore(DuckSaves.Capture(match));
         var players = restored.GetSnapshot("ai").Players;
@@ -232,7 +232,7 @@ public sealed class DuckGloriousSunshineTests
         Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(wrongThreshold));
 
         var final = new MatchSession<DuckMatchView>(SunshineRuntime(day: 10));
-        final.Execute("human", final.GetLegalActions("human").Single(action => action.Label.StartsWith("Warm Dreams")));
+        final.Execute("human", final.GetLegalActions("human").Single(action => action.Label.StartsWith("Starry Night")));
         var prematureCommit = DuckSaves.Capture(final);
         prematureCommit.FinalDayCommits.Add(new DuckFinalDayCommitSaveData
         {
@@ -261,7 +261,7 @@ public sealed class DuckGloriousSunshineTests
     {
         var match = new MatchSession<DuckMatchView>(SunshineRuntime(rulesRevision: 5));
         match.Execute("human", match.GetLegalActions("human").Single(action => action.Label.StartsWith("Fresh Air (+3")));
-        match.Execute("ai", match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Warm Dreams")));
+        match.Execute("ai", match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Starry Night")));
 
         var restored = DuckSaves.Restore(DuckSaves.Capture(match));
         var view = restored.GetSnapshot("human");
@@ -271,6 +271,24 @@ public sealed class DuckGloriousSunshineTests
         Assert.True(view.Rules.BoardSpaceAt(21).IsShelter);
         Assert.True(view.Rules.BoardSpaceAt(26).IsShelter);
         Assert.Equal(6, view.Rules.BoardSpaceAt(28).Twigs);
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(4)]
+    [InlineData(7)]
+    [InlineData(8)]
+    public void Starry_Night_uses_the_existing_action_and_saved_benefit(int revision)
+    {
+        var match = new MatchSession<DuckMatchView>(SunshineRuntime(rulesRevision: revision));
+        var restored = DuckSaves.Restore(DuckSaves.Capture(match));
+        var choice = restored.GetLegalActions("human").Single(a => a.Id == "duck.event.glorious-sunshine.warm-dreams");
+        Assert.StartsWith("Starry Night", choice.Label);
+        restored.Execute("human", choice);
+        var resumed = DuckSaves.Restore(DuckSaves.Capture(restored));
+        Assert.Equal(DuckGloriousSunshineBenefit.WarmDreams,
+            resumed.GetSnapshot("human").Players.Single(p => p.Id == "human").GloriousSunshineBenefit);
+        Assert.Equal(revision, resumed.GetSnapshot("human").RulesRevision);
     }
 
     private static DuckMatchRuntime SunshineRuntime(int day = 1, int rulesRevision = 3)

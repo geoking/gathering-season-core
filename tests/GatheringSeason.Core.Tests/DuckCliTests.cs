@@ -83,8 +83,8 @@ public sealed partial class DuckCliTests
         Assert.Contains("Weather report: Glorious Sunshine", result.Output);
         Assert.Contains("AI: Fresh Air (+2 safe Exhaustion today)", result.Output);
         Assert.Contains("1. Fresh Air (+2 safe Exhaustion today)", result.Output);
-        Assert.Contains("2. Warm Dreams (+2 Stars tonight)", result.Output);
-        Assert.Contains("Glorious Sunshine: Warm Dreams (+2 Stars tonight)", result.Output);
+        Assert.Contains("2. Starry Night (+2 Stars tonight)", result.Output);
+        Assert.Contains("Glorious Sunshine: Starry Night (+2 Stars tonight)", result.Output);
         Assert.Contains("Glorious Sunshine: Fresh Air (+2 safe Exhaustion today)", result.Output);
     }
 
