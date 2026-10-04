@@ -32,7 +32,7 @@ this guide assume the repository root is your current directory.
 
 1. Read the weather report. It affects every duck for this Day. Type `event` to
    review its effect, and `tokens` or `wishes` if you do not recognize a chip. On Glorious
-   Sunshine choose Fresh Air (+2 safe Exhaustion today) or Warm Dreams (+2 Stars
+   Sunshine choose Fresh Air (+2 safe Exhaustion today) or Starry Night (+2 Stars
    tonight); everyone must choose before exploring.
 2. Enter the number beside **Explore**. Core draws a chip, moves your duck and
    resolves its power. You must draw at least once each Day.
