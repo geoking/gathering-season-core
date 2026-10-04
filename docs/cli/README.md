@@ -1,7 +1,7 @@
 # Playing Gathering Season in the terminal
 
 The CLI plays the current ten-Day duck game against one, two or three Normal AI opponents using the Core
-rules. It includes all 43 spaces, encounter powers, ten weather reports, shopping,
+rules. It includes all 43 spaces, encounter powers, fifteen weather reports (ten played per match), shopping,
 Dawn Delivery, final scoring and local Continue.
 
 ## Start a game
@@ -100,7 +100,7 @@ Current revision 8 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishi
 Trail Feathers, which permanently move your later starts forward one step each.
 Dawn Delivery grants catch-up Trail Feathers from the gap to the Twig leader:
 0 for a 0–2 gap, 1 for 3–6, 2 for 7–10 and 3 for 11 or more.
-Trail Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Trail Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
+Trail Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Trail Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day, except during Low Cloud. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
 
 At Night, buy at most one chip of each helpful type: two Tailwind variants
 still count as the same type. Nest capacity allows one purchase on Nights 1–3,
@@ -109,7 +109,8 @@ Reeds quantities mean Twig yield, not movement; all Reeds move one space.
 New matches use Star prices: Seeds **0**, Tailwinds **1/2/3**, Signpost **2**, Splash **1**, Reeds **2/3/4**, Companion **2** and Wildflowers **1**. Free Seeds still use a purchase slot and the one-per-type limit.
 
 Night 10 has no shop. A shelter adds one extra Star before any exhaustion halving; each retained Star becomes one Dream Twig. The safe Most
-Rested duck, including tied winners, also earns one Dream Twig. Total Twigs
+Rested duck, including tied winners, also earns one Dream Twig, except during
+Low Cloud. Total Twigs
 wins; tied Twigs use final frozen Stars, then a draw.
 
 The [full rules recap](../rules/README.md),

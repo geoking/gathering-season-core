@@ -11,8 +11,9 @@ technical rules revision 8. The standard rules below describe the current setup.
 
 ## A Day and a Night
 
-1. Reveal one shared Weather report from the shuffled ten-card deck. Each appears
-   once per game. Glorious Sunshine asks every duck to choose a benefit first.
+1. Shuffle all fifteen Weather reports once before Day 1. Reveal the next shared
+   report each Day, using the first ten and leaving five unused. Glorious Sunshine
+   asks every duck to choose a benefit first.
 2. Explore by drawing physical chips from your own pouch. Move and resolve the
    complete chip. Draw at least once, then continue or settle on your occupied
    space. Reaching space 43 or emptying the pouch ends the Day after that chip
@@ -24,12 +25,14 @@ technical rules revision 8. The standard rules below describe the current setup.
    Worn-out ducks retain earned Twigs and half their Stars, rounded down.
 5. Compare frozen Stars among safe ducks. All tied Most Rested ducks receive a
    Most Rested marker: one temporary extra starting step tomorrow, never a Feather.
+   Low Cloud retains winner recognition but grants no temporary step.
 6. Spend Stars on Wishes for future pouches. Nights 1–3 allow one purchase, 4–6
    two, 7–9 three. All 11 Wishes have unlimited stock; buy at most one per
    helpful type each Night. Unspent Stars expire at Dawn.
 
 **Night 10 has no shop.** A shelter adds +1 Star before exhaustion halves the total. Each retained Star becomes
-one Dream Twig, and each safe Most Rested duck also gains one Dream Twig.
+one Dream Twig, and each safe Most Rested duck also gains one Dream Twig,
+unless the weather is Low Cloud.
 Shopping never changes frozen Most Rested scoring.
 
 ## The pouch and Exhaustion
@@ -73,7 +76,7 @@ Dawn Delivery are the only sources. Snapshot all Twig scores before Dawn:
 
 Most Rested’s temporary step is separate. Final-Day Feathers are recorded but
 there is no Day 11 or exchange into victory points. [Exact board and prices](board-and-shop.md)
-and [ten weather reports](world-events.md) are the current numeric authorities.
+and [fifteen weather reports](world-events.md) are the current numeric authorities.
 
 An available Signpost can be read without drawing. Core reveals the private
 preview and preserves that exact chip as the next draw.

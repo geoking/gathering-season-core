@@ -13,6 +13,11 @@ namespace GatheringSeason.Core.Ducks.Definitions
         StillAir,
         ThickMorningMist,
         RestlessNight,
-        GloriousSunshine
+        GloriousSunshine,
+        GoldenMorning = 11,
+        RefreshingShowers = 12,
+        FavourableWinds = 13,
+        Crosswinds = 14,
+        LowCloud = 15
     }
 }

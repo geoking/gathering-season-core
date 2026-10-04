@@ -20,12 +20,15 @@ wire fields without changing runtime terminology.
 | 5 | Same Stars, prices and board; exhausted ducks keep Flock, shelter bonuses and Feathers before Star halving | Same ten weather reports; Evening Chill/Thundery Skies include exhausted shelter occupants |
 | 6 | Same Star prices; meadow shelters are 16/22/25 and space 28 has five Twigs | Same ten weather reports; Fresh Air is +2 safe Exhaustion |
 | 7 | Same Star prices; meadow shelters are 17/21/25, with current 15–25 reward values; Log waits for the next Wish | Same ten weather reports; Fresh Air is +2 safe Exhaustion |
-| 8 (new games) | Same economy and board as revision 7; Log is consumed by the immediately next drawn chip, slowing only a Wish | Same ten weather reports; protection suppresses only the newly drawn nuisance |
+| 8 (new games) | Same economy and board as revision 7; Log is consumed by the immediately next drawn chip, slowing only a Wish | Fifteen BASE weather reports; play ten and leave five; protection suppresses only the newly drawn nuisance |
 
 Continue restores the recorded catalogue. It never retroactively changes
 purchases, paid Sleep/Stars, weather order or already-earned rewards. Clear Sunlight’s
-two-token preview survives only for old matches. New games have ten weather reports,
-not eleven. Exact pending weather choices and final-Day commitments are saved.
+two-token preview survives only for old matches. New games have fifteen BASE weather reports,
+playing ten cards and leaving five unused. Exact pending weather choices and
+final-Day commitments are saved. The BASE expansion retains the internal revision
+8 identifier. Earlier ten-card revision-8 saves are not accepted or migrated;
+existing revision 1–7 catalogues remain implemented.
 
 Format-1 saves retain their established `Sleep` wire names. `RulesVersion`
 distinguishes whether those values mean legacy Sleep or revision 4–8 Stars. The
@@ -56,10 +59,11 @@ support for a previous product profile.
 
 ## Weather reports and retained event identities
 
-Weather naming is a display change within revision 8. All supported catalogues
-use the following names; the established IDs, enum names and numeric values,
-shuffle order, save fields and command IDs/kinds remain stable. The enum type
-remains `DuckWorldEventType`.
+The original weather reports retain their display names, established IDs, enum
+names and numeric values. Five BASE additions append values 11–15 and are
+available in revision 8. Save fields and command IDs/kinds remain stable; the
+expanded deck changes seeded shuffles because it contains fifteen cards. The
+enum type remains `DuckWorldEventType`.
 
 | Definition ID | Retained enum value | Weather report |
 | --- | --- | --- |
@@ -74,6 +78,11 @@ remains `DuckWorldEventType`.
 | `thick_morning_mist` | `ThickMorningMist = 8` | Thick Morning Mist |
 | `restless_night` | `RestlessNight = 9` | Thundery Skies |
 | `glorious_sunshine` (revisions 3–8) | `GloriousSunshine = 10` | Glorious Sunshine |
+| `golden_morning` | `GoldenMorning = 11` | Golden Morning |
+| `refreshing_showers` | `RefreshingShowers = 12` | Refreshing Showers |
+| `favourable_winds` | `FavourableWinds = 13` | Favourable Winds |
+| `crosswinds` | `Crosswinds = 14` | Crosswinds |
+| `low_cloud` | `LowCloud = 15` | Low Cloud |
 
 `DuckRuleDefinitions.WeatherReports` and `WeatherReport(id)` alias the retained
 `WorldEvents` and `WorldEvent(id)` APIs. `DuckMatchView.CurrentWeatherReport`

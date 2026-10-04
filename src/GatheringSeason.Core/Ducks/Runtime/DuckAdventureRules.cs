@@ -43,6 +43,12 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (worldEvent == DuckWorldEventType.RainSoftenedSeeds && type == DuckEncounterType.Seeds)
                 movement++;
 
+            if (worldEvent == DuckWorldEventType.FavourableWinds && definition.IsHelpful)
+                movement++;
+            if (worldEvent == DuckWorldEventType.Crosswinds && type == DuckEncounterType.Tailwind
+                && !ContainsHelpfulType(state.HelpfulTypeMask, DuckEncounterType.Tailwind))
+                movement = Math.Max(1, movement - 1);
+
             var incomingLog = state.LogSlowdownPending;
             // Revision 8 spends the previous Log on this draw, even on a white
             // chip. Resolve the newly drawn nuisance afterwards so a fresh Log
@@ -68,7 +74,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var helpfulTypeMask = state.HelpfulTypeMask;
             var pocketDriftwoodAwarded = state.PocketDriftwoodAwarded;
             var reedsTwigs = 0;
-            var eventTwigs = 0;
+            var eventTwigs = worldEvent == DuckWorldEventType.GoldenMorning
+                && definition.IsHelpful && state.HelpfulTypeMask == 0 ? 1 : 0;
 
             if (definition.IsHelpful)
             {
@@ -80,6 +87,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
                         break;
                     case DuckEncounterType.Splash:
                         splashProtectionArmed = true;
+                        if (worldEvent == DuckWorldEventType.RefreshingShowers)
+                            exhaustion = Math.Max(0, exhaustion - 1);
                         break;
                     case DuckEncounterType.Wildflowers:
                         flowersPlaced++;

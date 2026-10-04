@@ -510,6 +510,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 $"Players[{player.Id}] has an invalid temporary Night step.");
             var outcomeEvent = rules.WorldEvent(save.WorldEventDeckDefinitionIds[outcome.Day - 1]).EventType;
             var economy = rules.Economy;
+            Require(outcome.NextDayTemporaryStep == (outcome.IsMostRested
+                    && outcome.Day < DuckMatchSettings.StandardDays && outcomeEvent != DuckWorldEventType.LowCloud ? 1 : 0),
+                $"Players[{player.Id}] has an inconsistent Most Rested step.");
             Require(outcome.GloriousSunshineSleep == 0
                     || outcome.GloriousSunshineSleep == economy.WarmDreamsReward
                     && outcomeEvent == DuckWorldEventType.GloriousSunshine,
@@ -552,7 +555,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     + outcome.EventTwigs - outcome.BramblesPenalty,
                 $"Players[{player.Id}] has an inconsistent Night Twig breakdown.");
             Require(outcome.DreamTwigs == (outcome.Day == DuckMatchSettings.StandardDays
-                    ? economy.ConvertFinalRewardToDreamTwigs(outcome.FrozenSleep) + (outcome.IsMostRested ? 1 : 0) : 0),
+                    ? economy.ConvertFinalRewardToDreamTwigs(outcome.FrozenSleep) + (outcome.IsMostRested && outcomeEvent != DuckWorldEventType.LowCloud ? 1 : 0) : 0),
                 $"Players[{player.Id}] has an inconsistent Dream Twig conversion.");
             if (player.IsSleepFrozen)
                 Require(outcome.Day == save.Day && player.FrozenSleep == outcome.FrozenSleep,

@@ -1,16 +1,16 @@
 # Gathering Season Weather Reports
 
-New matches use rules revision 8. This is the complete ten-card weather deck;
+New matches use rules revision 8. This is the complete fifteen-card BASE weather deck;
 revisions 1–7 retain their saved rules. The weather names are display text;
 [compatibility](../architecture/compatibility.md) describes retained identities
 and legacy effects.
 
 ## Shared deck and timing
 
-Shuffle these ten cards once before Day 1. Reveal one card at the start of each
-Day and discard it after that Night's scoring. Draw without replacement, so all
-ten cards appear exactly once in a ten-Day game. Every card can matter on any
-Day, including Day 10.
+Shuffle these fifteen cards once before Day 1. Reveal the next card at the start
+of each Day and discard it after that Night's scoring. Play the first ten cards
+without replacement; five stay unused. Every card can matter on any Day,
+including Day 10. The complete shuffled order survives Continue.
 
 The revealed weather report applies equally to **all match players**, including every
 human and AI duck. Effects last only for that Day unless their payout is awarded
@@ -44,7 +44,7 @@ weather or other shared effects. Movement bonuses from a weather report are incl
 before a pending Log halves movement, except for the single-halving rule on
 Still Air below.
 
-## The ten cards
+## The fifteen cards
 
 ### 1. Gentle Rain
 
@@ -163,3 +163,40 @@ other separately earned weather Star.
 Thundery Skies never removes Twigs or Feathers. It also applies to exhausted
 ducks, before the complete Star total is halved. Splash and
 Clearing Breeze cannot block it because it is weather, not an Obstacle nuisance.
+
+### 11. Golden Morning
+
+**Each duck immediately gains +1 Twig on its first placed Wish today.** White
+Obstacles and Signpost previews do not use the trigger. The first helpful type
+placed consumes it, regardless of variant or power. Later Wishes grant no extra
+Twig. Keep the Twig if the duck later wears out; an unsuppressed final Brambles
+can deduct one Twig from the complete daily Twig reward, once as usual.
+
+### 12. Refreshing Showers
+
+**Every placed Splash recovers 1 current Exhaustion, to a minimum of zero.** It
+still arms its normal protection for the next chip. Recovery changes neither
+the safe Exhaustion maximum nor any earlier Goose reduction. Repeated Splashes
+can recover repeatedly. A duck that has already worn out cannot draw again.
+
+### 13. Favourable Winds
+
+**Every placed Wish gains +1 movement.** Calculate normal movement first,
+including a Companion's new active flock count and normal cap of four, then
+add one, then apply any incoming Log halving. White Obstacles move normally.
+Movement still stops at space 43. Other Wish powers are unchanged.
+
+### 14. Crosswinds
+
+**Each duck's first placed Tailwind loses 1 movement, to a minimum of one.**
+Apply this before any incoming Log halving. Tailwind 2, 4 and 6 share the same
+first trigger: later variants move normally. Other Wish types and white
+Obstacles do not use it, and previews never count as placements.
+
+### 15. Low Cloud
+
+**Most Rested grants no temporary start step next Day, and no extra Most Rested
+Dream Twig on Day 10.** Calculate the safe winners and ties normally and retain
+their public recognition. All printed, flock, Wildflower and other normal Stars,
+Feathers, and Day 10 Star conversion still apply. The suppressed start step does
+not alter any already-active temporary step or permanent Feather trail.

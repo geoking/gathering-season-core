@@ -263,6 +263,8 @@ namespace GatheringSeason.Core.Ducks.AI
                 if (observation.CurrentEvent.EventType == DuckWorldEventType.RainSoftenedSeeds
                     && definition.EncounterType == DuckEncounterType.Seeds)
                     movement += count;
+                if (observation.CurrentEvent.EventType == DuckWorldEventType.FavourableWinds && definition.IsHelpful)
+                    movement += count;
                 reedsTwigs += count * definition.TwigYield;
                 if (definition.EncounterType == DuckEncounterType.Wildflowers) flowers += count;
                 if (definition.EncounterType == DuckEncounterType.Companion) flock += count;
@@ -272,6 +274,10 @@ namespace GatheringSeason.Core.Ducks.AI
             var futureTwigs = current.FutureTwigs + reedsTwigs;
             if (observation.CurrentEvent.EventType == DuckWorldEventType.PocketOfDriftwood
                 && !current.State.PocketDriftwoodAwarded)
+                futureTwigs++;
+            if (observation.CurrentEvent.EventType == DuckWorldEventType.GoldenMorning
+                && current.State.HelpfulTypeMask == 0
+                && observation.Rules.EncounterDefinitions.Where((definition, index) => definition.IsHelpful && counts[index] > 0).Any())
                 futureTwigs++;
             var maximumPosition = Math.Min(43, current.State.Position + movement);
             var opponentBounds = observation.Players
@@ -311,7 +317,7 @@ namespace GatheringSeason.Core.Ducks.AI
             var space = observation.Rules.BoardSpaceAt(state.State.Position);
             var brambles = state.FinalType == DuckEncounterType.Brambles && !state.FinalSuppressed ? 1 : 0;
             var sleep = FinalSleepUpperBound(observation, player, state, space);
-            var mostRestedTwig = state.WornOut ? 0 : 1;
+            var mostRestedTwig = state.WornOut || observation.CurrentEvent.EventType == DuckWorldEventType.LowCloud ? 0 : 1;
             var twigs = player.TotalTwigs + state.FutureTwigs + space.Twigs - brambles
                 + observation.Economy.ConvertFinalRewardToDreamTwigs(sleep) + mostRestedTwig;
             return new FinalScoreBound(twigs, sleep);
@@ -453,7 +459,7 @@ namespace GatheringSeason.Core.Ducks.AI
             int estimatedSleep,
             bool wornOut)
         {
-            if (wornOut) return 0;
+            if (wornOut || observation.CurrentEvent.EventType == DuckWorldEventType.LowCloud) return 0;
             var eligibleOpponents = observation.Players
                 .Where(candidate => candidate.Id != player.Id && !candidate.IsWornOut)
                 .ToArray();
