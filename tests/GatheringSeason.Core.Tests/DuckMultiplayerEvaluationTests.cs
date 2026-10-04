@@ -47,7 +47,8 @@ public sealed class DuckMultiplayerEvaluationTests
         Assert.Equal(Signature(first), Signature(repeat));
         Assert.Equal(count, first.Players.Count);
         Assert.Equal(Enumerable.Range(1, 10), first.Days.Select(day => day.Day));
-        Assert.Equal(3, first.Days.Count(day => day.CollectiveAttempt));
+        Assert.Equal(first.Days.Count(day => day.EventId is "all_tucked_in" or "home_before_dark" or "shared_supper"),
+            first.Days.Count(day => day.CollectiveAttempt));
         Assert.All(first.Days, day =>
         {
             Assert.Equal(count, day.Players.Count);

@@ -75,7 +75,7 @@ public sealed class DuckEvaluationTests
     [Fact]
     public void Pre_night_standings_keep_adventure_twigs_and_remove_final_dream_twigs()
     {
-        var result = Run(0, "normal", "reeds-heavy").Result;
+        var result = Run(1, "normal", "reeds-heavy").Result;
         var playerDays = result.Days.SelectMany(day => day.Players).ToArray();
 
         Assert.Contains(playerDays, player => player.Night.ReedsTwigs > 0);
@@ -89,7 +89,7 @@ public sealed class DuckEvaluationTests
     [Fact]
     public void Unspent_sleep_is_captured_before_finish_dream_expires_it()
     {
-        var result = Run(0, "baseline", "cautious").Result;
+        var result = Run(1, "baseline", "cautious").Result;
 
         Assert.Contains(result.Days.Take(9).SelectMany(day => day.Players), player => player.UnspentReward > 0);
         Assert.All(result.Days[9].Players, player => Assert.Equal(0, player.UnspentReward));
@@ -210,7 +210,7 @@ public sealed class DuckEvaluationTests
         var before = JsonSerializer.Serialize(source, jsonOptions);
         var probes = EventProbeRunner.Run(source!, request).ToArray();
         Assert.Equal(before, JsonSerializer.Serialize(source, jsonOptions));
-        Assert.Equal(9, probes.Select(probe => probe.EventDefinitionId).Distinct().Count());
+        Assert.Equal(14, probes.Select(probe => probe.EventDefinitionId).Distinct().Count());
         Assert.Single(probes.Select(probe => probe.SourceStateHash).Distinct());
         Assert.All(probes, probe =>
         {

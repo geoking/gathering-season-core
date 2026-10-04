@@ -91,7 +91,7 @@ public sealed class DuckFoundationTests
         var second = DuckMatchRuntime.Create(seed);
         var expectedRandom = new ResumableRandomSource(seed);
 
-        ConsumeFisherYates(expectedRandom, 10);
+        ConsumeFisherYates(expectedRandom, 15);
         ConsumeFisherYates(expectedRandom, 13);
         ConsumeFisherYates(expectedRandom, 13);
         var expectedState = expectedRandom.CaptureState();
@@ -101,7 +101,7 @@ public sealed class DuckFoundationTests
             first.State.Players.Select(player => player.BagPhysicalChipIds.ToArray()),
             second.State.Players.Select(player => player.BagPhysicalChipIds.ToArray()),
             IntSequenceComparer.Instance);
-        Assert.Equal(10, first.State.WorldEventDeckDefinitionIds.Distinct().Count());
+        Assert.Equal(15, first.State.WorldEventDeckDefinitionIds.Distinct().Count());
         Assert.Equal(expectedState.Algorithm, first.State.RandomState.Algorithm);
         Assert.Equal(expectedState.State, first.State.RandomState.State);
         Assert.Equal(expectedState.Increment, first.State.RandomState.Increment);

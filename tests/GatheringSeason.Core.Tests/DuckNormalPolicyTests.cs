@@ -673,7 +673,7 @@ public sealed class DuckNormalPolicyTests
 
     private static DreamTestScenario LegacyDreamScenario(int day, int sleep)
     {
-        var match = MatchSession.CreateDuck(seed: 228);
+        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(seed: 228, rulesRevision: 7));
         while (match.GetSnapshot("human").Day < day)
         {
             FinishAdventure(match);

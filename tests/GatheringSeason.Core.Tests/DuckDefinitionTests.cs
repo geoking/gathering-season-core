@@ -292,7 +292,12 @@ public sealed class DuckDefinitionTests
             ("shared_supper", DuckWorldEventType.SharedSupper, "Morning Dew"),
             ("still_air", DuckWorldEventType.StillAir, "Still Air"),
             ("thick_morning_mist", DuckWorldEventType.ThickMorningMist, "Thick Morning Mist"),
-            ("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies")
+            ("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies"),
+            ("golden_morning", DuckWorldEventType.GoldenMorning, "Golden Morning"),
+            ("refreshing_showers", DuckWorldEventType.RefreshingShowers, "Refreshing Showers"),
+            ("favourable_winds", DuckWorldEventType.FavourableWinds, "Favourable Winds"),
+            ("crosswinds", DuckWorldEventType.Crosswinds, "Crosswinds"),
+            ("low_cloud", DuckWorldEventType.LowCloud, "Low Cloud")
         };
         var actual = DuckRules.V1.WorldEvents
             .Select(item => (item.DefinitionId, item.EventType, item.Name))
