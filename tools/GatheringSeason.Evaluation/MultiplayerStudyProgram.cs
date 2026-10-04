@@ -6,10 +6,13 @@ public sealed record MultiplayerStudyOptions(
     int SeedStart, int SeedCount, IReadOnlyList<int> PlayerCounts,
     string SourceLabel, string OutputPath, int ProgressEvery)
 {
+    public IReadOnlyList<string>? FocalStyles { get; init; }
+    public bool AllMixedSeats { get; init; }
     public const string Help = """
         Gathering Season multiplayer study (separate from historical pairwise evaluation)
         --multiplayer --source-label LABEL [--seed-start N] [--seed-count N]
         [--players all|2|3|4] [--output JSONL_PATH|-] [--progress-every N]
+        [--focal-policies ID,ID,...] [--all-mixed-seats]
         Per seed and player count: one all-Normal baseline; Movement and Reeds
         each rotated through every seat against Normal; balanced mixed lobbies.
         """;
@@ -22,6 +25,8 @@ public sealed record MultiplayerStudyOptions(
         string? sourceLabel = null;
         var output = "-";
         var progressEvery = 10;
+        IReadOnlyList<string>? focalStyles = null;
+        var allMixedSeats = false;
         for (var index = 0; index < args.Count; index++)
         {
             var option = args[index];
@@ -44,6 +49,8 @@ public sealed record MultiplayerStudyOptions(
                 case "--source-label": sourceLabel = Value(); break;
                 case "--output": output = Value(); break;
                 case "--progress-every": progressEvery = Integer(Value(), option); break;
+                case "--focal-policies": focalStyles = Value().Split(','); break;
+                case "--all-mixed-seats": allMixedSeats = true; break;
                 default: throw new ArgumentException("Unknown multiplayer option: " + option);
             }
         }
@@ -53,7 +60,9 @@ public sealed record MultiplayerStudyOptions(
             throw new ArgumentException("--source-label is required for reproducible evidence.");
         if (string.IsNullOrWhiteSpace(output)) throw new ArgumentException("--output requires a path or -.");
         _ = checked(seedStart + seedCount);
-        return new MultiplayerStudyOptions(seedStart, seedCount, playerCounts, sourceLabel, output, progressEvery);
+        foreach (var count in playerCounts) _ = MultiplayerStudyRunner.Assignments(count, focalStyles, allMixedSeats);
+        return new MultiplayerStudyOptions(seedStart, seedCount, playerCounts, sourceLabel, output, progressEvery)
+            { FocalStyles = focalStyles, AllMixedSeats = allMixedSeats };
     }
 
     private static int Integer(string value, string option) => int.TryParse(value, out var parsed)
@@ -73,11 +82,12 @@ public static class MultiplayerStudyProgram
         var runner = new MultiplayerStudyRunner();
         TextWriter output = options.OutputPath == "-" ? Console.Out : CreateOutput(options.OutputPath);
         using var owned = ReferenceEquals(output, Console.Out) ? null : output;
-        var total = options.SeedCount * options.PlayerCounts.Sum(count => MultiplayerStudyRunner.Assignments(count).Count);
+        var total = checked(options.SeedCount * options.PlayerCounts.Sum(count =>
+            MultiplayerStudyRunner.Assignments(count, options.FocalStyles, options.AllMixedSeats).Count));
         var completed = 0;
         for (var seed = options.SeedStart; seed < checked(options.SeedStart + options.SeedCount); seed++)
             foreach (var playerCount in options.PlayerCounts)
-                foreach (var assignment in MultiplayerStudyRunner.Assignments(playerCount))
+                foreach (var assignment in MultiplayerStudyRunner.Assignments(playerCount, options.FocalStyles, options.AllMixedSeats))
                 {
                     var result = runner.Run(seed, playerCount, assignment, options.SourceLabel);
                     output.WriteLine(JsonSerializer.Serialize(result, EvaluationProgram.Json));

@@ -41,8 +41,9 @@ python3 -m unittest discover -s tools/tests -v
 ## Evaluate multiplayer strategies
 
 Run complete games with Normal, movement-focused and Reeds-focused shoppers
-rotated through two to four seats. All styles share Normal's Adventure policy;
-Day 10 choices use the same public beat before commitments are submitted.
+rotated through two to four seats. The default shopping styles share Normal's
+Adventure policy. Day 10 choices use the same public beat before commitments
+are submitted.
 
 ```sh
 dotnet run --project tools/GatheringSeason.Evaluation --configuration Release -- \
@@ -57,6 +58,19 @@ summary resamples whole matched-seed groups, not individual rotated seats.
 Record the exact source/build used; timing varies between runs. These scripted
 shoppers test specific strategies, not optimal or human play balance. The
 existing pairwise mode remains available without `--multiplayer`.
+
+Use `--focal-policies ID,ID,...` to select additional diagnostics, each rotated
+through every seat against Normal. Supported isolated scripts include
+`movement-first-mixed` (Tailwind, then Reeds), `flowers-first`, `seeds-first`,
+`cautious-stop`, `adventurous-stop`, `sunshine-fresh` and `sunshine-warm`.
+Stopping scripts retain Normal shopping and decisions using authorised Signpost
+previews; Sunshine scripts change only that
+weather choice. `--all-mixed-seats` expands the direct Movement/Reeds control
+to every ordered seat pair. Existing defaults retain their original matrix.
+The analyzer accepts plain or gzip JSONL and validates complete seed rotations,
+ten-Day outcomes and matching source/build identities. Multiplayer schema 2
+also records full Night components, Exhaustion, Dawn Feather progress, Sunshine
+choices and placed-chip counts; it does not change rules or the production AI.
 
 ## Licence
 
