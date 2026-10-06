@@ -17,6 +17,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 || state.Players.Any(player => !player.HasFinishedDream))
                 throw new InvalidOperationException("Only a completed Dream on Days 1–9 can advance the calendar.");
 
+            if (state.Day == 4 && !state.DayFiveGooseAdded)
+                _ = checked(state.NextPhysicalChipId + state.Players.Count);
+
             // Freeze all Twig deficits before any gifts, resets or temporary-step activation.
             var leadingTwigs = state.Players.Max(player => player.TotalTwigs);
             var deficits = state.Players.ToDictionary(player => player.Id, player => leadingTwigs - player.TotalTwigs);

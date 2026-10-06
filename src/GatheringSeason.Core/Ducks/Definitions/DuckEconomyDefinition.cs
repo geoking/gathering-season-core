@@ -73,13 +73,13 @@ namespace GatheringSeason.Core.Ducks.Definitions
         public int CalculateFlowerReward(int flowersPlaced)
         {
             if (flowersPlaced < 0) throw new ArgumentOutOfRangeException(nameof(flowersPlaced));
-            return Math.Min(FlowersRewardLimit, flowersPlaced * FlowersPerChipReward);
+            return (int)Math.Min(FlowersRewardLimit, (long)flowersPlaced * FlowersPerChipReward);
         }
 
         public int CalculateFlockLeaderReward(int activeFlock)
         {
             if (activeFlock < 0) throw new ArgumentOutOfRangeException(nameof(activeFlock));
-            return Math.Min(FlockLeaderRewardLimit, activeFlock * FlockLeaderPerCompanionReward);
+            return (int)Math.Min(FlockLeaderRewardLimit, (long)activeFlock * FlockLeaderPerCompanionReward);
         }
 
         public int ConvertFinalRewardToDreamTwigs(int retainedReward)

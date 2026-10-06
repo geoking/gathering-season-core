@@ -110,7 +110,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 ResolveAction(runtime, candidate, commits[candidate.Id].ActionKind);
 
             runtime.State.FinalDayCommits.Clear();
-            runtime.State.FinalDayDecisionBeat++;
+            runtime.State.FinalDayDecisionBeat = checked(beat + 1);
             ResolveNightWhenEveryoneFinished(runtime);
         }
 
@@ -138,10 +138,6 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 throw new InvalidOperationException("The saved Signpost preview does not match the next pouch chip.");
 
             var physicalChipId = player.BagPhysicalChipIds[0];
-            player.BagPhysicalChipIds.RemoveAt(0);
-            if (player.KnownNextPhysicalChipIds.Count > 0)
-                player.KnownNextPhysicalChipIds.RemoveAt(0);
-
             var physicalChip = player.Inventory.Single(chip => chip.PhysicalChipId == physicalChipId);
             var definition = runtime.Rules.Encounter(physicalChip.DefinitionId);
             var before = new DuckAdventureState(
@@ -157,6 +153,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
             var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType, runtime.Rules);
             var after = placement.State;
+            player.BagPhysicalChipIds.RemoveAt(0);
+            if (player.KnownNextPhysicalChipIds.Count > 0)
+                player.KnownNextPhysicalChipIds.RemoveAt(0);
+
             player.Position = after.Position;
             player.Exhaustion = after.Exhaustion;
             player.SafeExhaustionMaximum = after.SafeExhaustionMaximum;

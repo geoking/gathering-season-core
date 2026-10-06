@@ -155,6 +155,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 "Players must follow the fixed human and AI reveal order.");
             Require(save.FinalDayCommits != null, "FinalDayCommits are required.");
 
+            var limits = new DuckStateLimits(rules, save.Day);
             var physicalIds = new HashSet<int>();
             foreach (var player in save.Players)
                 ValidatePlayer(save, player, physicalIds, rules);
@@ -165,8 +166,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     || save.FinalDayCommits.Count > 0))
                 Require(save.Players.All(player => player.HasGloriousSunshineChoice),
                     "Every duck must choose a Glorious Sunshine benefit before Adventure begins.");
-            Require(save.NextPhysicalChipId > 0 && physicalIds.All(id => id < save.NextPhysicalChipId),
-                "NextPhysicalChipId must be greater than every existing physical chip ID.");
+            Require(save.NextPhysicalChipId > 0 && save.NextPhysicalChipId <= limits.Inventory * playerCount + 1
+                    && physicalIds.All(id => id < save.NextPhysicalChipId),
+                "NextPhysicalChipId must follow existing IDs within the calendar allocation bound.");
 
             ValidateHistory(save, expectedPlayerIds);
             ValidateAwards(save, expectedPlayerIds);
@@ -353,6 +355,18 @@ namespace GatheringSeason.Core.Ducks.Persistence
             ISet<int> allPhysicalIds,
             DuckRuleDefinitions rules)
         {
+            var limits = new DuckStateLimits(rules, save.Day);
+            Bounded(player.PermanentFeatherTrail, limits.FeatherTrail, $"Players[{player.Id}].PermanentFeatherTrail");
+            Bounded(player.TotalTwigs, limits.TotalTwigs, $"Players[{player.Id}].TotalTwigs");
+            Bounded(player.DayReedsTwigs, limits.ReedsTwigs, $"Players[{player.Id}].DayReedsTwigs");
+            Bounded(player.DayEventTwigs, 1, $"Players[{player.Id}].DayEventTwigs");
+            Bounded(player.Exhaustion, limits.Exhaustion, $"Players[{player.Id}].Exhaustion");
+            Bounded(player.ActiveFlock, limits.Inventory, $"Players[{player.Id}].ActiveFlock");
+            Bounded(player.FlowersPlaced, limits.Inventory, $"Players[{player.Id}].FlowersPlaced");
+            Bounded(player.FrozenSleep, limits.Reward, $"Players[{player.Id}].FrozenSleep");
+            Bounded(player.RemainingSleep, limits.Reward, $"Players[{player.Id}].RemainingSleep");
+            Bounded(player.EffectiveStart, limits.FeatherTrail + 1, $"Players[{player.Id}].EffectiveStart");
+            Bounded(player.DawnTwigDeficit, limits.TotalTwigs, $"Players[{player.Id}].DawnTwigDeficit");
             Require(player.Inventory != null, $"Players[{player.Id}].Inventory is required.");
             Require(player.BagPhysicalChipIds != null, $"Players[{player.Id}].BagPhysicalChipIds are required.");
             Require(player.KnownNextPhysicalChipIds != null, $"Players[{player.Id}].KnownNextPhysicalChipIds are required.");
@@ -362,14 +376,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 $"Players[{player.Id}].PurchasedEncounterDefinitionIds are required.");
             Require(player.PurchasedShopTypes != null, $"Players[{player.Id}].PurchasedShopTypes are required.");
             Require(!string.IsNullOrWhiteSpace(player.Name), $"Players[{player.Id}].Name is required.");
-            NonNegative(player.PermanentFeatherTrail, $"Players[{player.Id}].PermanentFeatherTrail");
-            NonNegative(player.TotalTwigs, $"Players[{player.Id}].TotalTwigs");
-            NonNegative(player.DayReedsTwigs, $"Players[{player.Id}].DayReedsTwigs");
-            NonNegative(player.DayEventTwigs, $"Players[{player.Id}].DayEventTwigs");
-            Require(player.TotalTwigs >= player.DayReedsTwigs + player.DayEventTwigs,
+            Require(player.TotalTwigs >= (long)player.DayReedsTwigs + player.DayEventTwigs,
                 $"Players[{player.Id}].TotalTwigs cannot be below current-Day Twigs already added to the nest.");
             Require(player.Position >= 0 && player.Position <= 43, $"Players[{player.Id}].Position is outside the board.");
-            NonNegative(player.Exhaustion, $"Players[{player.Id}].Exhaustion");
             var choseFreshAir = save.RulesVersion >= 3 && player.HasGloriousSunshineChoice
                 && player.GloriousSunshineBenefit == DuckGloriousSunshineBenefit.FreshAir;
             var validSafeMaximum = choseFreshAir
@@ -378,7 +387,6 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 : player.SafeExhaustionMaximum == 4 || player.SafeExhaustionMaximum == 5;
             Require(validSafeMaximum,
                 $"Players[{player.Id}].SafeExhaustionMaximum is not a supported threshold.");
-            NonNegative(player.ActiveFlock, $"Players[{player.Id}].ActiveFlock");
             var currentEvent = rules.WorldEvent(save.WorldEventDeckDefinitionIds[save.CurrentEventIndex]).EventType;
             Require(!player.HasGloriousSunshineChoice
                     || save.RulesVersion >= 3
@@ -389,18 +397,13 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 && currentEvent == DuckWorldEventType.GloriousSunshine && player.PlacedChips.Count > 0)
                 Require(player.HasGloriousSunshineChoice,
                     $"Players[{player.Id}] began Adventure without a Glorious Sunshine choice.");
-            NonNegative(player.FlowersPlaced, $"Players[{player.Id}].FlowersPlaced");
-            NonNegative(player.FrozenSleep, $"Players[{player.Id}].FrozenSleep");
-            NonNegative(player.RemainingSleep, $"Players[{player.Id}].RemainingSleep");
             Require(player.RemainingSleep <= player.FrozenSleep,
                 $"Players[{player.Id}].RemainingSleep cannot exceed frozen Sleep.");
-            NonNegative(player.EffectiveStart, $"Players[{player.Id}].EffectiveStart");
             if (save.Phase == DuckPhase.Adventure)
-                Require(player.EffectiveStart == player.PermanentFeatherTrail + (player.ActiveMostRestedStep ? 1 : 0),
+                Require(player.EffectiveStart == (long)player.PermanentFeatherTrail + (player.ActiveMostRestedStep ? 1 : 0),
                     $"Players[{player.Id}].EffectiveStart does not match trail and temporary movement.");
             Require(!player.IsWornOut || player.HasFinishedDay,
                 $"Players[{player.Id}] cannot be worn out before finishing Adventure.");
-            NonNegative(player.DawnTwigDeficit, $"Players[{player.Id}].DawnTwigDeficit");
             Require(player.DawnFeathersAwarded >= 0 && player.DawnFeathersAwarded <= 3,
                 $"Players[{player.Id}].DawnFeathersAwarded is outside the Dawn table.");
             var inventoryIds = new HashSet<int>();
@@ -415,8 +418,8 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     $"Physical chip {chip.PhysicalChipId} has an unknown encounter definition.");
                 inventoryById.Add(chip.PhysicalChipId, chip.DefinitionId);
             }
-            Require(inventoryIds.Count >= rules.OpeningBag.Count,
-                $"Players[{player.Id}].Inventory is smaller than the opening pouch.");
+            Require(inventoryIds.Count >= rules.OpeningBag.Count && inventoryIds.Count <= limits.Inventory,
+                $"Players[{player.Id}].Inventory is outside the opening/calendar bounds.");
             Require(player.Inventory.Select(chip => chip.PhysicalChipId)
                     .SequenceEqual(player.Inventory.Select(chip => chip.PhysicalChipId).OrderBy(id => id)),
                 $"Players[{player.Id}].Inventory must retain physical creation order.");
@@ -508,6 +511,18 @@ namespace GatheringSeason.Core.Ducks.Persistence
             }) Require(value >= 0, $"Players[{player.Id}] has a negative Night outcome value.");
             Require(outcome.NextDayTemporaryStep == 0 || outcome.NextDayTemporaryStep == 1,
                 $"Players[{player.Id}] has an invalid temporary Night step.");
+            var limits = new DuckStateLimits(rules, outcome.Day);
+            Bounded(outcome.PrintedSleep, limits.Reward, "Night outcome PrintedSleep");
+            Bounded(outcome.PrintedTwigs, limits.DailyTwigs, "Night outcome PrintedTwigs");
+            Bounded(outcome.ReedsTwigs, limits.ReedsTwigs, "Night outcome ReedsTwigs");
+            Bounded(outcome.EventTwigs, 1, "Night outcome EventTwigs");
+            Bounded(outcome.BramblesPenalty, 1, "Night outcome BramblesPenalty");
+            Bounded(outcome.FlowerSleep, limits.FlowersReward, "Night outcome FlowerSleep");
+            Bounded(outcome.SleepBeforeWear, limits.Reward, "Night outcome SleepBeforeWear");
+            Bounded(outcome.FrozenSleep, limits.Reward, "Night outcome FrozenSleep");
+            Bounded(outcome.TotalTwigsEarned, limits.DailyTwigs, "Night outcome TotalTwigsEarned");
+            Bounded(outcome.FeathersAwarded, rules.BoardSpaces.Max(space => space.Feathers), "Night outcome FeathersAwarded");
+            Bounded(outcome.DreamTwigs, limits.DreamTwigs, "Night outcome DreamTwigs");
             var outcomeEvent = rules.WorldEvent(save.WorldEventDeckDefinitionIds[outcome.Day - 1]).EventType;
             var economy = rules.Economy;
             Require(outcome.NextDayTemporaryStep == (outcome.IsMostRested
@@ -543,7 +558,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 $"Players[{player.Id}] has an invalid flock reward.");
             Require(outcome.PebblesPenalty == 0 || outcome.PebblesPenalty == economy.PebblesPenalty,
                 $"Players[{player.Id}] has an invalid Pebbles penalty.");
-            Require(outcome.SleepBeforeWear == outcome.PrintedSleep + outcome.FlowerSleep
+            Require(outcome.SleepBeforeWear == (long)outcome.PrintedSleep + outcome.FlowerSleep
                     + outcome.FinalHavenSleep - outcome.RestlessNightPenalty
                     + outcome.CollectiveEventSleep + outcome.GloriousSunshineSleep
                     + outcome.FlockSleep - outcome.PebblesPenalty,
@@ -551,7 +566,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(outcome.FrozenSleep == outcome.SleepBeforeWear
                     || outcome.FrozenSleep == outcome.SleepBeforeWear / economy.WearOutDivisor,
                 $"Players[{player.Id}] has an invalid worn-out reward total.");
-            Require(outcome.TotalTwigsEarned == outcome.PrintedTwigs + outcome.ReedsTwigs
+            Require(outcome.TotalTwigsEarned == (long)outcome.PrintedTwigs + outcome.ReedsTwigs
                     + outcome.EventTwigs - outcome.BramblesPenalty,
                 $"Players[{player.Id}] has an inconsistent Night Twig breakdown.");
             Require(outcome.DreamTwigs == (outcome.Day == DuckMatchSettings.StandardDays
@@ -624,10 +639,21 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 "CommandRevisions must contain every player.");
             Require(save.CommandRevisions.All(revision => revision != null
                     && playerIds.Contains(revision.PlayerId)
-                    && revision.Revision >= 0 && revision.Revision < long.MaxValue)
+                    && revision.Revision >= 0 && revision.Revision <= RevisionLimit(save, revision.PlayerId))
                     && save.CommandRevisions.Select(revision => revision.PlayerId)
                         .Distinct(StringComparer.Ordinal).Count() == playerIds.Count,
                 "CommandRevisions contains a missing, duplicate or invalid revision.");
+        }
+
+        private static long RevisionLimit(DuckSaveData save, string playerId)
+        {
+            var player = save.Players.Single(candidate => candidate.Id == playerId);
+            var priorDays = save.Day == 1 ? 0 : new DuckStateLimits(
+                DuckRules.ForRulesRevision(save.RulesVersion), save.Day - 1).CommandRevision;
+            return priorDays + player.PlacedChips.Count + (player.HasFinishedDay ? 1 : 0)
+                + (player.HasGloriousSunshineChoice ? 1 : 0) + player.PurchasedEncounterDefinitionIds.Count
+                + (player.HasFinishedDream ? 1 : 0)
+                + (save.FinalDayCommits.Any(commit => commit.PlayerId == playerId) ? 1 : 0);
         }
 
         private static void ValidateGoose(DuckSaveData save)
@@ -717,6 +743,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                             && player.IsSleepFrozen && player.RemainingSleep == 0),
                     "Finished requires a completely resolved Day 10.");
             }
+            Require(save.FinalDayDecisionBeat <= new DuckStateLimits(
+                    DuckRules.ForRulesRevision(save.RulesVersion), save.Day).Inventory + 1,
+                "FinalDayDecisionBeat exceeds the calendar's possible draws.");
             if (save.Day == DuckMatchSettings.StandardDays
                 && (save.Phase == DuckPhase.Adventure || save.Phase == DuckPhase.Finished))
                 Require(save.FinalDayDecisionBeat >= 1,
@@ -726,9 +755,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     "FinalDayDecisionBeat must be zero before Day 10 Adventure.");
         }
 
-        private static void NonNegative(int value, string path)
+        private static void Bounded(int value, int maximum, string path)
         {
-            Require(value >= 0, path + " cannot be negative.");
+            Require(value >= 0 && value <= maximum, path + " exceeds its catalogue/calendar bounds.");
         }
 
         private static void Require([DoesNotReturnIf(false)] bool condition, string message)
