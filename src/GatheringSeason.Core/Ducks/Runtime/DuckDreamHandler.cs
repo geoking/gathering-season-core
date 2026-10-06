@@ -52,10 +52,13 @@ namespace GatheringSeason.Core.Ducks.Runtime
             }
 
             var offer = rules.ShopOffer(legal.DefinitionId);
+            var physicalChipId = state.NextPhysicalChipId;
+            var nextPhysicalChipId = checked(physicalChipId + 1);
             player.RemainingSleep -= offer.Price;
             player.PurchasedEncounterDefinitionIds.Add(offer.DefinitionId);
             player.PurchasedShopTypes.Add(offer.ShopType);
-            player.Inventory.Add(new DuckPhysicalChipState(state.NextPhysicalChipId++, offer.EncounterDefinitionId));
+            player.Inventory.Add(new DuckPhysicalChipState(physicalChipId, offer.EncounterDefinitionId));
+            state.NextPhysicalChipId = nextPhysicalChipId;
             state.History.Add(new DuckHistoryState(state.Day, player.Id,
                 $"{player.Name} buys {(rules.Economy.UsesStars ? "Wish " : string.Empty)}{offer.Encounter.Name} for {Reward(offer.Price, rules.Economy)}; it enters tomorrow's pouch."));
         }

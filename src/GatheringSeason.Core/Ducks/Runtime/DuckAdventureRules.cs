@@ -32,8 +32,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
             int movement;
             if (type == DuckEncounterType.Companion)
             {
-                activeFlock++;
-                movement = Math.Min(activeFlock + 1, 4);
+                activeFlock = checked(activeFlock + 1);
+                movement = Math.Min(checked(activeFlock + 1), 4);
             }
             else
             {
@@ -67,7 +67,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             }
             movement = Math.Max(1, movement);
 
-            var position = Math.Min(43, state.Position + movement);
+            var position = Math.Min(43, checked(state.Position + movement));
             var exhaustion = state.Exhaustion;
             var safeExhaustionMaximum = state.SafeExhaustionMaximum;
             var flowersPlaced = state.FlowersPlaced;
@@ -91,13 +91,13 @@ namespace GatheringSeason.Core.Ducks.Runtime
                             exhaustion = Math.Max(0, exhaustion - 1);
                         break;
                     case DuckEncounterType.Wildflowers:
-                        flowersPlaced++;
+                        flowersPlaced = checked(flowersPlaced + 1);
                         break;
                 }
             }
             else
             {
-                exhaustion += definition.ExhaustionValue;
+                exhaustion = checked(exhaustion + definition.ExhaustionValue);
                 if (!nuisanceSuppressed)
                 {
                     switch (type)

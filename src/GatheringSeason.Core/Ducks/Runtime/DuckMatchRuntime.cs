@@ -145,6 +145,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 string.Equals(candidate.Id, action.Id, StringComparison.Ordinal));
             if (legal == null)
                 throw new InvalidOperationException("Action '" + action.Id + "' is not legal for " + playerId + " in " + State.Phase + ".");
+            DuckStateLimits.GuardMutation(State, Rules, legal, player);
             switch (State.Phase)
             {
                 case DuckPhase.Adventure: DuckAdventureHandler.Execute(this, player, legal); break;

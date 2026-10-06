@@ -37,8 +37,12 @@ namespace GatheringSeason.Core.Match
                 throw new InvalidOperationException("This action is stale or belongs to another player or match. Request current legal actions.");
             var legal = _runtime.GetLegalActions(playerId).SingleOrDefault(candidate => candidate.Id == action.Id);
             if (legal == null) throw new InvalidOperationException($"Action '{action.Id}' is no longer legal for {playerId}.");
+            var revision = Revision(playerId);
+            if (revision >= long.MaxValue - 1)
+                throw new InvalidOperationException("The command revision counter is exhausted.");
+            var nextRevision = checked(revision + 1);
             var view = _runtime.Execute(playerId, legal);
-            _revisions[playerId] = Revision(playerId) + 1;
+            _revisions[playerId] = nextRevision;
             return view;
         }
 
