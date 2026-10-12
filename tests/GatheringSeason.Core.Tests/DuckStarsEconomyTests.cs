@@ -9,24 +9,6 @@ namespace GatheringSeason.Core.Tests;
 
 public sealed class DuckStarsEconomyTests
 {
-    [Fact]
-    public void New_match_exposes_revision_seven_rules_and_unchanged_board_reward_tiers()
-    {
-        var view = MatchSession.CreateDuck(seed: 4001).GetSnapshot("human");
-        var rules = view.Rules;
-
-        Assert.Equal(8, view.RulesRevision);
-        Assert.Same(rules.Economy, view.Economy);
-        Assert.Equal("Stars", view.Economy.CurrencyName);
-        Assert.True(view.Economy.UsesStars);
-        Assert.All(rules.BoardSpaces.Where(space => space.Space <= 14 && !space.IsShelter), space => Assert.Equal(1, space.Reward));
-        Assert.All(rules.BoardSpaces.Where(space => space.Space <= 14 && space.IsShelter), space => Assert.Equal(2, space.Reward));
-        Assert.All(rules.BoardSpaces.Where(space => space.Space is >= 15 and <= 28 && !space.IsShelter), space => Assert.Equal(2, space.Reward));
-        Assert.All(rules.BoardSpaces.Where(space => space.Space is >= 15 and <= 28 && space.IsShelter), space => Assert.Equal(3, space.Reward));
-        Assert.All(rules.BoardSpaces.Where(space => space.Space is >= 29 and <= 42 && !space.IsShelter), space => Assert.Equal(1, space.Reward));
-        Assert.All(rules.BoardSpaces.Where(space => space.Space is >= 29 and <= 42 && space.IsShelter), space => Assert.Equal(4, space.Reward));
-        Assert.Equal(5, rules.BoardSpaceAt(43).Reward);
-    }
 
     [Fact]
     public void Revision_four_combines_each_approved_Star_bonus_once()

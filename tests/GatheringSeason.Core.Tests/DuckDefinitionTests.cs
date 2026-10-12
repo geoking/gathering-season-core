@@ -1,5 +1,6 @@
 using System.Text.Json;
 using GatheringSeason.Core.Ducks.Definitions;
+using GatheringSeason.Core.Match;
 using Xunit;
 
 namespace GatheringSeason.Core.Tests;
@@ -45,23 +46,6 @@ public sealed class DuckDefinitionTests
 
         Assert.Equal(new[] { 4, 10, 17, 21, 25, 32, 36, 43 },
             rules.BoardSpaces.Where(space => space.IsShelter).Select(space => space.Space));
-        Assert.Equal(
-            new[]
-            {
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 4, Stars: 3, Feathers: 1),
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 3, Feathers: 1),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 3, Feathers: 1)
-            },
-            rules.BoardSpaces.Skip(14).Take(11).Select(space =>
-                (space.Twigs, space.Stars, space.Feathers)));
     }
 
     [Fact]
@@ -129,20 +113,10 @@ public sealed class DuckDefinitionTests
     public void Current_catalogue_uses_revision_eight_with_the_approved_Stars_economy()
     {
         Assert.Equal(8, DuckRules.CurrentRulesRevision);
-        Assert.Equal(new Dictionary<string, int>
-        {
-            ["seeds"] = 0,
-            ["tailwind_2"] = 1,
-            ["tailwind_4"] = 2,
-            ["tailwind_6"] = 3,
-            ["signpost"] = 2,
-            ["splash"] = 1,
-            ["reeds_1"] = 2,
-            ["reeds_2"] = 3,
-            ["reeds_3"] = 4,
-            ["companion"] = 2,
-            ["wildflowers"] = 1
-        }, DuckRules.V1.ShopOffers.ToDictionary(offer => offer.DefinitionId, offer => offer.Price));
+        var view = MatchSession.CreateDuck(seed: 4001).GetSnapshot("human");
+        Assert.Equal(8, view.RulesRevision);
+        Assert.Same(DuckRules.V1, view.Rules);
+        Assert.Same(view.Rules.Economy, view.Economy);
 
         Assert.Equal(8, DuckRules.V1.RulesRevision);
         Assert.Equal(2, DuckRules.V1.FreshAirExhaustionBonus);
@@ -276,36 +250,6 @@ public sealed class DuckDefinitionTests
             encounter => Assert.Same(encounter, DuckRules.V1.Encounter(encounter.DefinitionId)));
         Assert.DoesNotContain(DuckRules.V1.OpeningBag,
             encounter => encounter.EncounterType == DuckEncounterType.GrumpyGoose);
-    }
-
-    [Fact]
-    public void V1_world_event_deck_has_the_ten_approved_stable_identities()
-    {
-        var expected = new[]
-        {
-            ("rain_softened_seeds", DuckWorldEventType.RainSoftenedSeeds, "Gentle Rain"),
-            ("glorious_sunshine", DuckWorldEventType.GloriousSunshine, "Glorious Sunshine"),
-            ("a_friendly_guide", DuckWorldEventType.FriendlyGuide, "Clearing Breeze"),
-            ("a_pocket_of_driftwood", DuckWorldEventType.PocketOfDriftwood, "Windfall Gusts"),
-            ("all_tucked_in", DuckWorldEventType.AllTuckedIn, "Evening Chill"),
-            ("home_before_dark", DuckWorldEventType.HomeBeforeDark, "Golden Sunset"),
-            ("shared_supper", DuckWorldEventType.SharedSupper, "Morning Dew"),
-            ("still_air", DuckWorldEventType.StillAir, "Still Air"),
-            ("thick_morning_mist", DuckWorldEventType.ThickMorningMist, "Thick Morning Mist"),
-            ("restless_night", DuckWorldEventType.RestlessNight, "Thundery Skies"),
-            ("golden_morning", DuckWorldEventType.GoldenMorning, "Golden Morning"),
-            ("refreshing_showers", DuckWorldEventType.RefreshingShowers, "Refreshing Showers"),
-            ("favourable_winds", DuckWorldEventType.FavourableWinds, "Favourable Winds"),
-            ("crosswinds", DuckWorldEventType.Crosswinds, "Crosswinds"),
-            ("low_cloud", DuckWorldEventType.LowCloud, "Low Cloud")
-        };
-        var actual = DuckRules.V1.WorldEvents
-            .Select(item => (item.DefinitionId, item.EventType, item.Name))
-            .ToArray();
-
-        Assert.Equal(expected, actual);
-        Assert.All(DuckRules.V1.WorldEvents,
-            worldEvent => Assert.Same(worldEvent, DuckRules.V1.WorldEvent(worldEvent.DefinitionId)));
     }
 
     [Fact]

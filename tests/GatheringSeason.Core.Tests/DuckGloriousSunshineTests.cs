@@ -53,26 +53,6 @@ public sealed class DuckGloriousSunshineTests
     }
 
     [Fact]
-    public void Fresh_Air_and_Goose_share_the_live_and_planning_transition()
-    {
-        var rules = DuckRules.V1;
-        var goose = rules.Encounter("grumpy_goose");
-        var before = new DuckAdventureState(0, 7, 8, 0, false, false, false, false, 0, 0);
-        var unprotected = DuckAdventureRules.ApplyEncounter(before, goose, DuckWorldEventType.GloriousSunshine, DuckRules.V1);
-        var protectedState = new DuckAdventureState(0, 7, 8, 0, true, false, false, false, 0, 0);
-        var protectedGoose = DuckAdventureRules.ApplyEncounter(
-            protectedState, goose, DuckWorldEventType.GloriousSunshine, DuckRules.V1);
-
-        Assert.Equal(8, unprotected.State.Exhaustion);
-        Assert.Equal(7, unprotected.State.SafeExhaustionMaximum);
-        Assert.True(unprotected.WearsOut);
-        Assert.Equal(8, protectedGoose.State.Exhaustion);
-        Assert.Equal(8, protectedGoose.State.SafeExhaustionMaximum);
-        Assert.False(protectedGoose.WearsOut);
-        Assert.True(protectedGoose.NuisanceSuppressed);
-    }
-
-    [Fact]
     public void Revision_six_Fresh_Air_can_wear_out_before_Day_five()
     {
         var runtime = SunshineRuntime(rulesRevision: 6);
@@ -111,22 +91,28 @@ public sealed class DuckGloriousSunshineTests
         Assert.Equal(7, human.SafeExhaustionMaximum);
     }
 
-    [Fact]
-    public void Revision_six_Goose_lowers_Fresh_Air_to_six_unless_Splash_protects_it()
+    [Theory]
+    [InlineData(5, 8, 7)]
+    [InlineData(8, 7, 6)]
+    public void Goose_uses_the_catalogue_Fresh_Air_limit_unless_Splash_protects_it(
+        int revision, int freshAirLimit, int gooseLimit)
     {
-        var goose = DuckRules.V1.Encounter("grumpy_goose");
+        var rules = DuckRules.ForRulesRevision(revision);
+        var goose = rules.Encounter("grumpy_goose");
         var unprotected = DuckAdventureRules.ApplyEncounter(
-            new DuckAdventureState(0, 6, 7, 0, false, false, false, false, 0, 0),
+            new DuckAdventureState(0, gooseLimit, freshAirLimit, 0, false, false, false, false, 0, 0),
             goose,
-            DuckWorldEventType.GloriousSunshine, DuckRules.V1);
+            DuckWorldEventType.GloriousSunshine, rules);
         var protectedGoose = DuckAdventureRules.ApplyEncounter(
-            new DuckAdventureState(0, 6, 7, 0, true, false, false, false, 0, 0),
+            new DuckAdventureState(0, gooseLimit, freshAirLimit, 0, true, false, false, false, 0, 0),
             goose,
-            DuckWorldEventType.GloriousSunshine, DuckRules.V1);
+            DuckWorldEventType.GloriousSunshine, rules);
 
-        Assert.Equal(6, unprotected.State.SafeExhaustionMaximum);
+        Assert.Equal(gooseLimit, unprotected.State.SafeExhaustionMaximum);
+        Assert.Equal(gooseLimit + 1, unprotected.State.Exhaustion);
+        Assert.Equal(gooseLimit + 1, protectedGoose.State.Exhaustion);
         Assert.True(unprotected.WearsOut);
-        Assert.Equal(7, protectedGoose.State.SafeExhaustionMaximum);
+        Assert.Equal(freshAirLimit, protectedGoose.State.SafeExhaustionMaximum);
         Assert.False(protectedGoose.WearsOut);
         Assert.True(protectedGoose.NuisanceSuppressed);
     }

@@ -69,6 +69,10 @@ public sealed class DuckWeatherReportTests
         var sunshine = DuckDisplayReference.WeatherReport(rules.WeatherReport("glorious_sunshine"), rules);
         Assert.Contains(revision < 6 ? "8 is safe, or 7 after an unprotected Goose" : "7 is safe, or 6 after an unprotected Goose", sunshine);
         Assert.Contains(revision < 4 ? "+8 Sleep" : "+2 Stars", sunshine);
+        Assert.Contains(revision < 6
+                ? "4, or 7 with Fresh Air; protection leaves it at 5, or 8 with Fresh Air"
+                : "4, or 6 with Fresh Air; protection leaves it at 5, or 7 with Fresh Air",
+            DuckDisplayReference.Encounter(rules.Encounter("grumpy_goose"), rules));
         Assert.Contains(revision < 5 ? "every duck finishes safely at a shelter" : "every duck finishes at a shelter",
             DuckDisplayReference.WeatherReport(rules.WeatherReport("all_tucked_in"), rules));
         var thunder = DuckDisplayReference.WeatherReport(rules.WeatherReport("restless_night"), rules);

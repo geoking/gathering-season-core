@@ -216,7 +216,11 @@ public sealed class DuckFiveWeatherTests
             }
             Assert.True(found);
         }
-        Assert.Equal(DuckPhase.Finished, match.GetSnapshot("human").Phase);
+        var finalView = match.GetSnapshot("human");
+        Assert.Equal(DuckPhase.Finished, finalView.Phase);
+        Assert.Equal(2, finalView.FinalResult!.Standings.Count);
+        Assert.NotEmpty(finalView.FinalResult.WinnerIds);
+        Assert.All(finalView.Players, player => Assert.Empty(match.GetLegalActions(player.Id)));
         Assert.Equal(10, seen.Count);
         Assert.Equal(originalDeck.Take(10), seen.OrderBy(pair => pair.Key).Select(pair => pair.Value));
         Assert.Equal(5, originalDeck.Except(seen.Values).Count());

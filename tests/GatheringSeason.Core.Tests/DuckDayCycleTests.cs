@@ -63,18 +63,20 @@ public sealed class DuckDayCycleTests
     }
 
     [Theory]
-    [InlineData(1, 1)]
-    [InlineData(3, 1)]
-    [InlineData(4, 2)]
-    [InlineData(6, 2)]
-    [InlineData(7, 3)]
-    [InlineData(9, 3)]
-    [InlineData(10, 0)]
-    public void Purchase_tiers_cover_the_full_calendar(int day, int expectedLimit)
+    [InlineData(1, 1, 1)]
+    [InlineData(3, 1, 1)]
+    [InlineData(4, 2, 2)]
+    [InlineData(6, 2, 2)]
+    [InlineData(7, 3, 3)]
+    [InlineData(9, 3, 3)]
+    [InlineData(10, 0, 3)]
+    public void Purchase_tiers_cover_the_full_calendar(int day, int expectedLimit, int expectedNestLevel)
     {
         Assert.Equal(expectedLimit, DuckDreamHandler.PurchaseLimitForDay(day));
 
         var runtime = DreamRuntime(day, sleep: 100);
+        Assert.Equal(expectedNestLevel, DuckDreamHandler.NestLevelForDay(day));
+        Assert.Equal(expectedNestLevel, runtime.GetSnapshot("human").NestLevel);
         var player = runtime.Player("human");
         for (var purchase = 0; purchase < expectedLimit; purchase++)
         {

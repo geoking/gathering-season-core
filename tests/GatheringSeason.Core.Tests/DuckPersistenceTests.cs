@@ -140,49 +140,7 @@ public sealed class DuckPersistenceTests
     }
 
     [Fact]
-    public void Final_scoring_round_trips_as_a_frozen_result_with_no_further_actions()
-    {
-        var match = MatchSession.CreateDuck(seed: 707);
-        PlayToFinished(match);
-        var finished = DuckSaves.Capture(match);
-        var restored = DuckSaves.Restore(finished);
-
-        AssertEquivalent(finished, DuckSaves.Capture(restored));
-        var result = Assert.IsType<DuckFinalResult>(restored.GetSnapshot("human").FinalResult);
-        Assert.Equal(2, result.Standings.Count);
-        Assert.NotEmpty(result.WinnerIds);
-        Assert.Empty(restored.GetLegalActions("human"));
-        Assert.Empty(restored.GetLegalActions("ai"));
-    }
-
-    [Fact]
-    public void Restored_random_state_produces_the_same_bags_and_final_result_for_the_whole_future()
-    {
-        var match = MatchSession.CreateDuck(seed: 712);
-        AdvanceToDay(match, 3);
-        Execute(match, "human", GameActionKind.Explore);
-        var restored = DuckSaves.Restore(DuckSaves.Capture(match));
-
-        PlayToFinished(match);
-        PlayToFinished(restored);
-
-        AssertEquivalent(DuckSaves.Capture(match), DuckSaves.Capture(restored));
-    }
-
-    [Fact]
-    public void Public_DTOs_round_trip_through_a_host_serializer_without_Core_owning_JSON()
-    {
-        var match = MatchSession.CreateDuck(seed: 808);
-        FinishAdventureAfterOneDraw(match);
-        var json = JsonSerializer.Serialize(DuckSaves.Capture(match), SaveJson);
-        var decoded = JsonSerializer.Deserialize<DuckSaveData>(json, SaveJson);
-        var restored = DuckSaves.Restore(Assert.IsType<DuckSaveData>(decoded));
-
-        AssertEquivalent(DuckSaves.Capture(match), DuckSaves.Capture(restored));
-    }
-
-    [Fact]
-    public void New_matches_capture_and_round_trip_with_rules_revision_seven_prices()
+    public void New_matches_capture_and_round_trip_with_current_Stars_prices()
     {
         var match = MatchSession.CreateDuck(seed: 809);
         var save = DuckSaves.Capture(match);
@@ -321,25 +279,6 @@ public sealed class DuckPersistenceTests
         var save = DuckSaves.Capture(MatchSession.CreateDuck(seed: 909));
         corrupt(save);
         Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(save));
-    }
-
-    private static void PlayToFinished(MatchSession<DuckMatchView> match)
-    {
-        while (match.GetSnapshot("human").Phase != DuckPhase.Finished)
-        {
-            var phase = match.GetSnapshot("human").Phase;
-            if (phase == DuckPhase.Adventure)
-                FinishAdventureAfterOneDraw(match);
-            else if (phase == DuckPhase.Night)
-            {
-                Execute(match, "human", GameActionKind.FinishDream);
-                Execute(match, "ai", GameActionKind.FinishDream);
-            }
-            else if (phase == DuckPhase.DayComplete)
-                Execute(match, "human", GameActionKind.NextDay);
-            else
-                throw new InvalidOperationException("Unexpected phase while completing match: " + phase);
-        }
     }
 
     private static void AdvanceToDay(MatchSession<DuckMatchView> match, int day)

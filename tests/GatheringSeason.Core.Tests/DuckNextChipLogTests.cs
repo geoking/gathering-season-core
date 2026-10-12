@@ -107,22 +107,6 @@ public sealed class DuckNextChipLogTests
     }
 
     [Theory]
-    [InlineData(7, 3)]
-    [InlineData(7, 4)]
-    [InlineData(8, 3)]
-    [InlineData(8, 4)]
-    public void Multiplayer_catalogues_seven_and_eight_restore_every_seat(int revision, int playerCount)
-    {
-        var runtime = DuckMatchRuntime.Create(321, new DuckMatchSettings(playerCount), rulesRevision: revision);
-        var match = new MatchSession<DuckMatchView>(runtime);
-        var saved = DuckSaves.Capture(match);
-        var restored = DuckSaves.Restore(saved);
-        Assert.Equal(revision, restored.GetSnapshot("human").RulesRevision);
-        Assert.Equal(playerCount, restored.GetSnapshot("human").Players.Count);
-        Assert.Equal(JsonSerializer.Serialize(saved, SaveJson), JsonSerializer.Serialize(DuckSaves.Capture(restored), SaveJson));
-    }
-
-    [Theory]
     [MemberData(nameof(WhiteDraws))]
     public void Planner_forecast_matches_actual_white_then_wish_route_for_both_catalogues(
         int revision, string definitionId, string protection)

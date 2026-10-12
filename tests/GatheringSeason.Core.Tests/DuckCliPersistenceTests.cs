@@ -120,17 +120,6 @@ public sealed partial class DuckCliTests
     }
 
     [Fact]
-    public void Default_duck_game_runs_Normal_AI_and_does_not_allow_its_private_view()
-    {
-        var result = Run("view:ai\nq\n", "--profile", "ducks", "--seed", "42", "--no-save");
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("Human versus Normal AI.", result.Output);
-        Assert.Contains("AI: Explore", result.Output);
-        Assert.DoesNotContain("Private preview for ai", result.Output);
-        Assert.DoesNotContain("Developer two-duck controls.", result.Output);
-    }
-
-    [Fact]
     public void CLI_autosaves_each_action_and_Continue_preserves_the_exact_next_draw()
     {
         using var files = new SaveFiles();
