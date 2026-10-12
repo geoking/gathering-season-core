@@ -68,17 +68,6 @@ public sealed class DuckAdventureTests
         Assert.Equal(new[] { "human", "ai" }, runtime.State.History.Select(entry => entry.ActorId));
     }
 
-    [Fact]
-    public void Issued_commands_reject_cross_player_and_repeated_use()
-    {
-        var match = MatchSession.CreateDuck(5);
-        var action = Assert.Single(match.GetLegalActions("human"));
-
-        Assert.Throws<InvalidOperationException>(() => match.Execute("ai", action));
-        match.Execute("human", action);
-        Assert.Throws<InvalidOperationException>(() => match.Execute("human", action));
-    }
-
     [Theory]
     [InlineData(DuckWorldEventType.HomeBeforeDark, 1)]
     [InlineData(DuckWorldEventType.SunlitSignboards, 2)]

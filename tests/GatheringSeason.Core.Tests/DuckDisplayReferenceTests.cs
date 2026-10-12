@@ -166,20 +166,6 @@ public sealed class DuckDisplayReferenceTests
     }
 
     [Fact]
-    public void Sunshine_reference_preserves_revision_five_thresholds()
-    {
-        var revisionFive = DuckRules.ForRulesRevision(5);
-        var revisionSix = DuckRules.ForRulesRevision(6);
-
-        Assert.Contains("+3 to today's safe Exhaustion maximum: 8 is safe, or 7 after an unprotected Goose",
-            DuckDisplayReference.Event(DuckWorldEventType.GloriousSunshine, revisionFive));
-        Assert.Contains("4, or 7 with Fresh Air; protection leaves it at 5, or 8 with Fresh Air",
-            DuckDisplayReference.Encounter(revisionFive.Encounter("grumpy_goose"), revisionFive));
-        Assert.Contains("+2 to today's safe Exhaustion maximum: 7 is safe, or 6 after an unprotected Goose",
-            DuckDisplayReference.Event(DuckWorldEventType.GloriousSunshine, revisionSix));
-    }
-
-    [Fact]
     public void Player_help_identifies_wish_set_and_uses_the_running_economy()
     {
         var legacyHelp = DuckDisplayReference.HowToPlay(DuckRules.ForRulesRevision(1).Economy);

@@ -19,16 +19,4 @@ public sealed partial class DuckCliTests
         Assert.DoesNotContain("0 Companions", result.Output);
     }
 
-    [Fact]
-    public void Night_ledger_distinguishes_absent_components_from_nonzero_rewards()
-    {
-        var result = Run("", "--seed", "42", "--demo-day");
-
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("Wildflowers: No Stars", result.Output);
-        Assert.Contains("Reeds: No Twigs", result.Output);
-        Assert.DoesNotContain("Wildflowers: +0", result.Output);
-        Assert.DoesNotContain("Reeds: +0", result.Output);
-        Assert.Contains("Star frozen", result.Output);
-    }
 }

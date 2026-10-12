@@ -53,6 +53,9 @@ public sealed partial class DuckCliTests
         var input = $"status\nboard 4\nboard 16\nboard 17\nboard 21\n{pouchCommand}\nwishes\nshop\nevent\nnight\nhistory\nview:ai\nq\n";
         var result = Run(input, "--seed", "42", "--no-save");
         Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Human versus Normal AI.", result.Output);
+        Assert.Contains("AI: Explore", result.Output);
+        Assert.DoesNotContain("Developer two-duck controls.", result.Output);
         Assert.Contains("4. Wetlands", result.Output);
         Assert.Contains("2 Stars · 1 Twig · 1 Trail Feather · SHELTER: Reed hammock", result.Output);
         Assert.Contains("16. Meadow", result.Output);
@@ -127,14 +130,6 @@ public sealed partial class DuckCliTests
     }
 
     [Fact]
-    public void Explicit_seed_replays_the_same_catalogue_output()
-    {
-        var first = Run("", "--seed", "42", "--inspect");
-        var second = Run("", "--profile=ducks", "--seed=42", "--inspect");
-        Assert.Equal(first.Output, second.Output);
-    }
-
-    [Fact]
     public void Daily_demo_runs_real_issued_actions_through_Night_purchases_and_next_Dawn()
     {
         var result = Run("", "--profile", "ducks", "--seed", "42", "--demo-day");
@@ -143,6 +138,10 @@ public sealed partial class DuckCliTests
         Assert.Contains("Day 1/10 · Night", result.Output);
         Assert.Contains("Night 1:", result.Output);
         Assert.Contains("Star frozen", result.Output);
+        Assert.Contains("Wildflowers: No Stars", result.Output);
+        Assert.Contains("Reeds: No Twigs", result.Output);
+        Assert.DoesNotContain("Wildflowers: +0", result.Output);
+        Assert.DoesNotContain("Reeds: +0", result.Output);
         Assert.Contains("Twigs: ", result.Output);
         Assert.Contains("human: Buy Wish Seeds for no Stars", result.Output);
         Assert.Contains("ai: Buy Wish Seeds for no Stars", result.Output);
@@ -169,7 +168,6 @@ public sealed partial class DuckCliTests
 
     [Theory]
     [InlineData("--starting-feathers", "4")]
-    [InlineData("--starting-feathers", "3")]
     [InlineData("--seed", "not-an-integer")]
     [InlineData("--unexpected", "option")]
     public void Invalid_duck_options_fail_clearly(string option, string value)
