@@ -13,7 +13,7 @@ public sealed partial class DuckCliTests
         Assert.Contains("Gathering Season · 10 Days · seed 42", ducks.Output);
         Assert.Contains("Rules revision 8 · Stars", ducks.Output);
 
-        var alias = Run("", "--profile", "ducks", "--seed", "42", "--inspect");
+        var alias = Run("", "--profile=ducks", "--seed=42", "--inspect");
         Assert.Equal(ducks.Output, alias.Output);
 
         var classic = Run("", "--profile", "classic", "--seed", "42");
