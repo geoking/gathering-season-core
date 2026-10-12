@@ -34,3 +34,26 @@ Core behavior and its regression tests separately, then push each checkpoint.
 After the relevant checks pass, merge completed, authorized work to main without
 another review or permission request. Keep pull requests as change records.
 Do not force-push without a request. New rules need approval.
+
+## Necessary testing
+
+Add or update automated tests only for a meaningful behaviour, supported
+contract, failure path or credible regression risk not already covered. Feature
+size alone is not a reason to add tests. Inspect existing coverage first and
+prefer a focused update to an overlapping fixture. Small reversible copy or
+documentation changes may need only the relevant build, CLI check or review.
+
+Test observable outcomes at the lowest useful layer. Avoid trivial
+constructors/getters/constants, source-text and private implementation-shape
+checks, exact prose snapshots and exhaustive combinations unless they protect a
+specific material contract. Retain parameter cases for distinct branches,
+boundaries and supported save catalogues; do not move redundant rows into loops
+merely to lower the reported count. Preserve meaningful rule, information-boundary,
+arithmetic, save-recovery and deterministic-continuation coverage.
+
+For a new test, identify the uncovered risk. For a removed test, identify its
+replacement coverage or the retired contract. Remove superseded assertions and
+unused helpers when behaviour changes. Record appropriate validation rather
+than requiring a test-count or coverage-percentage target. Use focused checks
+while iterating, then the relevant full suite at the completed step; repeat it
+only for new changes, failures or unresolved concerns.
