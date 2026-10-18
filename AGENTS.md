@@ -57,3 +57,20 @@ unused helpers when behaviour changes. Record appropriate validation rather
 than requiring a test-count or coverage-percentage target. Use focused checks
 while iterating, then the relevant full suite at the completed step; repeat it
 only for new changes, failures or unresolved concerns.
+
+## Versioned releases
+
+Publish approved stable Core distributions as GitHub releases with a matching
+Git tag and `GatheringSeason.Core.dll` attached. The initial release is `v1`;
+use `v1.1` and later minor versions for compatible incremental releases, and
+`v2` or later major versions for substantial or incompatible upgrades. Patch
+versions may identify compatible corrections when appropriate. Release versions
+are separate from rules revisions and save/catalogue compatibility identifiers.
+
+When a distributed application adopts a newer Core revision, publish the
+corresponding Core version before that application is released. Reuse an existing
+release when its exact DLL is unchanged. Keep published tags and assets fixed;
+ship corrections under a new version instead of replacing a published DLL.
+Core uses versioned tags/releases, not date-based release branches. Follow
+[the release procedure](README.md#releases), retaining the exact source commit,
+build command and DLL checksum. No release is authorised merely by these rules.
