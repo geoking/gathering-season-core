@@ -2,9 +2,8 @@
 
 Play ten Days as a duck adventuring through wetlands, meadow and wasteland.
 One human faces one to three Normal AI opponents. **Most Twigs wins**; tied totals compare retained
-Stars on the final Night, then a draw. New games use rules revision 8. Saves from
-revisions 1–7 retain their recorded catalogues, including their historical boards
-and exhaustion rewards.
+Stars on the final Night, then a draw. Core v2 supports only rules revision 8.
+Older and unknown revisions cannot be continued; their save files are preserved.
 
 The current powers are named **Wish Set 1**; that set name is distinct from
 technical rules revision 8. The standard rules below describe the current setup.
@@ -55,7 +54,6 @@ arrows show movement, Reeds ×1/×2/×3 show Twig yield, always moving one. See
 ## Shelters, Trail Feathers and catch-up
 
 The 43 spaces have eight shelters at **4, 10, 17, 21, 25, 32, 36 and 43**.
-Revisions 4–5 retain shelters at 16/21/26; revision 6 retains 16/22/25.
 Shelter finishes give Feathers and, when at least one Wildflowers chip was
 placed, +1 Star total, even when exhausted. Positive flock leaders gain +1 Star,
 with tied leaders and exhausted ducks qualifying. Exhaustion ends the adventure,

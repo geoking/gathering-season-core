@@ -3,7 +3,7 @@
 ## Scope
 
 This repository powers the Gathering Season gameplay backend and playable CLI.
-It contains the engine-independent rules, rule catalogues, tests and evaluation
+It contains the engine-independent rules, the current catalogue, tests and evaluation
 tools. It does not include the Gathering Season UI game.
 
 Keep contributions focused on developing, using and testing this repository.
@@ -16,10 +16,14 @@ Run tools/check_public_boundary.py against staged files before every commit.
 
 Core is engine-independent. Clients consume detached observations and issued
 legal actions rather than calculating their own rewards. Preserve information
-boundaries, deterministic random continuation and supported save catalogues.
-Keep the rule guides, executable catalogues and numeric test fixtures in sync.
+boundaries, deterministic random continuation and supported current saves.
+Keep the rule guides, executable catalogue and numeric test fixtures in sync.
 Do not infer rules from names or artwork; ask about unresolved rule decisions.
-Namespaces and assemblies use Gathering Season consistently.
+Namespaces and assemblies use Gathering Season consistently. Core v2 executes
+only rules revision 8; keep format 1, the stable profile identity and numeric
+enum values unchanged. Do not reintroduce historical rule execution or revision
+selection. Unsupported saves must be rejected before state construction and
+failed Continue must preserve source files.
 
 ## Working method
 
@@ -47,7 +51,7 @@ Test observable outcomes at the lowest useful layer. Avoid trivial
 constructors/getters/constants, source-text and private implementation-shape
 checks, exact prose snapshots and exhaustive combinations unless they protect a
 specific material contract. Retain parameter cases for distinct branches,
-boundaries and supported save catalogues; do not move redundant rows into loops
+boundaries and supported current saves; do not move redundant rows into loops
 merely to lower the reported count. Preserve meaningful rule, information-boundary,
 arithmetic, save-recovery and deterministic-continuation coverage.
 

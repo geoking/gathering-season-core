@@ -156,10 +156,11 @@ read but the backup can, Continue explicitly reports that it recovered the
 previous action. If neither is valid, it reports an error instead of silently
 starting over. A write failure stops play to preserve the preceding save.
 
-Revisions 1–7 keep their recorded rules. New games use revision 8 with Stars
-and Wishes and the current meadow catalogue. Existing paid Sleep or Stars and
-random order are preserved. Always use the in-game `shop` display for the
-running match.
+Core v2 supports only revision 8 with Stars and Wishes and the current meadow
+catalogue. Older, missing and future rules revisions fail Continue without
+changing the primary or backup save. There is no revision selection or migration.
+Accepted current saves preserve paid Stars and random order. Use the in-game
+`shop` display for the running match.
 Save files contain private host state, including future pouch order. Do not read
 them while trying to play without foreknowledge.
 
@@ -226,4 +227,3 @@ A pending Fallen Log in revision 8 affects the immediately next drawn chip. A
 Wish halves its total movement, rounded up; a white chip consumes the slowdown
 without slowing. A new unprotected Log arms a fresh slowdown, while a protected
 Log does not. Signpost previews and `status`/`help` reads never consume it.
-Continued revision 1–7 matches keep their original next-Wish behavior.
