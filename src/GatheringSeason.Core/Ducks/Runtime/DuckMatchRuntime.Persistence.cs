@@ -8,7 +8,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
         private DuckMatchRuntime(DuckMatchState state)
         {
             State = state ?? throw new ArgumentNullException(nameof(state));
-            Rules = Definitions.DuckRules.ForRulesRevision(state.RulesRevision);
+            Rules = Definitions.DuckRules.V1;
             _random = ResumableRandomSource.Restore(state.RandomState);
         }
 

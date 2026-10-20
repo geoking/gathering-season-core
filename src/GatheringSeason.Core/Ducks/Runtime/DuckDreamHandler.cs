@@ -30,7 +30,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             {
                 actions.AddRange(rules.ShopOffers.Where(offer => offer.SleepPrice <= player.RemainingSleep && !player.PurchasedShopTypes.Contains(offer.ShopType))
                     .Select(offer => new GameAction("buy:" + offer.DefinitionId, GameActionKind.BuyEncounter,
-                        $"Buy {(rules.Economy.UsesStars ? "Wish " : string.Empty)}{offer.Encounter.Name} for {Reward(offer.Price, rules.Economy)}",
+                        $"Buy Wish {offer.Encounter.Name} for {Reward(offer.Price, rules.Economy)}",
                         cost: offer.Price, definitionId: offer.DefinitionId)));
             }
             actions.Add(new GameAction("finish-dream", GameActionKind.FinishDream, "Finish Dream choices"));
@@ -60,12 +60,12 @@ namespace GatheringSeason.Core.Ducks.Runtime
             player.Inventory.Add(new DuckPhysicalChipState(physicalChipId, offer.EncounterDefinitionId));
             state.NextPhysicalChipId = nextPhysicalChipId;
             state.History.Add(new DuckHistoryState(state.Day, player.Id,
-                $"{player.Name} buys {(rules.Economy.UsesStars ? "Wish " : string.Empty)}{offer.Encounter.Name} for {Reward(offer.Price, rules.Economy)}; it enters tomorrow's pouch."));
+                $"{player.Name} buys Wish {offer.Encounter.Name} for {Reward(offer.Price, rules.Economy)}; it enters tomorrow's pouch."));
         }
 
         private static string Reward(int amount, DuckEconomyDefinition economy) =>
-            amount == 0 && economy.UsesStars
+            amount == 0
                 ? "no Stars"
-                : $"{amount} {(amount == 1 && economy.UsesStars ? "Star" : economy.CurrencyName)}";
+                : $"{amount} {(amount == 1 ? "Star" : economy.CurrencyName)}";
     }
 }

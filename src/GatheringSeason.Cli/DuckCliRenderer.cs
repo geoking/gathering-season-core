@@ -24,9 +24,7 @@ internal static class DuckCliRenderer
                     : $"Starry Night (+{CurrencyAmount(view.Economy.WarmDreamsReward, view.Economy)} tonight)"));
             var activeEffects = new List<string>();
             if (player.SplashProtectionArmed) activeEffects.Add("Splash protects the next placed chip");
-            if (player.LogSlowdownPending) activeEffects.Add(view.RulesRevision >= 8
-                ? "Log affects the next drawn chip: halve a Wish; a white chip consumes it without slowing"
-                : "Log will slow the next Wish");
+            if (player.LogSlowdownPending) activeEffects.Add("Log affects the next drawn chip: halve a Wish; a white chip consumes it without slowing");
             if (player.GuideProtectionAvailable) activeEffects.Add("Clearing Breeze protects the first Obstacle nuisance");
             if (activeEffects.Count > 0) Console.WriteLine("  Active: " + string.Join(" · ", activeEffects));
             if (view.Day > 1)
@@ -105,7 +103,7 @@ internal static class DuckCliRenderer
             Console.WriteLine($"{offer.DefinitionId}: {Price(offer.Price, view.Economy)} · {offer.Encounter.Name} · {status}");
             Console.WriteLine("  " + DuckReferenceText.Encounter(offer.Encounter, view.Rules));
         }
-        if (view.Economy.UsesStars) Console.WriteLine("Choose Wishes with Stars. One free Seed still uses one purchase slot and your Seed choice for tonight.");
+        Console.WriteLine("Choose Wishes with Stars. One free Seed still uses one purchase slot and your Seed choice for tonight.");
         Console.WriteLine("Prices above come from this running match; variants of Tailwind or Reeds share a one-per-type limit.");
         Console.WriteLine();
     }
@@ -255,7 +253,7 @@ internal static class DuckCliRenderer
     private static string CurrencyAmount(int amount, DuckEconomyDefinition economy) =>
         amount == 0
             ? "No " + economy.CurrencyName
-            : $"{amount} {(amount == 1 && economy.UsesStars ? "Star" : economy.CurrencyName)}";
+            : $"{amount} {(amount == 1 ? "Star" : economy.CurrencyName)}";
 
     private static string Price(int amount, DuckEconomyDefinition economy) => amount == 0 ? "Free" : CurrencyAmount(amount, economy);
 

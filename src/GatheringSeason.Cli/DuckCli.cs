@@ -41,7 +41,7 @@ internal static class DuckCli
                 ? $"Gathering Season · 10 Days · continuing saved game · {initial.Settings.PlayerCount} players · Wish Set {initial.Settings.WishSetId}"
                 : $"Gathering Season · 10 Days · seed {seed} · {initial.Settings.PlayerCount} players · Wish Set {initial.Settings.WishSetId} · all ducks start at the nest");
             Console.WriteLine($"Rules revision {initial.RulesRevision} · {initial.Economy.CurrencyName}" +
-                (initial.Economy.UsesStars ? " buy Wishes; Obstacles remain in your pouch." : " · legacy economy preserved for this saved game."));
+                " buy Wishes; Obstacles remain in your pouch.");
             DuckCliRenderer.ShowStatus(initial);
             if (options.InspectOnly)
             {

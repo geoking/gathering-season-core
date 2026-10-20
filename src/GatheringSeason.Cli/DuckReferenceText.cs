@@ -11,9 +11,4 @@ internal static class DuckReferenceText
     internal static string Event(DuckWorldEventType type, DuckRuleDefinitions rules) =>
         DuckDisplayReference.WeatherReport(type, rules);
 
-    internal static string Encounter(DuckEncounterDefinition encounter, DuckEconomyDefinition economy) =>
-        GatheringSeason.Core.Ducks.Reference.DuckDisplayReference.Encounter(encounter, economy);
-
-    internal static string Event(DuckWorldEventType type, DuckEconomyDefinition economy) =>
-        GatheringSeason.Core.Ducks.Reference.DuckDisplayReference.Event(type, economy);
 }

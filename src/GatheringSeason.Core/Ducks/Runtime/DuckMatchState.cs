@@ -12,20 +12,14 @@ namespace GatheringSeason.Core.Ducks.Runtime
     /// </summary>
     internal sealed class DuckMatchState
     {
-        internal DuckMatchState(
-            DuckMatchSettings settings,
-            int rulesRevision = DuckRules.CurrentRulesRevision)
+        internal DuckMatchState(DuckMatchSettings settings)
         {
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
-            DuckRules.ForRulesRevision(rulesRevision);
-            if (settings.PlayerCount > 2 && rulesRevision < 7)
-                throw new ArgumentException("Earlier rules revisions support two players only.", nameof(rulesRevision));
-            RulesRevision = rulesRevision;
         }
 
         public DuckMatchSettings Settings { get; }
         public string ProfileId => DuckRules.V1.ProfileId;
-        public int RulesRevision { get; }
+        public int RulesRevision => DuckRules.CurrentRulesRevision;
         public int Day { get; set; }
         public DuckPhase Phase { get; set; }
         public int CurrentEventIndex { get; set; }

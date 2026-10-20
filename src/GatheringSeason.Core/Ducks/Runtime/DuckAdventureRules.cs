@@ -53,7 +53,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             // Revision 8 spends the previous Log on this draw, even on a white
             // chip. Resolve the newly drawn nuisance afterwards so a fresh Log
             // can arm its own independent next-chip slowdown.
-            var logSlowdownPending = rules.RulesRevision >= 8 ? false : incomingLog;
+            var logSlowdownPending = false;
             var alreadyHalved = false;
             if (worldEvent == DuckWorldEventType.StillAir && type == DuckEncounterType.Tailwind)
             {

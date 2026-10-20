@@ -177,9 +177,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 RefreshSignpostPreview(runtime, player);
             if (placement.EventTwigsAwarded > 0)
                 runtime.AddHistory(player.Id, player.Name + " gained 1 Twig from " + runtime.CurrentEvent.Name + ".");
-            var encounterLabel = runtime.Rules.Economy.UsesStars
-                ? definition.IsWish ? "Wish " : "Obstacle "
-                : string.Empty;
+            var encounterLabel = definition.IsWish ? "Wish " : "Obstacle ";
             runtime.AddHistory(player.Id, player.Name + " placed " + encounterLabel + definition.Name + " at space " + player.Position + ".");
 
             if (placement.WearsOut)
@@ -200,7 +198,6 @@ namespace GatheringSeason.Core.Ducks.Runtime
         {
             var count = runtime.CurrentEvent.EventType switch
             {
-                DuckWorldEventType.SunlitSignboards => 2,
                 DuckWorldEventType.ThickMorningMist => 0,
                 _ => 1
             };
