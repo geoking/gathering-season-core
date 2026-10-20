@@ -25,13 +25,11 @@ public sealed class DuckMultiplayerTests
     }
 
     [Theory]
-    [InlineData(7, 3)]
-    [InlineData(7, 4)]
-    [InlineData(8, 3)]
-    [InlineData(8, 4)]
-    public void Every_seat_completes_ten_days_and_restores_the_final_standings(int revision, int count)
+    [InlineData(3)]
+    [InlineData(4)]
+    public void Every_seat_completes_ten_days_and_restores_the_final_standings(int count)
     {
-        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(721, new DuckMatchSettings(count), revision));
+        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(721, new DuckMatchSettings(count)));
         Assert.Equal(new[] { "human", "ai", "ai-2", "ai-3" }.Take(count),
             match.GetSnapshot("human").Players.Select(player => player.Id));
         Assert.Equal(new[] { "Human", "AI", "AI 2", "AI 3" }.Take(count),
@@ -49,12 +47,10 @@ public sealed class DuckMultiplayerTests
         Assert.All(finished.Players, player => Assert.Empty(restored.GetLegalActions(player.Id)));
     }
 
-    [Theory]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Partial_four_seat_final_beat_restores_without_exposing_or_replaying_commits(int revision)
+    [Fact]
+    public void Partial_four_seat_final_beat_restores_without_exposing_or_replaying_commits()
     {
-        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(722, new DuckMatchSettings(4), revision));
+        var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(722, new DuckMatchSettings(4)));
         PlayToDay(match, 10);
         ChooseSunshineForAll(match);
         Execute(match, "human", GameActionKind.Explore);
@@ -107,19 +103,19 @@ public sealed class DuckMultiplayerTests
     }
 
     [Fact]
-    public void Legacy_setup_defaults_resolve_set_one_without_changing_the_revision_catalogue()
+    public void Missing_additive_setup_fields_default_to_two_players_and_set_one()
     {
-        var runtime = DuckMatchRuntime.Create(724, rulesRevision: 1);
+        var runtime = DuckMatchRuntime.Create(724);
         var save = DuckSaves.Capture(new MatchSession<DuckMatchView>(runtime));
         save.Settings.PlayerCount = 0;
         save.Settings.WishSetId = null;
 
         var restored = DuckSaves.Restore(save);
         var view = restored.GetSnapshot("human");
-        Assert.Equal(1, view.RulesRevision);
+        Assert.Equal(8, view.RulesRevision);
         Assert.Equal(2, view.Settings.PlayerCount);
         Assert.Equal("set-1", view.Settings.WishSetId);
-        Assert.Equal(5, view.ShopOffers.Single(offer => offer.DefinitionId == "tailwind_2").Price);
+        Assert.Equal(1, view.ShopOffers.Single(offer => offer.DefinitionId == "tailwind_2").Price);
         Assert.Equal(2, DuckSaves.Capture(restored).Settings.PlayerCount);
     }
 
@@ -129,7 +125,6 @@ public sealed class DuckMultiplayerTests
         Assert.Throws<ArgumentOutOfRangeException>(() => new DuckMatchSettings(1));
         Assert.Throws<ArgumentOutOfRangeException>(() => new DuckMatchSettings(5));
         Assert.Throws<ArgumentException>(() => new DuckMatchSettings(3, "set-2"));
-        Assert.Throws<ArgumentException>(() => DuckMatchRuntime.Create(1, new DuckMatchSettings(3), rulesRevision: 6));
 
         Invalid(save => save.Settings.PlayerCount = 1);
         Invalid(save => save.Settings.PlayerCount = 5);

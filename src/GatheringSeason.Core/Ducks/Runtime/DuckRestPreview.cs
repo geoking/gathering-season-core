@@ -14,7 +14,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
     /// Read-only reward bounds for resting on the viewer's occupied space during Adventure.
     /// TwigsEarnedToday includes Twigs already banked from Reeds and events; the signed
     /// NestTwigChangeOnRest is the additional change when Night resolves. Stars fields
-    /// use the saved catalogue's Night currency, called Sleep in early revisions.
+    /// use the current Night currency and final one-for-one Dream Twig conversion.
     /// </summary>
     public sealed class DuckRestPreview
     {

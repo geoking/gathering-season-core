@@ -29,6 +29,11 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release -- --seed 4
 - [Board and shop](docs/rules/board-and-shop.md), [encounters](docs/rules/encounters.md) and [Weather reports](docs/rules/world-events.md)
 - [Core save compatibility](docs/architecture/compatibility.md)
 
+Core v2 supports only rules revision 8. It preserves the current format-1 wire
+identity and gameplay while retiring support for revision 1–7 saves and the
+revision-selection API. Unsupported saves are rejected without deletion or
+migration; see [save compatibility](docs/architecture/compatibility.md).
+
 ## Releases
 
 Stable DLLs are available from [GitHub releases](https://github.com/geoking/gathering-season-core/releases).

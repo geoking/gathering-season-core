@@ -13,17 +13,16 @@ namespace GatheringSeason.Core.Tests;
 public sealed class DuckNextChipLogTests
 {
     public static IEnumerable<object[]> WhiteDraws =>
-        from revision in new[] { 7, 8 }
-        from definition in DuckRules.ForRulesRevision(revision).EncounterDefinitions.Where(d => d.IsObstacle)
+        from definition in DuckRules.V1.EncounterDefinitions.Where(d => d.IsObstacle)
         from protection in new[] { "none", "splash", "guide", "both" }
-        select new object[] { revision, definition.DefinitionId, protection };
+        select new object[] { definition.DefinitionId, protection };
 
     [Theory]
     [MemberData(nameof(WhiteDraws))]
-    public void Every_white_draw_spends_the_incoming_log_only_in_revision_eight_and_resolves_its_own_nuisance(
-        int revision, string definitionId, string protection)
+    public void Every_white_draw_spends_the_incoming_log_and_resolves_its_own_nuisance(
+        string definitionId, string protection)
     {
-        var rules = DuckRules.ForRulesRevision(revision);
+        var rules = DuckRules.V1;
         var white = Draw(State(log: true, splash: protection is "splash" or "both",
             guide: protection is "guide" or "both", flock: 2), definitionId, rules);
         var suppressed = protection != "none";
@@ -31,13 +30,13 @@ public sealed class DuckNextChipLogTests
         Assert.Equal(1, white.Movement);
         Assert.Equal(1, white.State.Exhaustion);
         Assert.Equal(suppressed, white.NuisanceSuppressed);
-        Assert.Equal(revision < 8 || newLog, white.State.LogSlowdownPending);
+        Assert.Equal(newLog, white.State.LogSlowdownPending);
         Assert.False(white.State.SplashProtectionArmed);
         Assert.False(white.State.GuideProtectionAvailable);
         Assert.Equal(definitionId == "mud_puddle" && !suppressed ? 1 : 2, white.State.ActiveFlock);
         Assert.Equal(definitionId == "grumpy_goose" && !suppressed ? 4 : 5, white.State.SafeExhaustionMaximum);
         var wish = Draw(white.State, "tailwind_6", rules);
-        Assert.Equal(revision < 8 || newLog ? 3 : 6, wish.Movement);
+        Assert.Equal(newLog ? 3 : 6, wish.Movement);
         Assert.False(wish.State.LogSlowdownPending);
     }
 
@@ -58,12 +57,10 @@ public sealed class DuckNextChipLogTests
         if (definitionId == "splash") Assert.True(placed.State.SplashProtectionArmed);
     }
 
-    [Theory]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Actual_signpost_draw_consumes_log_but_peeks_and_repeated_reads_do_not(int revision)
+    [Fact]
+    public void Actual_signpost_draw_consumes_log_but_peeks_and_repeated_reads_do_not()
     {
-        var runtime = SavedScenario(revision, "fallen_log", "signpost", "tailwind_4", "seeds");
+        var runtime = SavedScenario( "fallen_log", "signpost", "tailwind_4", "seeds");
         var match = new MatchSession<DuckMatchView>(runtime);
         Explore(match);
         Assert.True(runtime.Player("human").LogSlowdownPending);
@@ -85,33 +82,31 @@ public sealed class DuckNextChipLogTests
         Assert.Equal(6, runtime.Player("human").Position);
     }
 
-    [Theory]
-    [InlineData(7, 4)]
-    [InlineData(8, 6)]
-    public void Saved_pending_log_and_saved_consumed_white_continue_with_their_recorded_catalogue(int revision, int finalPosition)
+    [Fact]
+    public void Saved_pending_log_and_saved_consumed_white_continue_with_their_recorded_catalogue()
     {
-        var runtime = SavedScenario(revision, "fallen_log", "mud_puddle", "tailwind_4", "seeds");
+        var runtime = SavedScenario( "fallen_log", "mud_puddle", "tailwind_4", "seeds");
         var match = new MatchSession<DuckMatchView>(runtime);
         Explore(match);
         var pending = DuckSaves.Capture(match);
         var restored = DuckSaves.Restore(JsonSerializer.Deserialize<DuckSaveData>(JsonSerializer.Serialize(pending, SaveJson), SaveJson)!);
-        Assert.Equal(revision, restored.GetSnapshot("human").RulesRevision);
+        Assert.Equal(8, restored.GetSnapshot("human").RulesRevision);
         Assert.True(restored.GetSnapshot("human").Players.Single(p => p.Id == "human").LogSlowdownPending);
         Explore(match); Explore(restored);
-        Assert.Equal(revision == 7, restored.GetSnapshot("human").Players.Single(p => p.Id == "human").LogSlowdownPending);
+        Assert.False(restored.GetSnapshot("human").Players.Single(p => p.Id == "human").LogSlowdownPending);
         restored = DuckSaves.Restore(DuckSaves.Capture(restored));
         Explore(match); Explore(restored);
-        Assert.Equal(finalPosition, restored.GetSnapshot("human").Players.Single(p => p.Id == "human").Position);
+        Assert.Equal(6, restored.GetSnapshot("human").Players.Single(p => p.Id == "human").Position);
         Assert.Equal(JsonSerializer.Serialize(DuckSaves.Capture(match), SaveJson),
             JsonSerializer.Serialize(DuckSaves.Capture(restored), SaveJson));
     }
 
     [Theory]
     [MemberData(nameof(WhiteDraws))]
-    public void Planner_forecast_matches_actual_white_then_wish_route_for_both_catalogues(
-        int revision, string definitionId, string protection)
+    public void Planner_forecast_matches_actual_white_then_wish_route_(
+        string definitionId, string protection)
     {
-        var runtime = Scenario(revision, "seeds", definitionId, "tailwind_4");
+        var runtime = Scenario( "seeds", definitionId, "tailwind_4");
         var match = new MatchSession<DuckMatchView>(runtime);
         Explore(match); // Planning starts only after a legal first placement.
         var human = runtime.Player("human");
@@ -128,31 +123,19 @@ public sealed class DuckNextChipLogTests
         Assert.Equal(Math.Max(stopAfterWhite, stopAfterWish), forecast, precision: 8);
     }
 
-    [Theory]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Reference_text_preserves_the_saved_catalogue_log_protection_contract(int revision)
+    [Fact]
+    public void Reference_text_preserves_the_saved_catalogue_log_protection_contract()
     {
-        var rules = DuckRules.ForRulesRevision(revision);
+        var rules = DuckRules.V1;
         var log = DuckDisplayReference.Encounter(rules.Encounter("fallen_log"), rules);
         var splash = DuckDisplayReference.Encounter(rules.Encounter("splash"), rules);
         var guide = DuckDisplayReference.Event(DuckWorldEventType.FriendlyGuide, rules);
         var stillAir = DuckDisplayReference.Event(DuckWorldEventType.StillAir, rules);
-        if (revision == 8)
-        {
-            Assert.Contains("immediately next drawn chip", log);
-            Assert.Contains("white Obstacle moves normally", log);
-            Assert.Contains("older Log is consumed", splash);
-            Assert.Contains("older Log is consumed", guide);
-            Assert.Contains("white Obstacle consumes", stillAir);
-        }
-        else
-        {
-            Assert.Contains("next Wish's", log);
-            Assert.Contains("cannot clear an older Log", splash);
-            Assert.Contains("older Log slowdown remains", guide);
-            Assert.Contains("next Wish is not a Tailwind", stillAir);
-        }
+        Assert.Contains("immediately next drawn chip", log);
+        Assert.Contains("white Obstacle moves normally", log);
+        Assert.Contains("older Log is consumed", splash);
+        Assert.Contains("older Log is consumed", guide);
+        Assert.Contains("white Obstacle consumes", stillAir);
     }
 
     private static readonly JsonSerializerOptions SaveJson = new() { IncludeFields = true };
@@ -163,9 +146,9 @@ public sealed class DuckNextChipLogTests
         => DuckAdventureRules.ApplyEncounter(state, rules.Encounter(id), weather, rules);
     private static void Explore(MatchSession<DuckMatchView> match)
         => match.Execute("human", match.GetLegalActions("human").Single(a => a.Kind == GameActionKind.Explore));
-    private static DuckMatchRuntime Scenario(int revision, params string[] definitions)
+    private static DuckMatchRuntime Scenario(params string[] definitions)
     {
-        var runtime = DuckMatchRuntime.Create(901, rulesRevision: revision);
+        var runtime = DuckMatchRuntime.Create(901);
         var index = runtime.State.WorldEventDeckDefinitionIds.IndexOf("home_before_dark");
         (runtime.State.WorldEventDeckDefinitionIds[0], runtime.State.WorldEventDeckDefinitionIds[index]) =
             (runtime.State.WorldEventDeckDefinitionIds[index], runtime.State.WorldEventDeckDefinitionIds[0]);
@@ -180,9 +163,9 @@ public sealed class DuckNextChipLogTests
         player.KnownNextPhysicalChipIds.Add(player.BagPhysicalChipIds[0]);
         return runtime;
     }
-    private static DuckMatchRuntime SavedScenario(int revision, params string[] definitions)
+    private static DuckMatchRuntime SavedScenario(params string[] definitions)
     {
-        var runtime = DuckMatchRuntime.Create(901, rulesRevision: revision);
+        var runtime = DuckMatchRuntime.Create(901);
         var index = runtime.State.WorldEventDeckDefinitionIds.IndexOf("home_before_dark");
         (runtime.State.WorldEventDeckDefinitionIds[0], runtime.State.WorldEventDeckDefinitionIds[index]) =
             (runtime.State.WorldEventDeckDefinitionIds[index], runtime.State.WorldEventDeckDefinitionIds[0]);

@@ -29,7 +29,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var eventStars = CollectiveEventAward(rules, worldEvent);
             var eventStatus = CollectiveEventStatus(state, rules, viewer, worldEvent, eventStars);
             var flockStars = FlockAward(rules, viewer);
-            var flockStatus = FlockStatus(state, rules, viewer, flockStars);
+            var flockStatus = FlockStatus(state, viewer, flockStars);
             var lowEvent = eventStatus == DuckRestBonusStatus.Guaranteed ? eventStars : 0;
             var highEvent = eventStatus == DuckRestBonusStatus.Unavailable ? 0 : eventStars;
             var lowFlockLeader = flockStatus == DuckRestBonusStatus.Guaranteed
@@ -78,7 +78,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var worldEvent = CurrentEventType(state, rules);
             var eventSleep = state.Players.All(player => QualifiesForCollectiveEvent(player, rules, worldEvent))
                 ? CollectiveEventAward(rules, worldEvent) : 0;
-            var greatestFlock = GreatestEligibleFlock(state, rules);
+            var greatestFlock = GreatestFlock(state);
             return state.Players.Select(player => new NightAmounts(
                 state.Day, player, rules, worldEvent, eventSleep, greatestFlock)).ToArray();
         }
@@ -99,8 +99,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             DuckPlayerState player, DuckRuleDefinitions rules, DuckWorldEventType worldEvent) =>
             worldEvent switch
             {
-                DuckWorldEventType.AllTuckedIn => rules.BoardSpaceAt(player.Position).IsShelter
-                    && (rules.RulesRevision >= 5 || !player.IsWornOut),
+                DuckWorldEventType.AllTuckedIn => rules.BoardSpaceAt(player.Position).IsShelter,
                 DuckWorldEventType.HomeBeforeDark => !player.IsWornOut,
                 DuckWorldEventType.SharedSupper => player.PlacedHelpfulTypes.Contains(DuckEncounterType.Seeds),
                 _ => false
@@ -123,23 +122,20 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 ? DuckRestBonusStatus.Guaranteed : DuckRestBonusStatus.Possible;
         }
 
-        private static bool EligibleForFlock(DuckPlayerState player, DuckRuleDefinitions rules) =>
-            rules.RulesRevision >= 5 || !player.IsWornOut;
-
-        private static int GreatestEligibleFlock(DuckMatchState state, DuckRuleDefinitions rules) =>
-            state.Players.Where(player => EligibleForFlock(player, rules))
+        private static int GreatestFlock(DuckMatchState state) =>
+            state.Players
                 .Select(player => player.ActiveFlock).DefaultIfEmpty(0).Max();
 
         private static int FlockAward(DuckRuleDefinitions rules, DuckPlayerState viewer) =>
-            EligibleForFlock(viewer, rules) && viewer.ActiveFlock > 0
+            viewer.ActiveFlock > 0
                 ? rules.Economy.CalculateFlockLeaderReward(viewer.ActiveFlock) : 0;
 
         private static DuckRestBonusStatus FlockStatus(
-            DuckMatchState state, DuckRuleDefinitions rules, DuckPlayerState viewer, int award)
+            DuckMatchState state, DuckPlayerState viewer, int award)
         {
             if (award == 0) return DuckRestBonusStatus.Unavailable;
             var others = state.Players.Where(player => player != viewer).ToArray();
-            if (others.Any(player => player.HasFinishedDay && EligibleForFlock(player, rules)
+            if (others.Any(player => player.HasFinishedDay
                     && player.ActiveFlock > viewer.ActiveFlock))
                 return DuckRestBonusStatus.Unavailable;
             return others.All(player => player.HasFinishedDay)
@@ -190,9 +186,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
         }
 
         private static string Reward(int amount, DuckEconomyDefinition economy) =>
-            amount == 0 && economy.UsesStars
+            amount == 0
                 ? "no Stars"
-                : $"{amount} {(amount == 1 && economy.UsesStars ? "Star" : economy.CurrencyName)}";
+                : $"{amount} {(amount == 1 ? "Star" : economy.CurrencyName)}";
 
         private static string Quantity(int amount, string singular) =>
             $"{amount} {(amount == 1 ? singular : singular + "s")}";
@@ -223,7 +219,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 var grossTwigs = space.Twigs + player.DayReedsTwigs + player.DayEventTwigs;
                 _brambles = finalType == DuckEncounterType.Brambles && !final.NuisanceSuppressed ? Math.Min(1, grossTwigs) : 0;
                 _totalTwigs = grossTwigs - _brambles;
-                var shelterRewardsEligible = space.IsShelter && (rules.RulesRevision >= 5 || !player.IsWornOut);
+                var shelterRewardsEligible = space.IsShelter;
                 var economy = rules.Economy;
                 _flowers = shelterRewardsEligible ? economy.CalculateFlowerReward(player.FlowersPlaced) : 0;
                 _finalShelter = shelterRewardsEligible && day == DuckMatchSettings.StandardDays ? economy.FinalShelterReward : 0;
@@ -234,8 +230,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 _sunshineSleep = worldEvent == DuckWorldEventType.GloriousSunshine
                     && player.HasGloriousSunshineChoice
                     && player.GloriousSunshineBenefit == DuckGloriousSunshineBenefit.WarmDreams ? economy.WarmDreamsReward : 0;
-                var flockEligible = rules.RulesRevision >= 5 || !player.IsWornOut;
-                _flock = flockEligible && player.ActiveFlock > 0 && player.ActiveFlock == greatestFlock
+                _flock = player.ActiveFlock > 0 && player.ActiveFlock == greatestFlock
                     ? economy.CalculateFlockLeaderReward(player.ActiveFlock) : 0;
                 var grossSleep = shelterSleep - _restless + _eventSleep + _sunshineSleep + _flock;
                 _pebbles = finalType == DuckEncounterType.LoosePebbles && !final.NuisanceSuppressed

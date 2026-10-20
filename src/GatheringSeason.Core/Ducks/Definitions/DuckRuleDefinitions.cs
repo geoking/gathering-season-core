@@ -14,8 +14,6 @@ namespace GatheringSeason.Core.Ducks.Definitions
         private readonly IReadOnlyDictionary<string, DuckWorldEventDefinition> _worldEventById;
 
         internal DuckRuleDefinitions(
-            int rulesRevision,
-            int freshAirExhaustionBonus,
             DuckEconomyDefinition economy,
             IEnumerable<DuckBoardSpace> boardSpaces,
             IEnumerable<DuckEncounterDefinition> encounterDefinitions,
@@ -23,10 +21,6 @@ namespace GatheringSeason.Core.Ducks.Definitions
             IEnumerable<DuckWorldEventDefinition> worldEvents,
             IEnumerable<DuckEncounterDefinition> openingBag)
         {
-            if (rulesRevision < 1) throw new ArgumentOutOfRangeException(nameof(rulesRevision));
-            if (freshAirExhaustionBonus < 1) throw new ArgumentOutOfRangeException(nameof(freshAirExhaustionBonus));
-            RulesRevision = rulesRevision;
-            FreshAirExhaustionBonus = freshAirExhaustionBonus;
             Economy = economy ?? throw new ArgumentNullException(nameof(economy));
             BoardSpaces = Freeze(boardSpaces, nameof(boardSpaces));
             EncounterDefinitions = Freeze(encounterDefinitions, nameof(encounterDefinitions));
@@ -44,8 +38,8 @@ namespace GatheringSeason.Core.Ducks.Definitions
 
         public const int NestPosition = 0;
         public string ProfileId => "gathering-season.duck.v1";
-        public int RulesRevision { get; }
-        public int FreshAirExhaustionBonus { get; }
+        public int RulesRevision => DuckRules.CurrentRulesRevision;
+        public int FreshAirExhaustionBonus => 2;
         public int FreshAirSafeExhaustionMaximum => 5 + FreshAirExhaustionBonus;
         public int FreshAirGooseSafeExhaustionMaximum => 4 + FreshAirExhaustionBonus;
         public DuckEconomyDefinition Economy { get; }
@@ -89,7 +83,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
             if (ShopOffers.Any(offer => !_encounterById.TryGetValue(offer.EncounterDefinitionId, out var encounter)
                 || !ReferenceEquals(encounter, offer.Encounter)))
                 throw new ArgumentException("Every shop offer must reference a registered encounter definition.");
-            var weatherCount = RulesRevision >= 8 ? 15 : 10;
+            const int weatherCount = 15;
             if (WorldEvents.Count != weatherCount || WorldEvents.Select(item => item.EventType).Distinct().Count() != weatherCount)
                 throw new ArgumentException($"Duck v1 requires exactly {weatherCount} distinct weather reports.");
             if (OpeningBag.Count != 13 || OpeningBag.Any(item => !_encounterById.TryGetValue(item.DefinitionId, out var encounter)

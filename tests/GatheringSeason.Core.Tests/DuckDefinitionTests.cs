@@ -124,69 +124,6 @@ public sealed class DuckDefinitionTests
         Assert.Equal(6, DuckRules.V1.FreshAirGooseSafeExhaustionMaximum);
         Assert.Equal("Stars", DuckRules.V1.Economy.CurrencyName);
         Assert.True(DuckRules.V1.Economy.UsesStars);
-        Assert.Same(DuckRules.V1, DuckRules.ForRulesRevision(8));
-        Assert.Equal(7, DuckRules.ForRulesRevision(7).RulesRevision);
-        Assert.Equal(6, DuckRules.ForRulesRevision(6).RulesRevision);
-        Assert.Equal(5, DuckRules.ForRulesRevision(5).RulesRevision);
-        Assert.Equal(4, DuckRules.ForRulesRevision(4).RulesRevision);
-    }
-
-    [Fact]
-    public void Revision_six_preserves_its_exact_Fresh_Air_and_meadow_board()
-    {
-        var rules = DuckRules.ForRulesRevision(6);
-
-        Assert.Equal(2, rules.FreshAirExhaustionBonus);
-        Assert.Equal(7, rules.FreshAirSafeExhaustionMaximum);
-        Assert.Equal(new[] { 4, 10, 16, 22, 25, 32, 36, 43 },
-            rules.BoardSpaces.Where(space => space.IsShelter).Select(space => space.Space));
-        Assert.Equal(
-            new[]
-            {
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 4, Stars: 3, Feathers: 1),
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 4, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 3, Feathers: 1),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 2, Feathers: 0),
-                (Twigs: 5, Stars: 3, Feathers: 1)
-            },
-            rules.BoardSpaces.Skip(14).Take(11).Select(space =>
-                (space.Twigs, space.Stars, space.Feathers)));
-        Assert.Equal(5, rules.BoardSpaceAt(28).Twigs);
-    }
-
-    [Fact]
-    public void Revision_five_preserves_its_Fresh_Air_and_meadow_board()
-    {
-        var rules = DuckRules.ForRulesRevision(5);
-
-        Assert.Equal(3, rules.FreshAirExhaustionBonus);
-        Assert.Equal(8, rules.FreshAirSafeExhaustionMaximum);
-        Assert.Equal(new[] { 4, 10, 16, 21, 26, 32, 36, 43 },
-            rules.BoardSpaces.Where(space => space.IsShelter).Select(space => space.Space));
-        Assert.Equal(6, rules.BoardSpaceAt(28).Twigs);
-    }
-
-    [Fact]
-    public void Revision_three_preserves_the_exact_legacy_Sleep_board_prices_and_economy()
-    {
-        var rules = DuckRules.ForRulesRevision(3);
-
-        Assert.Equal(new[] { 3, 3, 5, 6, 5, 6, 6, 6, 7, 10, 8, 8, 9, 9 },
-            rules.BoardSpaces.Take(14).Select(space => space.Reward));
-        Assert.Equal(new[] { 3, 4, 8, 12, 7, 4, 8, 14, 20, 7, 5 },
-            rules.ShopOffers.Select(offer => offer.Price));
-        Assert.Equal("Sleep", rules.Economy.CurrencyName);
-        Assert.False(rules.Economy.UsesStars);
-        Assert.Equal(8, rules.Economy.WarmDreamsReward);
-        Assert.Equal(4, rules.Economy.FinalRewardPerDreamTwig);
-        Assert.Equal(4, rules.Economy.CalculateFlowerReward(2));
-        Assert.Equal(2, rules.Economy.CalculateFlockLeaderReward(3));
     }
 
     [Fact]
@@ -290,8 +227,6 @@ public sealed class DuckDefinitionTests
             new DuckBoardSpace(0, DuckBiome.Wetlands, 0, 0, 0, null));
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new DuckShopOffer("seeds", DuckRules.V1.Encounter("seeds"), -1));
-        Assert.Throws<ArgumentOutOfRangeException>(() => DuckRules.ForRulesRevision(0));
-        Assert.Throws<ArgumentOutOfRangeException>(() => DuckRules.ForRulesRevision(9));
     }
 
     private static JsonDocument ReadReferenceJson(string fileName)

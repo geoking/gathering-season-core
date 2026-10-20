@@ -112,24 +112,6 @@ public sealed partial class DuckCliTests
     }
 
     [Fact]
-    public void Interactive_shop_for_a_revision_one_save_uses_its_live_prices()
-    {
-        using var files = new SaveFiles();
-        var fixture = Path.Combine(RepositoryRoot(), "tests", "GatheringSeason.Core.Tests", "Fixtures", "Duck", "seed20-day10-revision1.json");
-        File.Copy(fixture, files.Path);
-        var result = Run("shop\nboard 43\ntokens\nq\n", "--continue", "--two-player", "--save", files.Path);
-        Assert.Equal(0, result.ExitCode);
-        Assert.Contains("Dream shop", result.Output);
-        Assert.Contains("Rules revision 1 · Sleep", result.Output);
-        Assert.DoesNotContain("Stars", result.Output);
-        Assert.Contains("tailwind_2: 5 Sleep", result.Output);
-        Assert.Contains("reeds_3: 16 Sleep", result.Output);
-        Assert.DoesNotContain("reeds_3: 20 Sleep", result.Output);
-        Assert.Contains("21 Sleep · 9 Twigs", result.Output);
-        Assert.Contains("+2 Sleep at Night for each placed Wildflowers", result.Output);
-    }
-
-    [Fact]
     public void Daily_demo_runs_real_issued_actions_through_Night_purchases_and_next_Dawn()
     {
         var result = Run("", "--profile", "ducks", "--seed", "42", "--demo-day");

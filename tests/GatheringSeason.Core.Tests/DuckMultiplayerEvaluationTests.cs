@@ -181,7 +181,7 @@ public sealed class DuckMultiplayerEvaluationTests
         string style, int position, int exhaustion, string knownDefinition,
         GameActionKind thresholdAction, GameActionKind normalAction)
     {
-        var runtime = DuckMatchRuntime.Create(211, rulesRevision: 8);
+        var runtime = DuckMatchRuntime.Create(211);
         runtime.State.WorldEventDeckDefinitionIds[runtime.State.CurrentEventIndex] = "home_before_dark";
         var player = runtime.Player("human");
         player.Inventory.Clear();

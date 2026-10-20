@@ -10,7 +10,7 @@ namespace GatheringSeason.Core.Tests;
 
 public sealed class DuckCalendarTests
 {
-    private static readonly DuckRuleDefinitions Rules = DuckRules.ForRulesRevision(3);
+    private static readonly DuckRuleDefinitions Rules = DuckRules.V1;
 
     [Fact]
     public void Deterministic_policy_completes_all_ten_Days_and_reveals_each_event_once()
@@ -49,7 +49,7 @@ public sealed class DuckCalendarTests
     [Fact]
     public void Day_five_adds_one_Goose_per_duck_once_and_keeps_it_in_every_later_bag()
     {
-        var runtime = DuckMatchRuntime.Create(seed: 55, rulesRevision: 3);
+        var runtime = DuckMatchRuntime.Create(seed: 55);
         CompleteDreamForCalendar(runtime, day: 4);
         var nextPhysicalId = runtime.State.NextPhysicalChipId;
 
@@ -78,7 +78,7 @@ public sealed class DuckCalendarTests
     [Fact]
     public void Calendar_preserves_inventory_and_moves_through_all_nest_purchase_tiers()
     {
-        var runtime = DuckMatchRuntime.Create(seed: 87, rulesRevision: 3);
+        var runtime = DuckMatchRuntime.Create(seed: 87);
         var inventoryCounts = runtime.State.Players.ToDictionary(player => player.Id, player => player.Inventory.Count);
 
         for (var completedDay = 1; completedDay < DuckMatchSettings.StandardDays; completedDay++)
@@ -128,7 +128,7 @@ public sealed class DuckCalendarTests
     public void Final_Sleep_tiebreak_includes_worn_ducks_without_Most_Rested_filter()
     {
         var safe = FinalPlayer("safe", position: 1);
-        var worn = FinalPlayer("worn", position: 42, worn: true);
+        var worn = FinalPlayer("worn", position: 32, worn: true);
         var state = FinalState(safe, worn);
         SetBanksForEqualFinalTwigs(state, target: 50);
 
@@ -169,7 +169,7 @@ public sealed class DuckCalendarTests
     [Fact]
     public void Final_Night_banks_Dream_Twigs_once_and_snapshot_exposes_the_same_result()
     {
-        var runtime = DuckMatchRuntime.Create(seed: 123, rulesRevision: 3);
+        var runtime = DuckMatchRuntime.Create(seed: 123);
         runtime.State.Day = 10;
         runtime.State.CurrentEventIndex = 0;
         runtime.State.WorldEventDeckDefinitionIds[0] = "rain_softened_seeds";
@@ -267,7 +267,7 @@ public sealed class DuckCalendarTests
 
     private static DuckMatchState FinalState(params DuckPlayerState[] players)
     {
-        var state = new DuckMatchState(DuckMatchSettings.Standard, rulesRevision: 3)
+        var state = new DuckMatchState(DuckMatchSettings.Standard)
         {
             Day = 10,
             Phase = DuckPhase.Adventure,

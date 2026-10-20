@@ -4,8 +4,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
     public enum DuckWorldEventType
     {
         RainSoftenedSeeds,
-        SunlitSignboards,
-        FriendlyGuide,
+        FriendlyGuide = 2,
         PocketOfDriftwood,
         AllTuckedIn,
         HomeBeforeDark,

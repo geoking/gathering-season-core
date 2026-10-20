@@ -158,89 +158,14 @@ public sealed class DuckPersistenceTests
     }
 
     [Fact]
-    public void Revision_six_save_restores_its_exact_meadow_catalogue()
-    {
-        var runtime = DuckMatchRuntime.Create(seed: 811, rulesRevision: 6);
-        var save = DuckSaves.Capture(new MatchSession<DuckMatchView>(runtime));
-
-        var restored = DuckSaves.Restore(save);
-        var view = restored.GetSnapshot("human");
-
-        Assert.Equal(6, view.RulesRevision);
-        Assert.Equal(new[] { 4, 10, 16, 22, 25, 32, 36, 43 },
-            view.Rules.BoardSpaces.Where(space => space.IsShelter).Select(space => space.Space));
-        Assert.True(view.Rules.BoardSpaceAt(16).IsShelter);
-        Assert.False(view.Rules.BoardSpaceAt(17).IsShelter);
-        Assert.False(view.Rules.BoardSpaceAt(21).IsShelter);
-        Assert.True(view.Rules.BoardSpaceAt(22).IsShelter);
-        Assert.Equal(save.RulesVersion, DuckSaves.Capture(restored).RulesVersion);
-    }
-
-    [Fact]
-    public void Legacy_mid_Dream_restore_keeps_paid_Sleep_purchases_and_revision_one_prices()
-    {
-        var atNight = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(seed: 810, rulesRevision: 7));
-        AdvanceToDay(atNight, 4);
-        FinishAdventureAfterOneDraw(atNight);
-        var legacy = DuckSaves.Capture(atNight);
-        legacy.RulesVersion = 1;
-        legacy.WorldEventDeckDefinitionIds[legacy.WorldEventDeckDefinitionIds.IndexOf("glorious_sunshine")] =
-            "sunlit_signboards";
-        foreach (var player in legacy.Players)
-        {
-            player.HasGloriousSunshineChoice = false;
-            if (player.LastNightOutcome != null) player.LastNightOutcome.GloriousSunshineSleep = 0;
-        }
-        var human = legacy.Players.Single(player => player.Id == "human");
-        human.FrozenSleep = 20;
-        human.RemainingSleep = 20;
-        human.LastNightOutcome!.PrintedSleep += 20 - human.LastNightOutcome.SleepBeforeWear;
-        human.LastNightOutcome.SleepBeforeWear = 20;
-        human.LastNightOutcome!.FrozenSleep = 20;
-
-        var restored = DuckSaves.Restore(legacy);
-        var legacyPrices = restored.GetSnapshot("human").ShopOffers
-            .ToDictionary(offer => offer.DefinitionId, offer => offer.SleepPrice);
-        Assert.Equal(new Dictionary<string, int>
-        {
-            ["seeds"] = 3,
-            ["tailwind_2"] = 5,
-            ["tailwind_4"] = 10,
-            ["tailwind_6"] = 15,
-            ["signpost"] = 7,
-            ["splash"] = 4,
-            ["reeds_1"] = 6,
-            ["reeds_2"] = 11,
-            ["reeds_3"] = 16,
-            ["companion"] = 7,
-            ["wildflowers"] = 5
-        }, legacyPrices);
-
-        var buy = Action(restored, "human", GameActionKind.BuyEncounter, "tailwind_2");
-        Assert.Equal(5, buy.Cost);
-        restored.Execute("human", buy);
-        var midDream = DuckSaves.Capture(restored);
-        Assert.Equal(1, midDream.RulesVersion);
-        Assert.Equal(15, midDream.Players.Single(player => player.Id == "human").RemainingSleep);
-        Assert.Equal(new[] { "tailwind_2" },
-            midDream.Players.Single(player => player.Id == "human").PurchasedEncounterDefinitionIds);
-
-        var restoredAgain = DuckSaves.Restore(midDream);
-        var recaptured = DuckSaves.Capture(restoredAgain);
-        AssertEquivalent(midDream, recaptured);
-        Assert.Equal(1, recaptured.RulesVersion);
-        Assert.Equal(15, recaptured.Players.Single(player => player.Id == "human").RemainingSleep);
-        Assert.Equal(6, restoredAgain.GetLegalActions("human")
-            .Single(action => action.DefinitionId == "reeds_1").Cost);
-    }
-
-    [Fact]
     public void Restore_rejects_missing_versions_and_inconsistent_authoritative_data()
     {
         AssertInvalid(save => save.FormatVersion = 0);
         AssertInvalid(save => save.ProfileId = string.Empty);
         AssertInvalid(save => save.ProfileId = "unsupported.duck.v1");
         AssertInvalid(save => save.RulesVersion = 0);
+        AssertInvalid(save => save.RulesVersion = 1);
+        AssertInvalid(save => save.RulesVersion = 7);
         AssertInvalid(save => save.RulesVersion = 9);
         AssertInvalid(save => save.Settings = null!);
         AssertInvalid(save => save.Random.Algorithm = string.Empty);
@@ -248,6 +173,8 @@ public sealed class DuckPersistenceTests
         AssertInvalid(save => save.WorldEventDeckDefinitionIds[0] = save.WorldEventDeckDefinitionIds[1]);
         AssertInvalid(save => save.Players[0].BagPhysicalChipIds[0] = int.MaxValue);
         AssertInvalid(save => save.Players[0].KnownNextPhysicalChipIds.Add(save.Players[0].BagPhysicalChipIds[1]));
+        AssertInvalid(save => save.Players[0].KnownNextPhysicalChipIds.AddRange(
+            save.Players[0].BagPhysicalChipIds.Take(2)));
         AssertInvalid(save => save.DayFiveGooseAdded = true);
         AssertInvalid(save => save.Players.Reverse());
         AssertInvalid(save =>

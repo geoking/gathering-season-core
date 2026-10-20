@@ -1,9 +1,8 @@
 # Gathering Season Weather Reports
 
-New matches use rules revision 8. This is the complete fifteen-card BASE weather deck;
-revisions 1–7 retain their saved rules. The weather names are display text;
-[compatibility](../architecture/compatibility.md) describes retained identities
-and legacy effects.
+Rules revision 8 is the only supported rules catalogue. This is its complete
+fifteen-card BASE weather deck. Weather names are display text;
+[compatibility](../architecture/compatibility.md) describes the stable identities.
 
 ## Shared deck and timing
 

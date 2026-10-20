@@ -11,11 +11,11 @@ public sealed class DuckStarsEconomyTests
 {
 
     [Fact]
-    public void Revision_four_combines_each_approved_Star_bonus_once()
+    public void combines_each_approved_Star_bonus_once()
     {
         var runtime = Runtime(day: 10, eventId: "glorious_sunshine");
-        Complete(runtime, "human", position: 16, flowers: 3, flock: 2, DuckGloriousSunshineBenefit.WarmDreams);
-        Complete(runtime, "ai", position: 16, flowers: 1, flock: 2, DuckGloriousSunshineBenefit.WarmDreams);
+        Complete(runtime, "human", position: 17, flowers: 3, flock: 2, DuckGloriousSunshineBenefit.WarmDreams);
+        Complete(runtime, "ai", position: 17, flowers: 1, flock: 2, DuckGloriousSunshineBenefit.WarmDreams);
 
         var outcomes = DuckNightResolver.Calculate(runtime.State, runtime.Rules);
         var human = outcomes["human"];
@@ -35,7 +35,7 @@ public sealed class DuckStarsEconomyTests
     [InlineData("all_tucked_in", 4, 10)]
     [InlineData("home_before_dark", 1, 5)]
     [InlineData("shared_supper", 1, 5)]
-    public void Revision_four_collective_events_award_exactly_one_Star_to_each_eligible_duck(
+    public void collective_events_award_exactly_one_Star_to_each_eligible_duck(
         string eventId,
         int humanPosition,
         int aiPosition)
@@ -49,79 +49,6 @@ public sealed class DuckStarsEconomyTests
         Assert.All(outcomes.Values, outcome => Assert.Equal(1, outcome.CollectiveEventReward));
         Assert.Equal(runtime.Rules.BoardSpaceAt(humanPosition).Reward + 1, outcomes["human"].FrozenReward);
         Assert.Equal(runtime.Rules.BoardSpaceAt(aiPosition).Reward + 1, outcomes["ai"].FrozenReward);
-    }
-
-    [Fact]
-    public void Revision_four_worn_duck_takes_Pebbles_before_halving_and_loses_safe_only_bonuses()
-    {
-        var runtime = Runtime(day: 10, eventId: "glorious_sunshine");
-        Complete(runtime, "human", position: 16, flowers: 3, flock: 4,
-            DuckGloriousSunshineBenefit.WarmDreams, finalDefinitionId: "loose_pebbles", wornOut: true);
-        Complete(runtime, "ai", position: 1, benefit: DuckGloriousSunshineBenefit.FreshAir);
-
-        var outcome = DuckNightResolver.Calculate(runtime.State, runtime.Rules)["human"];
-
-        Assert.Equal(3, outcome.PrintedReward);
-        Assert.Equal(0, outcome.FlowerReward);
-        Assert.Equal(0, outcome.FinalShelterReward);
-        Assert.Equal(0, outcome.FlockReward);
-        Assert.Equal(2, outcome.GloriousSunshineReward);
-        Assert.Equal(1, outcome.PebblesPenalty);
-        Assert.Equal(4, outcome.RewardBeforeWear);
-        Assert.Equal(2, outcome.FrozenReward);
-        Assert.False(outcome.IsMostRested);
-        Assert.Equal(2, outcome.DreamTwigs);
-    }
-
-    [Fact]
-    public void Revision_four_Restless_Night_subtracts_one_only_from_a_safe_shelter()
-    {
-        var runtime = Runtime(day: 1, eventId: "restless_night");
-        Complete(runtime, "human", position: 16, flowers: 2);
-        Complete(runtime, "ai", position: 16, flowers: 2, wornOut: true);
-
-        var outcomes = DuckNightResolver.Calculate(runtime.State, runtime.Rules);
-        var safe = outcomes["human"];
-        var worn = outcomes["ai"];
-
-        Assert.Equal(3, safe.PrintedReward);
-        Assert.Equal(1, safe.FlowerReward);
-        Assert.Equal(1, safe.RestlessNightPenalty);
-        Assert.Equal(3, safe.FrozenReward);
-        Assert.Equal(3, worn.PrintedReward);
-        Assert.Equal(0, worn.FlowerReward);
-        Assert.Equal(0, worn.RestlessNightPenalty);
-        Assert.Equal(1, worn.FrozenReward);
-    }
-
-    [Theory]
-    [InlineData(1, 1)]
-    [InlineData(4, 2)]
-    [InlineData(15, 2)]
-    [InlineData(16, 3)]
-    [InlineData(29, 1)]
-    [InlineData(32, 4)]
-    [InlineData(43, 5)]
-    public void Revision_four_board_uses_each_approved_Star_reward(int position, int expectedStars)
-    {
-        Assert.Equal(expectedStars, DuckRules.ForRulesRevision(4).BoardSpaceAt(position).Reward);
-    }
-
-    [Theory]
-    [InlineData("seeds", 0)]
-    [InlineData("tailwind_2", 1)]
-    [InlineData("tailwind_4", 2)]
-    [InlineData("tailwind_6", 3)]
-    [InlineData("signpost", 2)]
-    [InlineData("splash", 1)]
-    [InlineData("reeds_1", 2)]
-    [InlineData("reeds_2", 3)]
-    [InlineData("reeds_3", 4)]
-    [InlineData("companion", 2)]
-    [InlineData("wildflowers", 1)]
-    public void Revision_four_shop_uses_each_approved_Star_price(string definitionId, int expectedStars)
-    {
-        Assert.Equal(expectedStars, DuckRules.ForRulesRevision(4).ShopOffer(definitionId).Price);
     }
 
     [Fact]
@@ -155,7 +82,7 @@ public sealed class DuckStarsEconomyTests
     }
 
     [Fact]
-    public void Revision_four_save_round_trip_keeps_Stars_rules_and_zero_price_purchase()
+    public void save_round_trip_keeps_Stars_rules_and_zero_price_purchase()
     {
         var runtime = ResolvedDayOneSunshine();
         var match = new MatchSession<DuckMatchView>(runtime);
@@ -166,8 +93,8 @@ public sealed class DuckStarsEconomyTests
         var restored = DuckSaves.Restore(save);
         var view = restored.GetSnapshot("human");
 
-        Assert.Equal(4, save.RulesVersion);
-        Assert.Equal(4, view.RulesRevision);
+        Assert.Equal(8, save.RulesVersion);
+        Assert.Equal(8, view.RulesRevision);
         Assert.True(view.Economy.UsesStars);
         Assert.Equal(view.Players.Single(player => player.Id == "human").FrozenReward,
             view.Players.Single(player => player.Id == "human").RemainingReward);
@@ -176,10 +103,10 @@ public sealed class DuckStarsEconomyTests
     }
 
     [Fact]
-    public void Revision_five_resolved_worn_shelter_rewards_round_trip_without_reinterpretation()
+    public void resolved_worn_shelter_rewards_round_trip_without_reinterpretation()
     {
-        var runtime = Runtime(day: 10, eventId: "restless_night", rulesRevision: 5);
-        Complete(runtime, "human", position: 16, flowers: 2, flock: 2, wornOut: true);
+        var runtime = Runtime(day: 10, eventId: "restless_night");
+        Complete(runtime, "human", position: 17, flowers: 2, flock: 2, wornOut: true);
         Complete(runtime, "ai", position: 5, flock: 1);
         DuckNightResolver.Resolve(runtime.State, runtime.Rules);
         var match = new MatchSession<DuckMatchView>(runtime);
@@ -189,7 +116,7 @@ public sealed class DuckStarsEconomyTests
         var player = restored.Players.Single(candidate => candidate.Id == "human");
         var outcome = Assert.IsType<DuckNightOutcome>(player.LastNightOutcome);
 
-        Assert.Equal(5, save.RulesVersion);
+        Assert.Equal(8, save.RulesVersion);
         Assert.Equal(1, player.PermanentFeatherTrail);
         Assert.Equal(1, outcome.FlowerReward);
         Assert.Equal(1, outcome.FinalShelterReward);
@@ -200,7 +127,7 @@ public sealed class DuckStarsEconomyTests
     }
 
     [Fact]
-    public void Save_validation_uses_revision_four_bonus_conversion_and_purchase_parameters()
+    public void Save_validation_uses_current_bonus_conversion_and_purchase_parameters()
     {
         var runtime = ResolvedDayOneSunshine();
         var match = new MatchSession<DuckMatchView>(runtime);
@@ -237,26 +164,6 @@ public sealed class DuckStarsEconomyTests
         Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(wrongConversion));
     }
 
-    [Fact]
-    public void Normal_uses_the_observed_revision_for_prices_and_currency()
-    {
-        var policy = new DuckNormalPolicy();
-        var stars = DreamRuntime(rulesRevision: 4, reward: 0);
-        var sleep = DreamRuntime(rulesRevision: 3, reward: 3);
-
-        var starsMatch = new MatchSession<DuckMatchView>(stars);
-        var sleepMatch = new MatchSession<DuckMatchView>(sleep);
-        var starsChoice = policy.Choose(starsMatch.GetSnapshot("human"), starsMatch.GetLegalActions("human"));
-        var sleepChoice = policy.Choose(sleepMatch.GetSnapshot("human"), sleepMatch.GetLegalActions("human"));
-
-        Assert.Equal("seeds", starsChoice.DefinitionId);
-        Assert.Equal(0, starsChoice.Cost);
-        Assert.Contains("Stars", policy.Evaluate(starsMatch.GetSnapshot("human"), starsMatch.GetLegalActions("human")).Reason);
-        Assert.Equal("seeds", sleepChoice.DefinitionId);
-        Assert.Equal(3, sleepChoice.Cost);
-        Assert.Contains("Sleep", policy.Evaluate(sleepMatch.GetSnapshot("human"), sleepMatch.GetLegalActions("human")).Reason);
-    }
-
     private static DuckMatchRuntime ResolvedDayOneSunshine()
     {
         var runtime = Runtime(day: 1, eventId: "glorious_sunshine");
@@ -266,23 +173,9 @@ public sealed class DuckStarsEconomyTests
         return runtime;
     }
 
-    private static DuckMatchRuntime DreamRuntime(int rulesRevision, int reward)
+    private static DuckMatchRuntime Runtime(int day, string eventId)
     {
-        var runtime = DuckMatchRuntime.Create(seed: 4003 + rulesRevision, rulesRevision: rulesRevision);
-        runtime.State.Phase = DuckPhase.Night;
-        foreach (var player in runtime.State.Players)
-        {
-            player.FrozenSleep = reward;
-            player.RemainingSleep = reward;
-            player.IsSleepFrozen = true;
-            player.HasFinishedDream = false;
-        }
-        return runtime;
-    }
-
-    private static DuckMatchRuntime Runtime(int day, string eventId, int rulesRevision = 4)
-    {
-        var runtime = DuckMatchRuntime.Create(seed: 4000 + day, rulesRevision: rulesRevision);
+        var runtime = DuckMatchRuntime.Create(seed: 4000 + day);
         runtime.State.Day = day;
         runtime.State.CurrentEventIndex = day - 1;
         runtime.State.FinalDayDecisionBeat = day == 10 ? 1 : 0;

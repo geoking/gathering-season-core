@@ -13,9 +13,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
     {
         private readonly ResumableRandomSource _random;
 
-        private DuckMatchRuntime(int seed, DuckMatchSettings settings, int rulesRevision)
+        private DuckMatchRuntime(int seed, DuckMatchSettings settings)
         {
-            State = new DuckMatchState(settings, rulesRevision)
+            State = new DuckMatchState(settings)
             {
                 Day = 1,
                 Phase = DuckPhase.Adventure,
@@ -23,7 +23,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 FinalDayDecisionBeat = 0,
                 NextPhysicalChipId = 1
             };
-            Rules = DuckRules.ForRulesRevision(State.RulesRevision);
+            Rules = DuckRules.V1;
             _random = new ResumableRandomSource(seed);
 
             State.WorldEventDeckDefinitionIds.AddRange(Rules.WorldEvents.Select(item => item.DefinitionId));
@@ -37,10 +37,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         internal static DuckMatchRuntime Create(
             int seed,
-            DuckMatchSettings? settings = null,
-            int rulesRevision = DuckRules.CurrentRulesRevision)
+            DuckMatchSettings? settings = null)
         {
-            return new DuckMatchRuntime(seed, settings ?? DuckMatchSettings.Standard, rulesRevision);
+            return new DuckMatchRuntime(seed, settings ?? DuckMatchSettings.Standard);
         }
 
         public string ActionWindow => $"duck:{State.Day}:{State.Phase}:{State.FinalDayDecisionBeat}";

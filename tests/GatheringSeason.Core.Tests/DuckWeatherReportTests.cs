@@ -10,22 +10,14 @@ namespace GatheringSeason.Core.Tests;
 
 public sealed class DuckWeatherReportTests
 {
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    [InlineData(6)]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Weather_names_preserve_each_catalogues_stable_identities_and_order(int revision)
+    [Fact]
+    public void Weather_names_preserve_each_catalogues_stable_identities_and_order()
     {
-        var rules = DuckRules.ForRulesRevision(revision);
-        var retained = new[]
+        var rules = DuckRules.V1;
+        var expected = new[]
         {
             ("rain_softened_seeds", 0, "Gentle Rain"),
-            revision < 3 ? ("sunlit_signboards", 1, "Clear Sunlight") : ("glorious_sunshine", 10, "Glorious Sunshine"),
+            ("glorious_sunshine", 10, "Glorious Sunshine"),
             ("a_friendly_guide", 2, "Clearing Breeze"),
             ("a_pocket_of_driftwood", 3, "Windfall Gusts"),
             ("all_tucked_in", 4, "Evening Chill"),
@@ -33,20 +25,16 @@ public sealed class DuckWeatherReportTests
             ("shared_supper", 6, "Morning Dew"),
             ("still_air", 7, "Still Air"),
             ("thick_morning_mist", 8, "Thick Morning Mist"),
-            ("restless_night", 9, "Thundery Skies")
-        };
-
-        var expected = revision < 8 ? retained : retained.Concat(new[]
-        {
+            ("restless_night", 9, "Thundery Skies"),
             ("golden_morning", 11, "Golden Morning"),
             ("refreshing_showers", 12, "Refreshing Showers"),
             ("favourable_winds", 13, "Favourable Winds"),
             ("crosswinds", 14, "Crosswinds"),
             ("low_cloud", 15, "Low Cloud")
-        });
+        };
         Assert.Equal(expected, rules.WeatherReports.Select(report => (report.DefinitionId, (int)report.EventType, report.Name)));
         Assert.Same(rules.WorldEvents, rules.WeatherReports);
-        Assert.Equal(16, Enum.GetValues<DuckWorldEventType>().Length);
+        Assert.Equal(15, Enum.GetValues<DuckWorldEventType>().Length);
         foreach (var report in rules.WeatherReports)
         {
             Assert.Same(report, rules.WeatherReport(report.DefinitionId));
@@ -54,35 +42,6 @@ public sealed class DuckWeatherReportTests
             Assert.Equal(DuckDisplayReference.Event(report, rules), DuckDisplayReference.WeatherReport(report, rules));
             Assert.Equal(DuckDisplayReference.Event(report.EventType, rules), DuckDisplayReference.WeatherReport(report.EventType, rules));
         }
-    }
-
-    [Theory]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    [InlineData(6)]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Weather_reference_preserves_legacy_thresholds_shelter_gates_and_Log_rules(int revision)
-    {
-        var rules = DuckRules.ForRulesRevision(revision);
-        var sunshine = DuckDisplayReference.WeatherReport(rules.WeatherReport("glorious_sunshine"), rules);
-        Assert.Contains(revision < 6 ? "8 is safe, or 7 after an unprotected Goose" : "7 is safe, or 6 after an unprotected Goose", sunshine);
-        Assert.Contains(revision < 4 ? "+8 Sleep" : "+2 Stars", sunshine);
-        Assert.Contains(revision < 6
-                ? "4, or 7 with Fresh Air; protection leaves it at 5, or 8 with Fresh Air"
-                : "4, or 6 with Fresh Air; protection leaves it at 5, or 7 with Fresh Air",
-            DuckDisplayReference.Encounter(rules.Encounter("grumpy_goose"), rules));
-        Assert.Contains(revision < 5 ? "every duck finishes safely at a shelter" : "every duck finishes at a shelter",
-            DuckDisplayReference.WeatherReport(rules.WeatherReport("all_tucked_in"), rules));
-        var thunder = DuckDisplayReference.WeatherReport(rules.WeatherReport("restless_night"), rules);
-        Assert.Contains("Thunder keeps shelter ducks awake", thunder);
-        Assert.Contains(revision < 5 ? "finishes safely at a shelter" : "finishes at a shelter", thunder);
-        Assert.Contains("printed shelter reward, Flowers, and Final Night shelter bonus together", thunder);
-        Assert.Contains(revision < 8 ? "older Log slowdown remains" : "older Log is consumed by that draw",
-            DuckDisplayReference.WeatherReport(rules.WeatherReport("a_friendly_guide"), rules));
-        Assert.Contains(revision < 8 ? "Log's next Wish" : "immediately next drawn chip",
-            DuckDisplayReference.WeatherReport(rules.WeatherReport("still_air"), rules));
     }
 
     [Fact]

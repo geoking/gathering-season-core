@@ -82,7 +82,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
         public static MatchSession<DuckMatchView> Restore(DuckSaveData save)
         {
             Validate(save);
-            var state = new DuckMatchState(SettingsFromSave(save), save.RulesVersion)
+            var state = new DuckMatchState(SettingsFromSave(save))
             {
                 Day = save.Day,
                 Phase = save.Phase,
@@ -115,9 +115,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 "FormatVersion must identify Duck save format version 1.");
             Require(string.Equals(save.ProfileId, DuckRules.V1.ProfileId, StringComparison.Ordinal),
                 "ProfileId must identify the Duck v1 rules profile.");
-            Require(save.RulesVersion >= 1 && save.RulesVersion <= CurrentRulesVersion,
-                "RulesVersion must identify supported Duck rules revision 1, 2, 3, 4, 5, 6, 7 or 8.");
-            var rules = DuckRules.ForRulesRevision(save.RulesVersion);
+            Require(save.RulesVersion == CurrentRulesVersion,
+                "RulesVersion must identify supported Duck rules revision 8.");
+            var rules = DuckRules.V1;
             Require(save.Settings != null, "Settings are required.");
             Require(save.Settings.Days == DuckMatchSettings.StandardDays,
                 "Settings.Days must match the ten-Day rules profile.");
@@ -126,8 +126,6 @@ namespace GatheringSeason.Core.Ducks.Persistence
             var playerCount = save.Settings.PlayerCount == 0 ? 2 : save.Settings.PlayerCount;
             Require(playerCount >= 2 && playerCount <= 4,
                 "Settings.PlayerCount must be two, three or four.");
-            Require(save.RulesVersion >= 7 || playerCount == 2,
-                "Earlier rules revisions support two players only.");
             Require(save.Settings.WishSetId == null || save.Settings.WishSetId.Length == 0
                     || save.Settings.WishSetId == DuckMatchSettings.StandardWishSetId,
                 "Settings.WishSetId is unsupported.");
@@ -379,7 +377,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(player.TotalTwigs >= (long)player.DayReedsTwigs + player.DayEventTwigs,
                 $"Players[{player.Id}].TotalTwigs cannot be below current-Day Twigs already added to the nest.");
             Require(player.Position >= 0 && player.Position <= 43, $"Players[{player.Id}].Position is outside the board.");
-            var choseFreshAir = save.RulesVersion >= 3 && player.HasGloriousSunshineChoice
+            var choseFreshAir = player.HasGloriousSunshineChoice
                 && player.GloriousSunshineBenefit == DuckGloriousSunshineBenefit.FreshAir;
             var validSafeMaximum = choseFreshAir
                 ? player.SafeExhaustionMaximum == rules.FreshAirGooseSafeExhaustionMaximum
@@ -389,11 +387,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 $"Players[{player.Id}].SafeExhaustionMaximum is not a supported threshold.");
             var currentEvent = rules.WorldEvent(save.WorldEventDeckDefinitionIds[save.CurrentEventIndex]).EventType;
             Require(!player.HasGloriousSunshineChoice
-                    || save.RulesVersion >= 3
-                    && currentEvent == DuckWorldEventType.GloriousSunshine
+                    || currentEvent == DuckWorldEventType.GloriousSunshine
                     && Enum.IsDefined(typeof(DuckGloriousSunshineBenefit), player.GloriousSunshineBenefit),
                 $"Players[{player.Id}] has an invalid Glorious Sunshine choice.");
-            if (save.RulesVersion >= 3 && save.Phase == DuckPhase.Adventure
+            if (save.Phase == DuckPhase.Adventure
                 && currentEvent == DuckWorldEventType.GloriousSunshine && player.PlacedChips.Count > 0)
                 Require(player.HasGloriousSunshineChoice,
                     $"Players[{player.Id}] began Adventure without a Glorious Sunshine choice.");
@@ -428,10 +425,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
             foreach (var id in player.BagPhysicalChipIds)
                 Require(inventoryIds.Contains(id) && bagIds.Add(id),
                     $"Players[{player.Id}] has a missing or duplicate physical chip in pouch order.");
-            Require(player.KnownNextPhysicalChipIds.Count <= 2
+            Require(player.KnownNextPhysicalChipIds.Count <= 1
                     && player.KnownNextPhysicalChipIds.SequenceEqual(
                         player.BagPhysicalChipIds.Take(player.KnownNextPhysicalChipIds.Count)),
-                $"Players[{player.Id}] Signpost preview must be an exact prefix of pouch order.");
+                $"Players[{player.Id}] Signpost preview must contain at most one chip and be an exact prefix of pouch order.");
 
             var placedIds = new HashSet<int>();
             var previousPosition = player.EffectiveStart;
@@ -649,7 +646,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
         {
             var player = save.Players.Single(candidate => candidate.Id == playerId);
             var priorDays = save.Day == 1 ? 0 : new DuckStateLimits(
-                DuckRules.ForRulesRevision(save.RulesVersion), save.Day - 1).CommandRevision;
+                DuckRules.V1, save.Day - 1).CommandRevision;
             return priorDays + player.PlacedChips.Count + (player.HasFinishedDay ? 1 : 0)
                 + (player.HasGloriousSunshineChoice ? 1 : 0) + player.PurchasedEncounterDefinitionIds.Count
                 + (player.HasFinishedDream ? 1 : 0)
@@ -744,7 +741,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     "Finished requires a completely resolved Day 10.");
             }
             Require(save.FinalDayDecisionBeat <= new DuckStateLimits(
-                    DuckRules.ForRulesRevision(save.RulesVersion), save.Day).Inventory + 1,
+                    DuckRules.V1, save.Day).Inventory + 1,
                 "FinalDayDecisionBeat exceeds the calendar's possible draws.");
             if (save.Day == DuckMatchSettings.StandardDays
                 && (save.Phase == DuckPhase.Adventure || save.Phase == DuckPhase.Finished))

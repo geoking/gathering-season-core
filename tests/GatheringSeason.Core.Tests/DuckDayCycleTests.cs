@@ -12,7 +12,7 @@ namespace GatheringSeason.Core.Tests;
 
 public sealed class DuckDayCycleTests
 {
-    private static readonly DuckRuleDefinitions Rules = DuckRules.ForRulesRevision(3);
+    private static readonly DuckRuleDefinitions Rules = DuckRules.V1;
     private static readonly JsonSerializerOptions SaveJson = new JsonSerializerOptions { IncludeFields = true };
 
     [Fact]
@@ -43,10 +43,10 @@ public sealed class DuckDayCycleTests
     [Fact]
     public void Dream_shop_enforces_affordability_one_purchase_and_one_variant_per_type()
     {
-        var nightOne = DreamRuntime(day: 1, sleep: 7);
+        var nightOne = DreamRuntime(day: 1, sleep: 1);
         var first = nightOne.Player("human");
         var affordableIds = BuyActions(nightOne.State, first).Select(action => action.DefinitionId).OrderBy(id => id);
-        Assert.Equal(new[] { "companion", "seeds", "signpost", "splash", "tailwind_2", "wildflowers" },
+        Assert.Equal(new[] { "seeds", "splash", "tailwind_2", "wildflowers" },
             affordableIds);
 
         DuckDreamHandler.Execute(nightOne.State, first, Rules, BuyAction(nightOne.State, first, "seeds"));
@@ -117,7 +117,7 @@ public sealed class DuckDayCycleTests
 
         DuckDreamHandler.Execute(runtime.State, human, Rules, BuyAction(runtime.State, human, "tailwind_2"));
         Assert.Equal(10, human.FrozenSleep);
-        Assert.Equal(6, human.RemainingSleep);
+        Assert.Equal(9, human.RemainingSleep);
         Assert.True(human.PendingMostRestedStep);
 
         DuckDreamHandler.Execute(runtime.State, human, Rules, FinishAction(runtime.State, human));
@@ -347,7 +347,7 @@ public sealed class DuckDayCycleTests
 
         Assert.Equal(1, soloOutcomes[solo.Id].FlockSleep);
         Assert.Equal(0, soloOutcomes[noFlock.Id].FlockSleep);
-        Assert.Equal(2, largeOutcomes[large.Id].FlockSleep);
+        Assert.Equal(1, largeOutcomes[large.Id].FlockSleep);
         Assert.Equal(0, largeOutcomes[noFlock.Id].FlockSleep);
     }
 
@@ -357,7 +357,7 @@ public sealed class DuckDayCycleTests
         var safeShelter = ScoringPlayer("safe", position: 4);
         var wornShelter = ScoringPlayer("worn", position: 10, worn: true);
         var tucked = DuckNightResolver.Calculate(ScoringState("all_tucked_in", safeShelter, wornShelter), Rules);
-        Assert.All(tucked.Values, outcome => Assert.Equal(0, outcome.CollectiveEventSleep));
+        Assert.All(tucked.Values, outcome => Assert.Equal(1, outcome.CollectiveEventSleep));
 
         var firstSupperDuck = ScoringPlayer("supper-one", position: 4, worn: true, finalDefinitionId: "seeds");
         var secondSupperDuck = ScoringPlayer("supper-two", position: 10, worn: true, finalDefinitionId: "seeds");
@@ -366,8 +366,8 @@ public sealed class DuckDayCycleTests
         var supper = DuckNightResolver.Calculate(
             ScoringState("shared_supper", firstSupperDuck, secondSupperDuck), Rules);
         Assert.All(supper.Values, outcome => Assert.Equal(1, outcome.CollectiveEventSleep));
-        Assert.Equal(3, supper[firstSupperDuck.Id].FrozenSleep);
-        Assert.Equal(5, supper[secondSupperDuck.Id].FrozenSleep);
+        Assert.Equal(1, supper[firstSupperDuck.Id].FrozenSleep);
+        Assert.Equal(1, supper[secondSupperDuck.Id].FrozenSleep);
 
         var zero = ScoringPlayer("zero", position: 4, finalDefinitionId: "brambles");
         var retained = ScoringPlayer("retained", position: 4, finalDefinitionId: "brambles", worn: true);
@@ -386,7 +386,7 @@ public sealed class DuckDayCycleTests
 
     private static DuckMatchRuntime DreamRuntime(int day, int sleep)
     {
-        var runtime = DuckMatchRuntime.Create(seed: 17, rulesRevision: 3);
+        var runtime = DuckMatchRuntime.Create(seed: 17);
         runtime.State.Day = day;
         runtime.State.Phase = DuckPhase.Night;
         foreach (var player in runtime.State.Players)
@@ -407,7 +407,7 @@ public sealed class DuckDayCycleTests
 
     private static DuckMatchState ScoringState(string eventDefinitionId, params DuckPlayerState[] players)
     {
-        var state = new DuckMatchState(DuckMatchSettings.Standard, rulesRevision: 3)
+        var state = new DuckMatchState(DuckMatchSettings.Standard)
         {
             Day = 1,
             Phase = DuckPhase.Adventure,

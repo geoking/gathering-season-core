@@ -73,9 +73,6 @@ namespace GatheringSeason.Core.Ducks.AI
                 return new DuckPolicyDecision(settle, "The pouch is empty, so the current occupied space is final.");
 
             var plan = PlanAdventure(observation, player);
-            if (plan.KnownFirstWearsOut && observation.RulesRevision < 5)
-                return new DuckPolicyDecision(settle,
-                    $"The Signpost preview is {plan.KnownFirstName}, which would exceed Exhaustion {plan.KnownFirstSafeMaximum}.");
             if (plan.CurrentRestProvablyLoses && plan.OptimisticRecoveryPossible)
                 return new DuckPolicyDecision(explore,
                     $"The current final score is provably behind; continuing keeps a possible recovery open beyond the " +
@@ -168,9 +165,6 @@ namespace GatheringSeason.Core.Ducks.AI
                 if (placement.WearsOut) firstWearWeight += weight;
             }
 
-            var knownFirst = known.Length == 0
-                ? (DuckAdventurePlacement?)null
-                : DuckAdventureRules.ApplyEncounter(state.State, definitions[known[0]], observation.CurrentEvent.EventType, observation.Rules);
             var currentRestProvablyLoses = IsProvablyLosingFinalRest(observation, player, state);
             return new AdventurePlan(
                 currentValue,
@@ -181,9 +175,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 search.Nodes,
                 currentRestProvablyLoses,
                 currentRestProvablyLoses && OptimisticFinalRecoveryPossible(observation, player, state, counts),
-                knownFirst?.WearsOut ?? false,
-                known.Length == 0 ? string.Empty : definitions[known[0]].Name,
-                knownFirst?.State.SafeExhaustionMaximum ?? state.State.SafeExhaustionMaximum);
+                known.Length == 0 ? string.Empty : definitions[known[0]].Name);
         }
 
         private static int DefinitionIndex(DuckMatchView observation, string definitionId)
@@ -329,7 +321,7 @@ namespace GatheringSeason.Core.Ducks.AI
             PlannedAdventureState state,
             DuckBoardSpace space)
         {
-            var shelterRewardsEligible = ShelterRewardsEligible(observation, space, state.WornOut);
+            var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
             if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(state.State.FlowersPlaced)
                 + observation.Economy.FinalShelterReward;
@@ -337,9 +329,8 @@ namespace GatheringSeason.Core.Ducks.AI
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
             sleep += CollectiveSleepUpperBound(observation, player, state, shelterRewardsEligible);
             sleep += GloriousSunshineReward(observation, player);
-            if (FlockRewardsEligible(observation, state.WornOut) && state.State.ActiveFlock > 0
-                && observation.Players.Where(opponent => opponent.Id != player.Id && opponent.HasFinishedDay
-                    && (observation.RulesRevision >= 5 || !opponent.IsWornOut))
+            if (state.State.ActiveFlock > 0
+                && observation.Players.Where(opponent => opponent.Id != player.Id && opponent.HasFinishedDay)
                     .All(opponent => state.State.ActiveFlock >= opponent.ActiveFlock))
                 sleep += observation.Economy.CalculateFlockLeaderReward(state.State.ActiveFlock);
             if (state.FinalType == DuckEncounterType.LoosePebbles && !state.FinalSuppressed)
@@ -358,8 +349,7 @@ namespace GatheringSeason.Core.Ducks.AI
             {
                 case DuckWorldEventType.AllTuckedIn:
                     return shelterRewardsEligible && opponents.All(opponent => !opponent.HasFinishedDay
-                        || (observation.RulesRevision >= 5 || !opponent.IsWornOut)
-                        && observation.Rules.BoardSpaceAt(opponent.Position).IsShelter)
+                        || observation.Rules.BoardSpaceAt(opponent.Position).IsShelter)
                         ? observation.Economy.AllTuckedInReward : 0;
                 case DuckWorldEventType.HomeBeforeDark:
                     return !state.WornOut && opponents.All(opponent => !opponent.HasFinishedDay || !opponent.IsWornOut)
@@ -400,7 +390,7 @@ namespace GatheringSeason.Core.Ducks.AI
             DuckPlayerView opponent)
         {
             var space = observation.Rules.BoardSpaceAt(opponent.Position);
-            var shelterRewardsEligible = ShelterRewardsEligible(observation, space, opponent.IsWornOut);
+            var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
             if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(opponent.FlowersPlaced)
                 + observation.Economy.FinalShelterReward;
@@ -424,14 +414,14 @@ namespace GatheringSeason.Core.Ducks.AI
             int helpfulTypeMask)
         {
             var space = observation.Rules.BoardSpaceAt(position);
-            var shelterRewardsEligible = ShelterRewardsEligible(observation, space, wornOut);
+            var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
             if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(flowers);
             if (shelterRewardsEligible && observation.Day == DuckMatchSettings.StandardDays)
                 sleep += observation.Economy.FinalShelterReward;
             if (shelterRewardsEligible && observation.CurrentEvent.EventType == DuckWorldEventType.RestlessNight)
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
-            if (FlockRewardsEligible(observation, wornOut) && activeFlock > 0
+            if (activeFlock > 0
                 && LeadsFlock(observation, player.Id, activeFlock))
                 sleep += observation.Economy.CalculateFlockLeaderReward(activeFlock);
             sleep += CollectiveSleep(observation, player, position, wornOut, finalType, helpfulTypeMask);
@@ -444,7 +434,7 @@ namespace GatheringSeason.Core.Ducks.AI
             if (finalType == DuckEncounterType.Brambles && !finalSuppressed)
                 twigs = Math.Max(0, twigs - 1);
             var remainingDays = DuckMatchSettings.StandardDays - observation.Day;
-            var rewardScale = observation.Economy.UsesStars ? 4.0 : 1.0;
+            var rewardScale = 4.0;
             var sleepWeight = (observation.Day == DuckMatchSettings.StandardDays ? 1.0 : 0.38) * rewardScale;
             var featherValue = shelterRewardsEligible && remainingDays > 0
                 ? space.Feathers * (0.8 + remainingDays * 0.55)
@@ -482,14 +472,14 @@ namespace GatheringSeason.Core.Ducks.AI
         {
             if (player.Position < 1) return 0;
             var space = observation.Rules.BoardSpaceAt(player.Position);
-            var shelterRewardsEligible = ShelterRewardsEligible(observation, space, player.IsWornOut);
+            var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
             if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(player.FlowersPlaced);
             if (shelterRewardsEligible && observation.Day == DuckMatchSettings.StandardDays)
                 sleep += observation.Economy.FinalShelterReward;
             if (shelterRewardsEligible && observation.CurrentEvent.EventType == DuckWorldEventType.RestlessNight)
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
-            if (FlockRewardsEligible(observation, player.IsWornOut) && player.ActiveFlock > 0
+            if (player.ActiveFlock > 0
                 && LeadsFlock(observation, player.Id, player.ActiveFlock))
                 sleep += observation.Economy.CalculateFlockLeaderReward(player.ActiveFlock);
             sleep += CollectiveSleep(
@@ -516,11 +506,9 @@ namespace GatheringSeason.Core.Ducks.AI
             switch (observation.CurrentEvent.EventType)
             {
                 case DuckWorldEventType.AllTuckedIn:
-                    return (observation.RulesRevision >= 5 || !wornOut)
-                        && observation.Rules.BoardSpaceAt(position).IsShelter
+                    return observation.Rules.BoardSpaceAt(position).IsShelter
                         && OthersFinished(observation, player.Id, other =>
-                            (observation.RulesRevision >= 5 || !other.IsWornOut)
-                            && observation.Rules.BoardSpaceAt(other.Position).IsShelter)
+                            observation.Rules.BoardSpaceAt(other.Position).IsShelter)
                         ? observation.Economy.AllTuckedInReward : 0;
                 case DuckWorldEventType.HomeBeforeDark:
                     return !wornOut && OthersFinished(observation, player.Id, other => !other.IsWornOut)
@@ -551,19 +539,9 @@ namespace GatheringSeason.Core.Ducks.AI
 
         private static bool LeadsFlock(DuckMatchView observation, string playerId, int activeFlock)
         {
-            return observation.Players.Where(player => player.Id != playerId
-                    && (observation.RulesRevision >= 5 || !player.IsWornOut))
+            return observation.Players.Where(player => player.Id != playerId)
                 .All(player => activeFlock >= player.ActiveFlock);
         }
-
-        private static bool ShelterRewardsEligible(
-            DuckMatchView observation,
-            DuckBoardSpace space,
-            bool wornOut) =>
-            space.IsShelter && (observation.RulesRevision >= 5 || !wornOut);
-
-        private static bool FlockRewardsEligible(DuckMatchView observation, bool wornOut) =>
-            observation.RulesRevision >= 5 || !wornOut;
 
         private static DuckEncounterType? CurrentFinalType(DuckMatchView observation, DuckPlayerView player)
         {
@@ -622,7 +600,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 .ThenBy(offer => offer.DefinitionId, StringComparer.Ordinal)
                 .First();
             return new DuckPolicyDecision(actionsByDefinition[next.DefinitionId],
-                $"{(observation.Economy.UsesStars ? "Wish " : string.Empty)}{next.Encounter.Name} starts the best affordable {best.Complete.Count}-chip Night bundle " +
+                $"Wish {next.Encounter.Name} starts the best affordable {best.Complete.Count}-chip Night bundle " +
                 $"({best.Value:0.0} value, {best.Extension.Sum(offer => offer.Price)} remaining {observation.Economy.CurrencyName} spend).");
         }
 
@@ -715,7 +693,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 && completeBundle.Any(item => item.ShopType == DuckEncounterType.Signpost)
                 ? 0.25
                 : 0;
-            var currencyCostWeight = observation.Economy.UsesStars ? 0.72 : 0.18;
+            var currencyCostWeight = 0.72;
             return movementValue + twigValue + abilityValue + diversityAdjustment + synergy - offer.Price * currencyCostWeight;
         }
 
@@ -796,7 +774,6 @@ namespace GatheringSeason.Core.Ducks.AI
                 {
                     var previewCount = _observation.CurrentEvent.EventType switch
                     {
-                        DuckWorldEventType.SunlitSignboards => 2,
                         DuckWorldEventType.ThickMorningMist => 0,
                         _ => 1
                     };
@@ -904,9 +881,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 int totalNodes,
                 bool currentRestProvablyLoses,
                 bool optimisticRecoveryPossible,
-                bool knownFirstWearsOut,
-                string knownFirstName,
-                int knownFirstSafeMaximum)
+                string knownFirstName)
             {
                 CurrentValue = currentValue;
                 ExploreValue = exploreValue;
@@ -916,9 +891,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 TotalNodes = totalNodes;
                 CurrentRestProvablyLoses = currentRestProvablyLoses;
                 OptimisticRecoveryPossible = optimisticRecoveryPossible;
-                KnownFirstWearsOut = knownFirstWearsOut;
                 KnownFirstName = knownFirstName;
-                KnownFirstSafeMaximum = knownFirstSafeMaximum;
             }
 
             internal double CurrentValue { get; }
@@ -929,9 +902,7 @@ namespace GatheringSeason.Core.Ducks.AI
             internal int TotalNodes { get; }
             internal bool CurrentRestProvablyLoses { get; }
             internal bool OptimisticRecoveryPossible { get; }
-            internal bool KnownFirstWearsOut { get; }
             internal string KnownFirstName { get; }
-            internal int KnownFirstSafeMaximum { get; }
         }
 
         private sealed class PlanningLimitExceededException : Exception

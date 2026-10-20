@@ -1,6 +1,6 @@
 # Gathering Season encounter rules and timing
 
-The implemented encounter contract for rules revision 8 new matches. Revisions 1–7 retain their saved rules. See [Weather reports](world-events.md)
+The implemented encounter contract for the supported rules revision 8. See [Weather reports](world-events.md)
 for shared weather and [board/shop](board-and-shop.md) for exact values.
 
 ## Draw and placement order
@@ -132,9 +132,6 @@ Log → protected Log → Wish leaves the Wish at full movement. Protection affe
 only the newly drawn nuisance; there is no stashed slowdown. A Signpost's own
 draw consumes a pending Log, but its private peek and repeated observations do
 not count as draws.
-
-Revisions 1–7 retain their next-Wish behavior: white chips do not consume the
-old pending Log, including a later protected Log.
 
 Pebbles and Brambles attach their penalty to their own placement. Moving beyond
 that chip avoids the penalty. Splash or Clearing Breeze suppression remains marked on the
