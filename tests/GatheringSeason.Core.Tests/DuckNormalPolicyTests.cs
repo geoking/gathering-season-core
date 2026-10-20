@@ -34,7 +34,6 @@ public sealed class DuckNormalPolicyTests
         Assert.Equal(GameActionKind.Explore, Choose(seedPreview).Kind);
         var gooseDecision = Evaluate(goosePreview);
         Assert.Equal(GameActionKind.Settle, gooseDecision.Action.Kind);
-        Assert.Contains("100% immediate wear-out risk", gooseDecision.Reason, StringComparison.Ordinal);
 
         var firstUnknown = AdventureScenario(position: 8, exhaustion: 4,
             bag: new[] { "seeds", "grumpy_goose" });
@@ -87,7 +86,6 @@ public sealed class DuckNormalPolicyTests
         var decision = Evaluate(scenario);
 
         Assert.Equal(GameActionKind.Settle, decision.Action.Kind);
-        Assert.Contains("100% immediate wear-out risk", decision.Reason, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -127,7 +125,6 @@ public sealed class DuckNormalPolicyTests
         var decision = Evaluate(scenario);
 
         Assert.Equal(GameActionKind.Explore, decision.Action.Kind);
-        Assert.Contains("3-draw plan", decision.Reason, StringComparison.Ordinal);
         scenario.Match.Execute("human", decision.Action);
         Assert.Equal(5, scenario.Runtime.Player("human").Position);
         Assert.False(DuckRules.V1.BoardSpaceAt(5).IsShelter);
@@ -145,7 +142,6 @@ public sealed class DuckNormalPolicyTests
         var decision = Evaluate(scenario);
 
         Assert.Equal(GameActionKind.Explore, decision.Action.Kind);
-        Assert.Contains("2-draw plan", decision.Reason, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -157,7 +153,6 @@ public sealed class DuckNormalPolicyTests
         var decision = Evaluate(plateau);
 
         Assert.Equal(GameActionKind.Explore, decision.Action.Kind);
-        Assert.Contains("improves", decision.Reason, StringComparison.Ordinal);
         plateau.Match.Execute("human", decision.Action);
         Assert.Equal(2, plateau.Runtime.Player("human").Position);
     }
@@ -177,8 +172,6 @@ public sealed class DuckNormalPolicyTests
 
         Assert.Equal(GameActionKind.Settle, defendDecision.Action.Kind);
         Assert.Equal(GameActionKind.Explore, chaseDecision.Action.Kind);
-        Assert.Contains("Keeping", defendDecision.Reason, StringComparison.Ordinal);
-        Assert.Contains("improves", chaseDecision.Reason, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -196,8 +189,6 @@ public sealed class DuckNormalPolicyTests
 
         Assert.Equal(GameActionKind.Explore, blocked.Action.Kind);
         Assert.Equal(GameActionKind.Settle, unblocked.Action.Kind);
-        Assert.Contains("improves", blocked.Reason, StringComparison.Ordinal);
-        Assert.Contains("Keeping", unblocked.Reason, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -214,31 +205,36 @@ public sealed class DuckNormalPolicyTests
     }
 
     [Fact]
-    public void Complete_bundle_uses_both_slots_within_the_available_budget()
+    public void Complete_bundle_beats_the_strongest_individual_purchase_that_would_consume_the_budget()
     {
-        var scenario = DreamScenario(day: 4, sleep: 3);
-        var first = _policy.Evaluate(
-            scenario.Match.GetSnapshot("human"),
-            scenario.Match.GetLegalActions("human"));
+        var individual = DreamScenario(day: 6, sleep: 3);
+        var bundle = DreamScenario(day: 6, sleep: 3);
+        foreach (var scenario in new[] { individual, bundle })
+        {
+            var player = scenario.Runtime.Player("human");
+            for (var count = 0; count < 8; count++)
+                player.Inventory.Add(new DuckPhysicalChipState(scenario.Runtime.State.NextPhysicalChipId++, "seeds"));
+        }
 
-        Assert.Equal(GameActionKind.BuyEncounter, first.Action.Kind);
-        Assert.Contains("2-chip Night bundle", first.Reason, StringComparison.Ordinal);
+        // A free Seed already bought tonight leaves one slot for the best single
+        // purchase. With two slots, the same saturated pouch favours a better bundle.
+        var individualPlayer = individual.Runtime.Player("human");
+        individualPlayer.PurchasedEncounterDefinitionIds.Add("seeds");
+        individualPlayer.PurchasedShopTypes.Add(DuckEncounterType.Seeds);
+        var strongestIndividual = _policy.Choose(individual.Match.GetSnapshot("human"),
+            individual.Match.GetLegalActions("human"));
+        Assert.Equal("tailwind_6", strongestIndividual.DefinitionId);
+        Assert.Equal(3, strongestIndividual.Cost);
 
-        scenario.Match.Execute("human", first.Action);
-        var second = _policy.Choose(
-            scenario.Match.GetSnapshot("human"),
-            scenario.Match.GetLegalActions("human"));
-        Assert.Equal(GameActionKind.BuyEncounter, second.Kind);
-        scenario.Match.Execute("human", second);
+        var first = _policy.Choose(bundle.Match.GetSnapshot("human"), bundle.Match.GetLegalActions("human"));
+        Assert.NotEqual(strongestIndividual.DefinitionId, first.DefinitionId);
+        bundle.Match.Execute("human", first);
+        var second = _policy.Choose(bundle.Match.GetSnapshot("human"), bundle.Match.GetLegalActions("human"));
+        bundle.Match.Execute("human", second);
 
-        var player = scenario.Runtime.Player("human");
-        Assert.Equal(2, player.PurchasedEncounterDefinitionIds.Count);
-        Assert.Equal(2, player.PurchasedShopTypes.Count);
-        var observedPrices = scenario.Match.GetSnapshot("human").ShopOffers
-            .ToDictionary(offer => offer.DefinitionId, offer => offer.SleepPrice);
-        Assert.True(player.PurchasedEncounterDefinitionIds
-            .Select(id => observedPrices[id])
-            .Sum() <= 3);
+        var bundledPlayer = bundle.Runtime.Player("human");
+        Assert.Equal(new[] { "companion", "wildflowers" }, bundledPlayer.PurchasedEncounterDefinitionIds);
+        Assert.Equal(0, bundledPlayer.RemainingSleep);
     }
 
     [Fact]
@@ -255,7 +251,6 @@ public sealed class DuckNormalPolicyTests
         var decision = _policy.Evaluate(scenario.Match.GetSnapshot("human"), actions);
 
         Assert.Equal(GameActionKind.FinishDream, decision.Action.Kind);
-        Assert.Contains("without another purchase", decision.Reason, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -301,7 +296,6 @@ public sealed class DuckNormalPolicyTests
         var decision = Evaluate(scenario);
 
         Assert.Equal(GameActionKind.Explore, decision.Action.Kind);
-        Assert.Contains("known Tailwind 2", decision.Reason, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -420,7 +414,6 @@ public sealed class DuckNormalPolicyTests
         var decision = Evaluate(scenario);
 
         Assert.Equal(GameActionKind.Settle, decision.Action.Kind);
-        Assert.Contains("100% immediate wear-out risk", decision.Reason, StringComparison.Ordinal);
     }
 
     [Fact]

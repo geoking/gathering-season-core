@@ -173,6 +173,8 @@ public sealed class DuckPersistenceTests
         AssertInvalid(save => save.WorldEventDeckDefinitionIds[0] = save.WorldEventDeckDefinitionIds[1]);
         AssertInvalid(save => save.Players[0].BagPhysicalChipIds[0] = int.MaxValue);
         AssertInvalid(save => save.Players[0].KnownNextPhysicalChipIds.Add(save.Players[0].BagPhysicalChipIds[1]));
+        AssertInvalid(save => save.Players[0].KnownNextPhysicalChipIds.AddRange(
+            save.Players[0].BagPhysicalChipIds.Take(2)));
         AssertInvalid(save => save.DayFiveGooseAdded = true);
         AssertInvalid(save => save.Players.Reverse());
         AssertInvalid(save =>
