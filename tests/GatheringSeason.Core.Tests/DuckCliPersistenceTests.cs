@@ -10,12 +10,10 @@ public sealed partial class DuckCliTests
 {
     private static readonly JsonSerializerOptions SaveJson = new() { IncludeFields = true };
 
-    [Theory]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Continued_pending_log_status_and_help_use_the_saved_catalogue_without_consuming_it(int revision)
+    [Fact]
+    public void Continued_pending_log_status_and_help_use_the_saved_catalogue_without_consuming_it()
     {
-        var runtime = DuckMatchRuntime.Create(901, rulesRevision: revision);
+        var runtime = DuckMatchRuntime.Create(901);
         var home = runtime.State.WorldEventDeckDefinitionIds.IndexOf("home_before_dark");
         (runtime.State.WorldEventDeckDefinitionIds[0], runtime.State.WorldEventDeckDefinitionIds[home]) =
             (runtime.State.WorldEventDeckDefinitionIds[home], runtime.State.WorldEventDeckDefinitionIds[0]);
@@ -30,17 +28,9 @@ public sealed partial class DuckCliTests
         var original = File.ReadAllBytes(files.Path);
         var result = Run("status\ntokens\nevent\nhelp\nq\n", "--continue", "--two-player", "--save", files.Path);
         Assert.Equal(0, result.ExitCode);
-        if (revision == 8)
-        {
-            Assert.Contains("Log affects the next drawn chip", result.Output);
-            Assert.Contains("white chip consumes it without slowing", result.Output);
-            Assert.Contains("immediately next drawn chip consumes this slowdown", result.Output);
-        }
-        else
-        {
-            Assert.Contains("Log will slow the next Wish", result.Output);
-            Assert.Contains("halve the next Wish's total movement", result.Output);
-        }
+        Assert.Contains("Log affects the next drawn chip", result.Output);
+        Assert.Contains("white chip consumes it without slowing", result.Output);
+        Assert.Contains("immediately next drawn chip consumes this slowdown", result.Output);
         Assert.Equal(original, File.ReadAllBytes(files.Path));
         Assert.True(files.Read().Players.Single(p => p.Id == "human").LogSlowdownPending);
     }
@@ -219,6 +209,32 @@ public sealed partial class DuckCliTests
         Assert.Contains("Recovered the previous saved action from backup", result.Error);
         Assert.Contains("Human: No Nest Twigs · space 0", result.Output);
         Assert.Equal("not a save", File.ReadAllText(files.Path));
+    }
+
+    // Unsupported rules must fail Continue without replacing either recovery file.
+    [Theory]
+    [InlineData(0)]
+    [InlineData(7)]
+    [InlineData(9)]
+    public void Unsupported_rules_in_primary_and_backup_fail_without_rewriting_either_file(int rulesVersion)
+    {
+        using var files = new SaveFiles();
+        var primary = DuckSaves.Capture(MatchSession.CreateDuck(42));
+        primary.RulesVersion = rulesVersion;
+        files.Write(primary);
+        var backup = DuckSaves.Capture(MatchSession.CreateDuck(43));
+        backup.RulesVersion = rulesVersion;
+        files.Write(backup, backup: true);
+        var primaryBytes = File.ReadAllBytes(files.Path);
+        var backupBytes = File.ReadAllBytes(files.Path + ".bak");
+
+        var result = Run("", "--continue", "--save", files.Path);
+
+        Assert.Equal(3, result.ExitCode);
+        Assert.Contains("RulesVersion", result.Error);
+        Assert.DoesNotContain("all ducks start at the nest", result.Output);
+        Assert.Equal(primaryBytes, File.ReadAllBytes(files.Path));
+        Assert.Equal(backupBytes, File.ReadAllBytes(files.Path + ".bak"));
     }
 
     [Fact]

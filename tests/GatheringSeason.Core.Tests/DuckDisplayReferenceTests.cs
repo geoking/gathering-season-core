@@ -40,18 +40,10 @@ public sealed class DuckDisplayReferenceTests
         { DuckWorldEventType.RestlessNight, ["finishes at a shelter", "1 less shelter-related Star", "minimum of 0", "printed shelter reward, Flowers, and Final Night shelter bonus together", "worn-out ducks before halving Stars", "Twigs, Feathers, flock rewards, and other weather rewards stay untouched"] }
     };
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    [InlineData(6)]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Every_encounter_variant_has_reference_text_for_each_supported_revision(int rulesRevision)
+    [Fact]
+    public void Every_encounter_variant_has_reference_text_for_the_current_catalogue()
     {
-        var rules = DuckRules.ForRulesRevision(rulesRevision);
+        var rules = DuckRules.V1;
 
         Assert.Equal(16, rules.EncounterDefinitions.Count);
         foreach (var encounter in rules.EncounterDefinitions)
@@ -78,24 +70,21 @@ public sealed class DuckDisplayReferenceTests
     }
 
     [Fact]
-    public void Event_reference_covers_every_enum_value_and_each_revision_catalogue()
+    public void Event_reference_covers_every_current_weather_type()
     {
         var supportedTypes = new HashSet<DuckWorldEventType>();
 
-        for (var rulesRevision = 1; rulesRevision <= DuckRules.CurrentRulesRevision; rulesRevision++)
-        {
-            var rules = DuckRules.ForRulesRevision(rulesRevision);
-            Assert.Equal(rulesRevision >= 8 ? 15 : 10, rules.WorldEvents.Count);
+        var rules = DuckRules.V1;
+        Assert.Equal(15, rules.WorldEvents.Count);
 
-            foreach (var worldEvent in rules.WorldEvents)
-            {
-                supportedTypes.Add(worldEvent.EventType);
-                Assert.False(string.IsNullOrWhiteSpace(DuckDisplayReference.Event(worldEvent, rules)));
-            }
+        foreach (var worldEvent in rules.WorldEvents)
+        {
+            supportedTypes.Add(worldEvent.EventType);
+            Assert.False(string.IsNullOrWhiteSpace(DuckDisplayReference.Event(worldEvent, rules)));
         }
 
         var enumTypes = Enum.GetValues<DuckWorldEventType>();
-        Assert.Equal(16, enumTypes.Length);
+        Assert.Equal(15, enumTypes.Length);
         Assert.Equal(enumTypes.Order(), supportedTypes.Order());
         Assert.All(enumTypes, type =>
             Assert.False(string.IsNullOrWhiteSpace(DuckDisplayReference.Event(type, DuckRules.V1))));
@@ -115,18 +104,10 @@ public sealed class DuckDisplayReferenceTests
         Assert.All(requiredText, expected => Assert.Contains(expected, text));
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    [InlineData(6)]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Offer_reference_uses_the_running_catalogue_price_currency_and_power(int rulesRevision)
+    [Fact]
+    public void Offer_reference_uses_the_running_catalogue_price_currency_and_power()
     {
-        var rules = DuckRules.ForRulesRevision(rulesRevision);
+        var rules = DuckRules.V1;
 
         Assert.Equal(11, rules.ShopOffers.Count);
         foreach (var offer in rules.ShopOffers)
@@ -142,44 +123,15 @@ public sealed class DuckDisplayReferenceTests
     }
 
     [Fact]
-    public void Economy_dependent_reference_text_follows_the_active_revision()
-    {
-        var legacy = DuckRules.ForRulesRevision(1);
-        var current = DuckRules.V1;
-
-        Assert.Contains("+1 Sleep for one active Companion or +2 Sleep total for two or more",
-            DuckDisplayReference.Encounter(legacy.Encounter("companion"), legacy.Economy));
-        Assert.Contains("+1 Star total",
-            DuckDisplayReference.Encounter(current.Encounter("companion"), current.Economy));
-        Assert.Contains("+8 Sleep",
-            DuckDisplayReference.Event(DuckWorldEventType.GloriousSunshine, legacy.Economy));
-        Assert.Contains("+2 Stars",
-            DuckDisplayReference.Event(DuckWorldEventType.GloriousSunshine, current.Economy));
-        Assert.Contains("+2 Sleep",
-            DuckDisplayReference.Event(DuckWorldEventType.AllTuckedIn, legacy.Economy));
-        Assert.Contains("+1 Star",
-            DuckDisplayReference.Event(DuckWorldEventType.AllTuckedIn, current.Economy));
-        Assert.Contains("preview up to 2 available chips in their fixed draw order",
-            DuckDisplayReference.Event(DuckWorldEventType.SunlitSignboards, legacy.Economy));
-        Assert.Contains("+2 Sleep at Night for each placed Wildflowers chip",
-            DuckDisplayReference.Encounter(legacy.Encounter("wildflowers"), legacy.Economy));
-    }
-
-    [Fact]
     public void Player_help_identifies_wish_set_and_uses_the_running_economy()
     {
-        var legacyHelp = DuckDisplayReference.HowToPlay(DuckRules.ForRulesRevision(1).Economy);
         var currentHelp = DuckDisplayReference.HowToPlay(DuckRules.V1.Economy);
-        var legacyGlossary = DuckDisplayReference.Glossary(DuckRules.ForRulesRevision(1));
         var currentGlossary = DuckDisplayReference.Glossary(DuckRules.V1);
 
         Assert.Equal("Wish Set 1", DuckDisplayReference.WishSetName);
         Assert.Contains("Every chip moves 1 space unless its arrow, power, or today's weather says otherwise", currentHelp);
-        Assert.Contains("spend tonight's Sleep", legacyHelp);
         Assert.Contains("spend tonight's Stars", currentHelp);
         Assert.Contains("Unspent Stars fade at Dawn", currentHelp);
-        Assert.Contains("Sleep: Tonight's Wish-buying budget in this legacy match", legacyGlossary);
-        Assert.Contains("each 4 retained Sleep becomes 1 Dream Twig", legacyGlossary);
         Assert.Contains("Stars: Tonight's Wish-buying budget", currentGlossary);
         Assert.Contains("each retained Star becomes 1 Dream Twig", currentGlossary);
         Assert.Contains("Trail Feathers: Head starts that stay for later Days, one space each", currentGlossary);
@@ -188,16 +140,12 @@ public sealed class DuckDisplayReferenceTests
     }
 
     [Fact]
-    public void Glossary_includes_Low_Cloud_exception_only_for_the_current_rules_catalogue()
+    public void Glossary_includes_Low_Cloud_exception_for_the_current_rules()
     {
         var current = DuckDisplayReference.Glossary(DuckRules.V1);
         Assert.Contains("Low Cloud recognizes Most Rested winners and ties", current);
         Assert.Contains("no next-Day head start or Final Night Most Rested Dream Twig", current);
-        for (var revision = 1; revision < DuckRules.CurrentRulesRevision; revision++)
-            Assert.DoesNotContain("Low Cloud", DuckDisplayReference.Glossary(DuckRules.ForRulesRevision(revision)));
-        Assert.DoesNotContain("Low Cloud", DuckDisplayReference.Glossary(DuckRules.V1.Economy));
-        Assert.Contains("On Final Night, it becomes 1 Dream Twig instead.",
-            DuckDisplayReference.Glossary(DuckRules.V1.Economy));
+
     }
 
     [Fact]
@@ -206,12 +154,12 @@ public sealed class DuckDisplayReferenceTests
         var rules = DuckRules.V1;
 
         Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.HowToPlay(null!));
-        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Glossary((DuckEconomyDefinition)null!));
-        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Encounter(null!, rules.Economy));
-        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Encounter(rules.Encounter("seeds"), (DuckEconomyDefinition)null!));
-        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Event((DuckWorldEventDefinition)null!, rules.Economy));
-        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Event(DuckWorldEventType.AllTuckedIn, (DuckEconomyDefinition)null!));
-        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Offer(null!, rules.Economy));
-        Assert.Throws<ArgumentOutOfRangeException>(() => DuckDisplayReference.Event((DuckWorldEventType)int.MaxValue, rules.Economy));
+        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Glossary((DuckRuleDefinitions)null!));
+        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Encounter(null!, rules));
+        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Encounter(rules.Encounter("seeds"), (DuckRuleDefinitions)null!));
+        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Event((DuckWorldEventDefinition)null!, rules));
+        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Event(DuckWorldEventType.AllTuckedIn, (DuckRuleDefinitions)null!));
+        Assert.Throws<ArgumentNullException>(() => DuckDisplayReference.Offer(null!, rules));
+        Assert.Throws<ArgumentOutOfRangeException>(() => DuckDisplayReference.Event((DuckWorldEventType)int.MaxValue, rules));
     }
 }

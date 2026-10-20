@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using GatheringSeason.Core.Ducks.Runtime;
-using GatheringSeason.Core.Ducks.AI;
 using GatheringSeason.Core.Ducks.Persistence;
 using GatheringSeason.Core.Match;
 using GatheringSeason.Evaluation;
@@ -12,28 +11,6 @@ namespace GatheringSeason.Core.Tests;
 
 public sealed class DuckEvaluationTests
 {
-    [Fact]
-    public void Seed_20_trailer_keeps_a_final_Day_recovery_open_instead_of_banking_shelter_ten()
-    {
-        var json = File.ReadAllText(Path.Combine(AppContext.BaseDirectory,
-            "Fixtures", "Duck", "seed20-day10-revision1.json"));
-        var save = JsonSerializer.Deserialize<DuckSaveData>(json,
-            new JsonSerializerOptions { IncludeFields = true })!;
-        var match = DuckSaves.Restore(save);
-        var observation = match.GetSnapshot("ai");
-        var player = observation.Players.Single(candidate => candidate.Id == "ai");
-        Assert.Equal(1, save.RulesVersion);
-        Assert.Equal(10, observation.Day);
-        Assert.Equal(10, player.Position);
-        Assert.Equal(32, player.TotalTwigs);
-        Assert.Single(player.PlacedChips);
-        Assert.Equal(40, observation.Players.Single(candidate => candidate.Id == "human").TotalTwigs);
-
-        var decision = new DuckNormalPolicy().Evaluate(observation, match.GetLegalActions("ai"));
-        Assert.Equal(GameActionKind.Explore, decision.Action.Kind);
-        Assert.Contains("keeps a possible recovery open", decision.Reason, StringComparison.Ordinal);
-    }
-
     [Fact]
     public void Telemetry_accounts_for_every_authoritative_night_and_inventory_change()
     {

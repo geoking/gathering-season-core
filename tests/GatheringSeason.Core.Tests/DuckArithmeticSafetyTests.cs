@@ -112,39 +112,22 @@ public sealed class DuckArithmeticSafetyTests
         AssertAtomicRejection(runtime, "human", GameActionKind.NextDay);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    [InlineData(6)]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Catalogue_reward_helpers_do_not_overflow_extreme_nonnegative_counts(int revision)
+    [Fact]
+    public void Catalogue_reward_helpers_do_not_overflow_extreme_nonnegative_counts()
     {
-        var economy = DuckRules.ForRulesRevision(revision).Economy;
+        var economy = DuckRules.V1.Economy;
         Assert.Equal(economy.FlowersRewardLimit, economy.CalculateFlowerReward(int.MaxValue));
         Assert.Equal(economy.FlockLeaderRewardLimit, economy.CalculateFlockLeaderReward(int.MaxValue));
     }
 
     [Theory]
-    [InlineData(1, 2)]
-    [InlineData(2, 2)]
-    [InlineData(3, 2)]
-    [InlineData(4, 2)]
-    [InlineData(5, 2)]
-    [InlineData(6, 2)]
-    [InlineData(7, 2)]
-    [InlineData(7, 3)]
-    [InlineData(7, 4)]
-    [InlineData(8, 2)]
-    [InlineData(8, 3)]
-    [InlineData(8, 4)]
-    public void Every_retained_catalogue_continues_deterministically_at_each_command_boundary(int revision, int seats)
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public void Current_games_continue_deterministically_at_each_command_boundary(int seats)
     {
         var match = new MatchSession<DuckMatchView>(DuckMatchRuntime.Create(73,
-            new DuckMatchSettings(seats), revision));
+            new DuckMatchSettings(seats)));
         while (match.GetSnapshot("human").Phase != DuckPhase.Finished)
         {
             var restored = DuckSaves.Restore(DuckSaves.Capture(match));
@@ -168,33 +151,9 @@ public sealed class DuckArithmeticSafetyTests
     [InlineData("PermanentFeatherTrail", 2147483643)]
     public void Other_seat_arithmetic_headroom_is_checked_before_any_command_mutates_state(string counter, int value)
     {
-        var runtime = DuckMatchRuntime.Create(seed: 42, rulesRevision: 1);
+        var runtime = DuckMatchRuntime.Create(seed: 42);
         typeof(DuckPlayerState).GetProperty(counter)!.SetValue(runtime.Player("ai"), value);
         AssertAtomicRejection(runtime, "human", GameActionKind.Explore);
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    public void Legacy_Flowers_above_the_current_cap_preserve_their_reward_when_restored(int revision)
-    {
-        var runtime = DuckMatchRuntime.Create(seed: 42, rulesRevision: revision);
-        foreach (var player in runtime.State.Players)
-        {
-            var log = player.Inventory.First(chip => chip.DefinitionId == "fallen_log").PhysicalChipId;
-            player.BagPhysicalChipIds.Remove(log);
-            player.PlacedChips.Add(new DuckPlacedChipState(log, 4, false));
-            player.Position = 4;
-            player.FlowersPlaced = 2;
-            player.HasFinishedDay = true;
-        }
-        DuckNightResolver.Resolve(runtime.State, runtime.Rules);
-        var match = new MatchSession<DuckMatchView>(runtime);
-        var save = DuckSaves.Capture(match);
-        Assert.Equal(4, save.Players[0].LastNightOutcome!.FlowerSleep);
-        Assert.Equal(JsonSerializer.Serialize(save, SaveJson),
-            JsonSerializer.Serialize(DuckSaves.Capture(DuckSaves.Restore(save)), SaveJson));
     }
 
     [Fact]

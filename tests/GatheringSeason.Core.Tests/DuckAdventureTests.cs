@@ -70,7 +70,6 @@ public sealed class DuckAdventureTests
 
     [Theory]
     [InlineData(DuckWorldEventType.HomeBeforeDark, 1)]
-    [InlineData(DuckWorldEventType.SunlitSignboards, 2)]
     [InlineData(DuckWorldEventType.ThickMorningMist, 0)]
     public void Signpost_preview_count_obeys_the_current_event_and_stays_private(
         DuckWorldEventType eventType,
@@ -93,25 +92,6 @@ public sealed class DuckAdventureTests
             aiView.Players.Single(player => player.Id == "human").PlacedChips.Select(chip => (chip.DefinitionId, chip.Position)));
         Assert.Null(typeof(DuckPlayerView).GetProperty("KnownNextChips"));
         Assert.DoesNotContain(runtime.State.History, entry => entry.Message.Contains("preview", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
-    public void Sunlit_preview_keeps_the_known_second_chip_when_the_first_is_another_Signpost()
-    {
-        var runtime = RuntimeWithEvent(DuckWorldEventType.SunlitSignboards);
-        var ids = SetBag(runtime, "human", "signpost", "signpost", "seeds", "splash");
-        var match = Session(runtime);
-
-        Execute(match, "human", GameActionKind.Explore);
-        Assert.Equal(new[] { ids[1], ids[2] }, runtime.Player("human").KnownNextPhysicalChipIds);
-
-        Execute(match, "human", GameActionKind.Explore);
-
-        Assert.Equal(new[] { ids[0], ids[1] }, runtime.Player("human").PlacedChips.Select(chip => chip.PhysicalChipId));
-        Assert.Equal(new[] { ids[2], ids[3] }, runtime.Player("human").KnownNextPhysicalChipIds);
-        Execute(match, "human", GameActionKind.Explore);
-        Assert.Equal(ids[2], runtime.Player("human").PlacedChips.Last().PhysicalChipId);
-        Assert.Equal(new[] { ids[3] }, runtime.Player("human").KnownNextPhysicalChipIds);
     }
 
     [Fact]
@@ -145,7 +125,7 @@ public sealed class DuckAdventureTests
     }
 
     [Fact]
-    public void Repeated_Logs_do_not_stack_and_a_protected_Log_does_not_clear_an_older_one()
+    public void Repeated_Logs_rearm_but_a_protected_Log_only_consumes_the_incoming_slowdown()
     {
         var runtime = RuntimeWithEvent(DuckWorldEventType.HomeBeforeDark);
         SetBag(runtime, "human", "fallen_log", "fallen_log", "tailwind_4", "seeds");
@@ -164,7 +144,7 @@ public sealed class DuckAdventureTests
         player.SplashProtectionArmed = true;
         Execute(match, "human", GameActionKind.Explore);
         Assert.True(player.PlacedChips.Single().NuisanceSuppressed);
-        Assert.True(player.LogSlowdownPending);
+        Assert.False(player.LogSlowdownPending);
         Execute(match, "human", GameActionKind.Explore);
         Assert.False(player.LogSlowdownPending);
     }
@@ -342,11 +322,11 @@ public sealed class DuckAdventureTests
         Assert.Equal(9, ai.TotalTwigs);
         Assert.Equal(2, human.PermanentFeatherTrail);
         Assert.Equal(2, ai.PermanentFeatherTrail);
-        Assert.Equal(21, human.LastNightOutcome!.PrintedSleep);
+        Assert.Equal(5, human.LastNightOutcome!.PrintedSleep);
         Assert.Equal(9, human.LastNightOutcome.PrintedTwigs);
         Assert.Equal(2, human.LastNightOutcome.FeathersAwarded);
-        Assert.Equal(24, human.FrozenSleep);
-        Assert.Equal(22, ai.FrozenSleep);
+        Assert.Equal(7, human.FrozenSleep);
+        Assert.Equal(6, ai.FrozenSleep);
         Assert.All(runtime.State.Players, player =>
             Assert.Equal(43, player.PlacedChips.Last().Position));
     }
@@ -510,8 +490,7 @@ public sealed class DuckAdventureTests
 
     private static DuckMatchRuntime RuntimeWithEvent(DuckWorldEventType eventType)
     {
-        var runtime = DuckMatchRuntime.Create(101, rulesRevision:
-            eventType == DuckWorldEventType.SunlitSignboards ? 2 : 3);
+        var runtime = DuckMatchRuntime.Create(101);
         runtime.State.WorldEventDeckDefinitionIds[runtime.State.CurrentEventIndex] = runtime.Rules.WorldEvents
             .Single(worldEvent => worldEvent.EventType == eventType).DefinitionId;
         foreach (var player in runtime.State.Players)

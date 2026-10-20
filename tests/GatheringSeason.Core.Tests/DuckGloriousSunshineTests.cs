@@ -47,15 +47,15 @@ public sealed class DuckGloriousSunshineTests
 
         Assert.Single(match.GetLegalActions("human"), action => action.Kind == GameActionKind.Explore);
         Assert.Single(match.GetLegalActions("ai"), action => action.Kind == GameActionKind.Explore);
-        Assert.Equal(8, runtime.Player("human").SafeExhaustionMaximum);
+        Assert.Equal(7, runtime.Player("human").SafeExhaustionMaximum);
         Assert.Equal(5, runtime.Player("ai").SafeExhaustionMaximum);
         Assert.Equal(2, runtime.State.History.Count(entry => entry.Message.Contains("Glorious Sunshine")));
     }
 
     [Fact]
-    public void Revision_six_Fresh_Air_can_wear_out_before_Day_five()
+    public void Fresh_Air_can_wear_out_before_Day_five()
     {
-        var runtime = SunshineRuntime(rulesRevision: 6);
+        var runtime = SunshineRuntime();
         var human = runtime.Player("human");
         var obstacleIds = human.Inventory
             .Where(chip => runtime.Rules.Encounter(chip.DefinitionId).IsObstacle)
@@ -92,12 +92,11 @@ public sealed class DuckGloriousSunshineTests
     }
 
     [Theory]
-    [InlineData(5, 8, 7)]
-    [InlineData(8, 7, 6)]
+    [InlineData(7, 6)]
     public void Goose_uses_the_catalogue_Fresh_Air_limit_unless_Splash_protects_it(
-        int revision, int freshAirLimit, int gooseLimit)
+        int freshAirLimit, int gooseLimit)
     {
-        var rules = DuckRules.ForRulesRevision(revision);
+        var rules = DuckRules.V1;
         var goose = rules.Encounter("grumpy_goose");
         var unprotected = DuckAdventureRules.ApplyEncounter(
             new DuckAdventureState(0, gooseLimit, freshAirLimit, 0, false, false, false, false, 0, 0),
@@ -127,9 +126,9 @@ public sealed class DuckGloriousSunshineTests
             DuckGloriousSunshineBenefit.FreshAir);
         var safeOutcomes = DuckNightResolver.Calculate(safeRuntime.State, safeRuntime.Rules);
 
-        Assert.Equal(11, safeOutcomes["human"].FrozenSleep);
+        Assert.Equal(3, safeOutcomes["human"].FrozenSleep);
         Assert.True(safeOutcomes["human"].IsMostRested);
-        Assert.Equal(5, safeOutcomes["ai"].FrozenSleep);
+        Assert.Equal(1, safeOutcomes["ai"].FrozenSleep);
         Assert.False(safeOutcomes["ai"].IsMostRested);
 
         var wornRuntime = SunshineRuntime();
@@ -140,12 +139,12 @@ public sealed class DuckGloriousSunshineTests
 
         var outcomes = DuckNightResolver.Calculate(wornRuntime.State, wornRuntime.Rules);
 
-        Assert.Equal(8, outcomes["human"].GloriousSunshineSleep);
-        Assert.Equal(11, outcomes["human"].SleepBeforeWear);
-        Assert.Equal(5, outcomes["human"].FrozenSleep);
+        Assert.Equal(2, outcomes["human"].GloriousSunshineSleep);
+        Assert.Equal(3, outcomes["human"].SleepBeforeWear);
+        Assert.Equal(1, outcomes["human"].FrozenSleep);
         Assert.False(outcomes["human"].IsMostRested);
         Assert.Equal(0, outcomes["ai"].GloriousSunshineSleep);
-        Assert.Equal(3, outcomes["ai"].FrozenSleep);
+        Assert.Equal(1, outcomes["ai"].FrozenSleep);
         Assert.True(outcomes["ai"].IsMostRested);
     }
 
@@ -161,9 +160,9 @@ public sealed class DuckGloriousSunshineTests
         DuckNightResolver.Resolve(runtime.State, runtime.Rules);
 
         Assert.Equal(DuckPhase.Finished, runtime.State.Phase);
-        Assert.Equal(11, runtime.Player("human").FrozenSleep);
-        Assert.Equal(2, runtime.Player("human").LastNightOutcome!.DreamTwigs);
-        Assert.Equal(13, runtime.Player("ai").FrozenSleep);
+        Assert.Equal(3, runtime.Player("human").FrozenSleep);
+        Assert.Equal(4, runtime.Player("human").LastNightOutcome!.DreamTwigs);
+        Assert.Equal(3, runtime.Player("ai").FrozenSleep);
         Assert.Equal(4, runtime.Player("ai").LastNightOutcome!.DreamTwigs);
         Assert.NotNull(runtime.State.FinalResult);
     }
@@ -177,7 +176,7 @@ public sealed class DuckGloriousSunshineTests
         {
             player.HasGloriousSunshineChoice = true;
             player.GloriousSunshineBenefit = DuckGloriousSunshineBenefit.FreshAir;
-            player.SafeExhaustionMaximum = 8;
+            player.SafeExhaustionMaximum = 7;
             player.HasFinishedDay = true;
             player.HasFinishedDream = true;
         }
@@ -230,43 +229,9 @@ public sealed class DuckGloriousSunshineTests
     }
 
     [Fact]
-    public void Revision_two_keeps_legacy_Sunlit_Signboards()
+    public void Starry_Night_uses_the_existing_action_and_saved_benefit()
     {
-        var runtime = DuckMatchRuntime.Create(41, rulesRevision: 2);
-        var save = DuckSaves.Capture(new MatchSession<DuckMatchView>(runtime));
-
-        Assert.Equal(2, save.RulesVersion);
-        Assert.Contains("sunlit_signboards", save.WorldEventDeckDefinitionIds);
-        Assert.DoesNotContain("glorious_sunshine", save.WorldEventDeckDefinitionIds);
-        Assert.Equal(save.WorldEventDeckDefinitionIds,
-            DuckSaves.Capture(DuckSaves.Restore(save)).WorldEventDeckDefinitionIds);
-    }
-
-    [Fact]
-    public void Revision_five_Fresh_Air_save_restores_its_old_threshold_and_board()
-    {
-        var match = new MatchSession<DuckMatchView>(SunshineRuntime(rulesRevision: 5));
-        match.Execute("human", match.GetLegalActions("human").Single(action => action.Label.StartsWith("Fresh Air (+3")));
-        match.Execute("ai", match.GetLegalActions("ai").Single(action => action.Label.StartsWith("Starry Night")));
-
-        var restored = DuckSaves.Restore(DuckSaves.Capture(match));
-        var view = restored.GetSnapshot("human");
-
-        Assert.Equal(5, view.RulesRevision);
-        Assert.Equal(8, view.Players.Single(player => player.Id == "human").SafeExhaustionMaximum);
-        Assert.True(view.Rules.BoardSpaceAt(21).IsShelter);
-        Assert.True(view.Rules.BoardSpaceAt(26).IsShelter);
-        Assert.Equal(6, view.Rules.BoardSpaceAt(28).Twigs);
-    }
-
-    [Theory]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(7)]
-    [InlineData(8)]
-    public void Starry_Night_uses_the_existing_action_and_saved_benefit(int revision)
-    {
-        var match = new MatchSession<DuckMatchView>(SunshineRuntime(rulesRevision: revision));
+        var match = new MatchSession<DuckMatchView>(SunshineRuntime());
         var restored = DuckSaves.Restore(DuckSaves.Capture(match));
         var choice = restored.GetLegalActions("human").Single(a => a.Id == "duck.event.glorious-sunshine.warm-dreams");
         Assert.StartsWith("Starry Night", choice.Label);
@@ -274,12 +239,12 @@ public sealed class DuckGloriousSunshineTests
         var resumed = DuckSaves.Restore(DuckSaves.Capture(restored));
         Assert.Equal(DuckGloriousSunshineBenefit.WarmDreams,
             resumed.GetSnapshot("human").Players.Single(p => p.Id == "human").GloriousSunshineBenefit);
-        Assert.Equal(revision, resumed.GetSnapshot("human").RulesRevision);
+        Assert.Equal(8, resumed.GetSnapshot("human").RulesRevision);
     }
 
-    private static DuckMatchRuntime SunshineRuntime(int day = 1, int rulesRevision = 3)
+    private static DuckMatchRuntime SunshineRuntime(int day = 1)
     {
-        var runtime = DuckMatchRuntime.Create(317, rulesRevision: rulesRevision);
+        var runtime = DuckMatchRuntime.Create(317);
         runtime.State.Day = day;
         runtime.State.CurrentEventIndex = day - 1;
         runtime.State.FinalDayDecisionBeat = day == 10 ? 1 : 0;
@@ -314,6 +279,6 @@ public sealed class DuckGloriousSunshineTests
         player.IsWornOut = wornOut;
         player.HasGloriousSunshineChoice = true;
         player.GloriousSunshineBenefit = benefit;
-        player.SafeExhaustionMaximum = benefit == DuckGloriousSunshineBenefit.FreshAir ? 8 : 5;
+        player.SafeExhaustionMaximum = benefit == DuckGloriousSunshineBenefit.FreshAir ? 7 : 5;
     }
 }

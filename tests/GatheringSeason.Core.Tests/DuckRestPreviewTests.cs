@@ -51,17 +51,10 @@ public sealed class DuckRestPreviewTests
         Assert.Equal(before, after);
     }
 
-    [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    [InlineData(4)]
-    [InlineData(5)]
-    [InlineData(6)]
-    [InlineData(7)]
-    public void Exact_preview_matches_authoritative_Night_under_every_saved_catalogue(int revision)
+    [Fact]
+    public void Exact_preview_matches_authoritative_Night()
     {
-        var runtime = DuckMatchRuntime.Create(831, rulesRevision: revision);
+        var runtime = DuckMatchRuntime.Create(831);
         PutEventAtCurrentDay(runtime, "still_air");
         PutDefinitionFirst(runtime.Player("human"), "brambles");
         PutDefinitionFirst(runtime.Player("ai"), "seeds");

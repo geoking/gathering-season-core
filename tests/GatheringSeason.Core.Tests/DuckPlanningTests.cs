@@ -10,14 +10,14 @@ namespace GatheringSeason.Core.Tests;
 public sealed class DuckPlanningTests
 {
     public static IEnumerable<object[]> EncounterDefinitionIds =>
-        new[] { 7, 8 }.SelectMany(revision => DuckRules.ForRulesRevision(revision).EncounterDefinitions
-            .Select(definition => new object[] { revision, definition.DefinitionId }));
+        DuckRules.V1.EncounterDefinitions
+            .Select(definition => new object[] { definition.DefinitionId });
 
     [Theory]
     [MemberData(nameof(EncounterDefinitionIds))]
-    public void Runtime_applies_every_shared_encounter_transition_without_changing_draw_ownership(int revision, string definitionId)
+    public void Runtime_applies_every_shared_encounter_transition_without_changing_draw_ownership(string definitionId)
     {
-        var runtime = DuckMatchRuntime.Create(seed: 733, rulesRevision: revision);
+        var runtime = DuckMatchRuntime.Create(seed: 733);
         runtime.State.WorldEventDeckDefinitionIds[runtime.State.CurrentEventIndex] = "a_pocket_of_driftwood";
         var player = runtime.Player("human");
         player.Inventory.Clear();
