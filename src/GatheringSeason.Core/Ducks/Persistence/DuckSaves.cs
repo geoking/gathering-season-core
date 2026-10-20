@@ -377,7 +377,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(player.TotalTwigs >= (long)player.DayReedsTwigs + player.DayEventTwigs,
                 $"Players[{player.Id}].TotalTwigs cannot be below current-Day Twigs already added to the nest.");
             Require(player.Position >= 0 && player.Position <= 43, $"Players[{player.Id}].Position is outside the board.");
-            var choseFreshAir = save.RulesVersion >= 3 && player.HasGloriousSunshineChoice
+            var choseFreshAir = player.HasGloriousSunshineChoice
                 && player.GloriousSunshineBenefit == DuckGloriousSunshineBenefit.FreshAir;
             var validSafeMaximum = choseFreshAir
                 ? player.SafeExhaustionMaximum == rules.FreshAirGooseSafeExhaustionMaximum
@@ -387,11 +387,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 $"Players[{player.Id}].SafeExhaustionMaximum is not a supported threshold.");
             var currentEvent = rules.WorldEvent(save.WorldEventDeckDefinitionIds[save.CurrentEventIndex]).EventType;
             Require(!player.HasGloriousSunshineChoice
-                    || save.RulesVersion >= 3
-                    && currentEvent == DuckWorldEventType.GloriousSunshine
+                    || currentEvent == DuckWorldEventType.GloriousSunshine
                     && Enum.IsDefined(typeof(DuckGloriousSunshineBenefit), player.GloriousSunshineBenefit),
                 $"Players[{player.Id}] has an invalid Glorious Sunshine choice.");
-            if (save.RulesVersion >= 3 && save.Phase == DuckPhase.Adventure
+            if (save.Phase == DuckPhase.Adventure
                 && currentEvent == DuckWorldEventType.GloriousSunshine && player.PlacedChips.Count > 0)
                 Require(player.HasGloriousSunshineChoice,
                     $"Players[{player.Id}] began Adventure without a Glorious Sunshine choice.");
@@ -426,10 +425,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
             foreach (var id in player.BagPhysicalChipIds)
                 Require(inventoryIds.Contains(id) && bagIds.Add(id),
                     $"Players[{player.Id}] has a missing or duplicate physical chip in pouch order.");
-            Require(player.KnownNextPhysicalChipIds.Count <= 2
+            Require(player.KnownNextPhysicalChipIds.Count <= 1
                     && player.KnownNextPhysicalChipIds.SequenceEqual(
                         player.BagPhysicalChipIds.Take(player.KnownNextPhysicalChipIds.Count)),
-                $"Players[{player.Id}] Signpost preview must be an exact prefix of pouch order.");
+                $"Players[{player.Id}] Signpost preview must contain at most one chip and be an exact prefix of pouch order.");
 
             var placedIds = new HashSet<int>();
             var previousPosition = player.EffectiveStart;
