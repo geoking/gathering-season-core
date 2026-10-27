@@ -24,6 +24,7 @@ internal static class DuckCliDemos
                 var player = view.Players.Single(candidate => candidate.Id == id);
                 var actions = match.GetLegalActions(id);
                 var chosen = actions.FirstOrDefault(action => action.Kind == GameActionKind.ChooseEventBenefit)
+                    ?? actions.FirstOrDefault(action => action.Kind == GameActionKind.ChooseTailwind)
                     ?? actions.FirstOrDefault(action => action.Kind == GameActionKind.NextDay)
                     ?? actions.FirstOrDefault(action => action.Kind == GameActionKind.Settle && player.PlacedChips.Count >= (id == "human" ? 4 : 3))
                     ?? actions.FirstOrDefault(action => action.Kind == GameActionKind.Explore)
@@ -59,7 +60,7 @@ internal static class DuckCliDemos
             }
             var seats = publicView.Players.Select(player => player.Id).ToArray();
             var finalDecisionBeat = publicView.Day == 10 && publicView.Phase == DuckPhase.Adventure
-                && seats.Any(id => match.GetLegalActions(id).Any(action => action.Kind is GameActionKind.Explore or GameActionKind.Settle));
+                && seats.Any(id => match.GetLegalActions(id).Any(action => action.Kind is GameActionKind.Explore or GameActionKind.Settle or GameActionKind.ChooseTailwind));
             var acted = false;
             if (finalDecisionBeat)
             {

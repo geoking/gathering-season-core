@@ -27,6 +27,16 @@ def matrix(seed=0, extra_style=None):
 
 
 class MultiplayerAnalysisTests(unittest.TestCase):
+    def test_identical_seed_rotations_remain_separate_for_each_wish_set(self):
+        second = [dict(record, wishSetId="set-2", wishSetVersion=1) for record in matrix()]
+        groups = analysis.group_by_wish_set(matrix() + second)
+        self.assertEqual({("set-1", 1), ("set-2", 1)}, set(groups))
+        for cohort in groups.values():
+            self.assertEqual(7, len(analysis.validate(cohort)[2][0]))
+        second[0]["coreAssemblyVersion"] = "other"
+        with self.assertRaisesRegex(ValueError, "Core builds"):
+            analysis.group_by_wish_set(matrix() + second)
+
     def test_collective_ratio_pools_unequal_seed_exposures(self):
         result = analysis.ratio_interval([(1, 1), (0, 9)], random.Random(42), 1000)
         self.assertEqual("0.100 [0.000, 1.000]", result)
@@ -56,6 +66,7 @@ class MultiplayerAnalysisTests(unittest.TestCase):
 
     def test_mixed_builds_incomplete_days_and_repeated_weather_are_rejected(self):
         for mutate in (lambda item: item.update(coreAssemblyVersion="other"),
+                       lambda item: item.update(wishSetId="set-2", wishSetVersion=1),
                        lambda item: item["days"].pop(),
                        lambda item: item["days"][1].update(eventId=item["days"][0]["eventId"])):
             records = deepcopy(matrix())

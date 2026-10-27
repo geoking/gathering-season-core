@@ -2,7 +2,7 @@ namespace GatheringSeason.Cli;
 
 internal sealed class DuckCliOptions
 {
-    internal const string Usage = "Usage: GatheringSeason.Cli [--profile ducks] [--seed integer] [--players 2|3|4] [--wish-set set-1] [--inspect | --demo-day | --demo-game] [--save path | --no-save] [--continue | --new-game] [--two-player]";
+    internal const string Usage = "Usage: GatheringSeason.Cli [--profile ducks] [--seed integer] [--players 2|3|4] [--wish-set set-1|set-2] [--inspect | --demo-day | --demo-game] [--save path | --no-save] [--continue | --new-game] [--two-player]";
     internal int? FixedSeed { get; private set; }
     internal bool InspectOnly { get; private set; }
     internal bool DemoDay { get; private set; }
@@ -57,8 +57,8 @@ internal sealed class DuckCliOptions
                     break;
                 case "--wish-set":
                     options.WishSetId = Value();
-                    if (options.WishSetId != "set-1")
-                        throw new ArgumentException("--wish-set currently supports set-1 only.");
+                    if (options.WishSetId is not ("set-1" or "set-2"))
+                        throw new ArgumentException("--wish-set requires set-1 or set-2.");
                     break;
                 case "--inspect" when parts.Length == 1: options.InspectOnly = true; break;
                 case "--demo-day" when parts.Length == 1: options.DemoDay = true; break;

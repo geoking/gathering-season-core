@@ -124,12 +124,12 @@ public sealed class DuckMultiplayerTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new DuckMatchSettings(1));
         Assert.Throws<ArgumentOutOfRangeException>(() => new DuckMatchSettings(5));
-        Assert.Throws<ArgumentException>(() => new DuckMatchSettings(3, "set-2"));
+        Assert.Throws<ArgumentException>(() => new DuckMatchSettings(3, "set-3"));
 
         Invalid(save => save.Settings.PlayerCount = 1);
         Invalid(save => save.Settings.PlayerCount = 5);
         Invalid(save => save.Settings.PlayerCount = 2);
-        Invalid(save => save.Settings.WishSetId = "set-2");
+        Invalid(save => save.Settings.WishSetId = "set-3");
         Invalid(save => save.Settings.WishSetId = " ");
         Invalid(save => save.RulesVersion = 6);
         Invalid(save => save.Players[2].Id = "ai");

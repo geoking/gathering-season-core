@@ -8,14 +8,17 @@ is `GatheringSeason.Core.dll`; tests use `GatheringSeason.Core.Tests`.
 Save profile IDs, format version and existing enum numeric values remain stable.
 New enum values append instead of changing serialized meanings.
 `GameActionKind` retains Explore=11, Settle=12, BuyEncounter=13, FinishDream=14,
-NextDay=15 and ChooseEventBenefit=16. Legacy JSON adapters retain required
+NextDay=15 and ChooseEventBenefit=16. ChooseTailwind=17 is appended for the
+pending Set 2 destination choice. Legacy JSON adapters retain required
 wire fields without changing runtime terminology.
 
 Core v2 executes only rules revision 8: ten Days, 43 spaces, zero starting
 Feathers, Stars and Wishes, the current meadow shelters at 17/21/25 and fifteen
-weather reports (play ten, leave five). `DuckRules.V1` is the sole catalogue;
-`V1` names the stable product profile, not a release or rules revision.
-There is no revision selector in the API or CLI.
+weather reports (play ten, leave five). `DuckRules.V1` remains the unchanged
+Set 1 catalogue; `DuckRules.Set2` supplies the alternate powers and prices.
+`DuckRules.ForWishSet(id)` resolves either immutable catalogue. `V1` names the
+stable product profile, not a release or rules revision. There is no rules
+revision selector in the API or CLI; Wish-set selection is separate.
 
 Core v2 is a breaking compatibility release: revisions 1–7, missing/zero and
 future rules revisions are rejected before state construction. Earlier ten-card
@@ -100,7 +103,8 @@ reward fields remain unchanged. Previously saved history remains verbatim.
 
 ## Match setup and seats
 
-`DuckMatchSettings` validates two to four players and `WishSetId = "set-1"`.
+`DuckMatchSettings` validates two to four players and `WishSetId` equal to
+`"set-1"` or `"set-2"`, each with `WishSetVersion = 1`.
 Defaults remain two players, ten Days and zero starting Feathers. Set identity
 names the encounter powers; it is distinct from the numeric rules revision.
 The ordered player IDs are `human`, `ai`, `ai-2`, `ai-3`, using as many as the
@@ -108,23 +112,72 @@ setup needs. Every seat uses the same player state and legal-action contracts.
 
 Format-1 `Settings.PlayerCount` and `Settings.WishSetId` are additive fields.
 A missing/zero count means two players; a missing/empty set means Set 1 in the
-current rules catalogue. Unknown sets, unsupported counts, mismatched player
-records and invalid command/result references fail validation. Continue preserves the recorded setup.
+current rules catalogue. Missing/zero `Settings.WishSetVersion` means version 1
+only for legacy Set 1 data. Set 2 saves require explicit version 1. Unknown sets
+or versions, unsupported counts, mismatched player records and invalid
+command/result references fail validation before state construction. Continue
+preserves the recorded setup. The existing two-argument settings constructor is
+retained; a separate three-argument overload accepts the set version.
 
-Core observations retain the viewer's own private data for policy clients.
-The terminal interface intentionally hides changing pouch composition and
-accumulated purchase lists. The opening recipe is shown before the first draw;
-every player's current-Night purchases remain visible until Dawn clears them.
-Explicit Signpost previews and already placed chips remain available.
+Older binaries already reject `set-2`. They ignore the new version field for
+Set 1, so Set 1/version 1 remains frozen: an incompatible future power change
+would require an identity or format those binaries reject.
+
+Core observations retain the viewer's own private data. `OwnBag` is sorted by
+physical ID, never draw order. The CLI's exact next-draw probabilities now make
+the viewer's remaining composition available without exposing hidden order or
+opponent pouches. The opening recipe and placed chips remain available;
+current-Night purchases clear at Dawn and no accumulated purchase ledger is
+introduced.
+
+`KnownNextChips` retains its ordered meaning. `UnorderedNextChips` is a Set 2
+Signpost pair presented in canonical physical-ID order. Drawing a member makes
+the remaining chip known. Overlapping peeks preserve inferences: if a previous
+pair was `{Signpost, A}`, drawing Signpost makes A next; its new `{A, B}` peek
+then establishes the ordered prefix A, B. Repeated observations do not consume
+randomness or advance the pouch. Saved unordered IDs must match the actual
+next two chips as a set; ordered IDs must match an actual prefix.
+
+## Tailwind choice and probability observations
+
+After a Set 2 Tailwind is revealed, `OwnPendingTailwind` supplies its definition,
+full movement/destination and first reachable shelter, if any. The issued
+`duck.tailwind.full` and `duck.tailwind.shelter` actions complete that same draw.
+The latter settles immediately. Its chip stays reserved at the pouch head;
+it is not placed or removed twice, and ordinary draw/rest actions are unavailable
+until the choice resolves. Pending state survives save/restore, which issues
+fresh commands and validates the reserved chip and reachable destination.
+
+On Day 10, all ordinary Draw/Settle commitments precede any Tailwind choices.
+The entire cohort stays at the preceding public state until every required
+choice is submitted, then resolves and reveals together. Only the choosing
+player sees their own pending chip and destinations.
+
+`DuckMatchView.DrawProbability` is available only when Explore is currently
+legal. It is absent during a pending Tailwind choice, after a Day-10 commitment,
+outside Adventure or after finishing. Each outcome has a definition ID, exact
+integer `Numerator`/`Denominator`, `Probability` and `WearsOut`.
+`WearOutNumerator` with the shared `Denominator` gives the combined immediate
+wear-out probability. The candidate pool is the first ordered known chip,
+otherwise the unordered pair, otherwise all remaining chips. Duplicate variants
+combine into one outcome. These weights describe player knowledge and do not
+inspect the hidden draw order.
+
+Wear-out predictions use the same authoritative encounter transition as play,
+including the selected Splash power, Goose's safe-limit reduction, Clearing
+Breeze and weather. Observation never mutates state or consumes randomness.
 
 ## Settling projection
 
 `DuckMatchView.RestPreview` is present during Adventure once the viewer has a
 placed chip. It projects resting on that occupied space through the same reward
 calculation used by Night, without issuing a command or consuming randomness.
-Twigs earned today include already-banked Reeds/event Twigs; the separate signed
-`NestTwigChangeOnRest` is the additional route change, excluding final Dream
-Twigs. Feathers are exact. Star and Dream Twig minimum/maximum bounds distinguish
+Twigs earned today include already-banked Set 1 Reeds/event Twigs. Set 2 Reeds
+are conditional until settlement and count only at a shelter; they enter the
+nest exactly once at Night. The separate signed `NestTwigChangeOnRest` includes
+the additional route change and eligible unbanked Set 2 Reeds, excluding final
+Dream Twigs. No rest preview is offered during a pending Tailwind choice.
+Feathers are exact. Star and Dream Twig minimum/maximum bounds distinguish
 secure rewards from bonuses still dependent on the other ducks.
 
 Shared-event, Flock and Most Rested statuses are `Unavailable`, `Possible` or

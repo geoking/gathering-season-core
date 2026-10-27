@@ -10,6 +10,7 @@ namespace GatheringSeason.Core.Ducks.Reference
     public static class DuckDisplayReference
     {
         public const string WishSetName = "Wish Set 1";
+        public static string WishSetNameFor(DuckRuleDefinitions rules) => rules.IsWishSetTwo ? "Wish Set 2" : WishSetName;
 
         public static string HowToPlay(DuckEconomyDefinition economy)
         {
@@ -23,10 +24,16 @@ namespace GatheringSeason.Core.Ducks.Reference
         public static string Glossary(DuckRuleDefinitions rules)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
+            var obstacleText = rules.IsWishSetTwo
+                ? "Obstacles and exhaustion: White chips move 1 space and add 1 exhaustion. Splash prevents only the next chip’s obstacle exhaustion; Clearing Breeze suppresses nuisance separately.\n"
+                : "Obstacles and Exhaustion: White chips move 1 space and add 1 Exhaustion. Protection hushes only their nuisance; movement and Exhaustion still happen.\n";
+            var twigText = rules.IsWishSetTwo
+                ? "Nest twigs: Your victory score. The Twig number at your resting space is the whole route total. Reeds pay their printed twigs at Night only if you finish at a shelter; weather twigs are kept immediately.\n"
+                : "Nest Twigs: Your victory score. The Twig number at your resting space is the whole route total; Reeds and weather Twigs are added to your nest.\n";
             return "Wishes: Helpful chips for the journey. Draw them by Day and bring new ones home from the shop at Night.\n"
-                + "Obstacles and Exhaustion: White chips move 1 space and add 1 Exhaustion. Protection hushes only their nuisance; movement and Exhaustion still happen.\n"
+                + obstacleText
                 + "Stars: Tonight's Wish-buying budget. Unspent Stars fade at Dawn; on Final Night, each retained Star becomes 1 Dream Twig.\n"
-                + "Nest Twigs: Your victory score. The Twig number at your resting space is the whole route total; Reeds and weather Twigs are added to your nest.\n"
+                + twigText
                 + "Trail Feathers: Head starts that stay for later Days, one space each and never spent. Shelters and Dawn Delivery can award them; wearing out does not prevent a shelter Trail Feather.\n"
                 + "Most Rested marker: A one-Day head start for every eligible duck tied for Most Rested. On Final Night, it becomes 1 Dream Twig instead. Low Cloud recognizes Most Rested winners and ties but grants no next-Day head start or Final Night Most Rested Dream Twig.";
         }
@@ -36,7 +43,20 @@ namespace GatheringSeason.Core.Ducks.Reference
             if (encounter == null) throw new ArgumentNullException(nameof(encounter));
             if (rules == null) throw new ArgumentNullException(nameof(rules));
             var freshAirExhaustionBonus = rules.FreshAirExhaustionBonus;
-            return encounter.EncounterType switch
+            if (rules.IsWishSetTwo)
+            {
+                switch (encounter.EncounterType)
+                {
+                    case DuckEncounterType.Seeds: return "Move 1 space, plus 1 if the immediately preceding placed chip was an obstacle, including a protected obstacle. Apply weather and Log afterwards.";
+                    case DuckEncounterType.Tailwind: return $"After drawing, choose the full movement from its printed {encounter.BaseMovement}, modified by weather and Log, or stop at the first shelter ahead within that reach and immediately settle.";
+                    case DuckEncounterType.Signpost: return "Move 2 spaces and privately see the next two chips, without their order. One remaining chip is certain; after drawing one, the other is certain. Never choose or reorder.";
+                    case DuckEncounterType.Splash: return "Move 1 space and protect only the immediately next chip from its +1 exhaustion if it is an obstacle. Its nuisance still applies. A helpful chip uses up this protection too.";
+                    case DuckEncounterType.Reeds: return $"Move 1 space. At Night, gather the printed {encounter.TwigYield} twigs only if your final space is a shelter, including when worn out.";
+                    case DuckEncounterType.Companion: return "Move 1 space and add one active companion. The largest positive flock gains +2 stars once at Night, including ties and worn-out ducks, before halving.";
+                    case DuckEncounterType.Wildflowers: return "Move 1 space. Gain +2 stars once at Night only if your final placed chip is wildflowers, at any space, before worn-out halving.";
+                }
+            }
+            var text = encounter.EncounterType switch
             {
                 DuckEncounterType.Seeds => "A nice snack, as simple as that.",
                 DuckEncounterType.Tailwind => $"A gentle breeze carries you {encounter.BaseMovement} spaces total (+{encounter.BaseMovement - 1} extra).",
@@ -52,6 +72,11 @@ namespace GatheringSeason.Core.Ducks.Reference
                 DuckEncounterType.GrumpyGoose => $"The Goose hustles you 1 space and adds 1 Exhaustion. Unless protected, today's safe maximum immediately falls to 4, or {4 + freshAirExhaustionBonus} with Fresh Air; protection leaves it at 5, or {5 + freshAirExhaustionBonus} with Fresh Air. Exactly one Goose joins each pouch on Day 5 and stays, while the lowered limit resets at Dawn.",
                 _ => throw new ArgumentOutOfRangeException(nameof(encounter))
             };
+            return rules.IsWishSetTwo
+                ? text.Replace("Unless protected", "Unless protected by Clearing Breeze")
+                    .Replace("protection leaves it", "Clearing Breeze protection leaves it")
+                    + " An armed Splash prevents this obstacle’s +1 exhaustion, while its nuisance still applies unless Clearing Breeze protects it."
+                : text;
         }
 
         /// <summary>Describes a weather report using the active catalogue's exact rules.</summary>
@@ -64,6 +89,14 @@ namespace GatheringSeason.Core.Ducks.Reference
             if (rules == null) throw new ArgumentNullException(nameof(rules));
             var economy = rules.Economy;
             var freshAirExhaustionBonus = rules.FreshAirExhaustionBonus;
+            if (rules.IsWishSetTwo && type == DuckWorldEventType.FriendlyGuide)
+                return "Clearing Breeze suppresses each duck’s first obstacle nuisance. Its movement and exhaustion still happen unless an armed Splash prevents that exhaustion; both protections are used on that chip. An older Log is consumed by the draw.";
+            if (rules.IsWishSetTwo && type == DuckWorldEventType.RestlessNight)
+                return "A duck finishing at a shelter loses 1 star from its printed shelter reward and Final Night shelter bonus, to a minimum of 0, before worn-out halving. Wildflowers, flock and other weather rewards are unchanged.";
+            if (rules.IsWishSetTwo && type == DuckWorldEventType.RefreshingShowers)
+                return "Each placed Splash recovers 1 current exhaustion, to a minimum of 0, and protects only the next chip from its obstacle exhaustion. Its nuisance still applies; Clearing Breeze separately protects the first obstacle nuisance.";
+            if (rules.IsWishSetTwo && type == DuckWorldEventType.RainSoftenedSeeds)
+                return "Every Seed gains +1 movement after its power, before a pending Log halves movement.";
 
             return type switch
             {

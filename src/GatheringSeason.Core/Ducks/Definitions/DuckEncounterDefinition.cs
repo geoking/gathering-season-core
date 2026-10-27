@@ -21,8 +21,8 @@ namespace GatheringSeason.Core.Ducks.Definitions
                 throw new ArgumentOutOfRangeException(nameof(twigYield));
             if (exhaustionValue < 0)
                 throw new ArgumentOutOfRangeException(nameof(exhaustionValue));
-            if (encounterType == DuckEncounterType.Companion && baseMovement.HasValue)
-                throw new ArgumentException("Companion movement is conditional and must not be stored as base movement.", nameof(baseMovement));
+            if (encounterType == DuckEncounterType.Companion && baseMovement.HasValue && baseMovement != 1)
+                throw new ArgumentException("Companion movement must be conditional or the fixed Set 2 movement of one.", nameof(baseMovement));
             if (encounterType != DuckEncounterType.Companion && !baseMovement.HasValue)
                 throw new ArgumentException("Only Companion has conditional movement in the v1 catalogue.", nameof(baseMovement));
             if (encounterType != DuckEncounterType.Reeds && twigYield != 0)

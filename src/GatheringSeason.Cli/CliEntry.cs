@@ -64,7 +64,7 @@ internal static class CliEntry
         Console.WriteLine(Usage);
         Console.WriteLine();
         Console.WriteLine("Gathering Season's ten-Day duck game is the default. --profile ducks remains a compatibility alias.");
-        Console.WriteLine("Options: --seed N, --players 2|3|4, --wish-set set-1, --inspect, --demo-day,");
+        Console.WriteLine("Options: --seed N, --players 2|3|4, --wish-set set-1|set-2, --inspect, --demo-day,");
         Console.WriteLine("              --demo-game, --save PATH, --no-save, --continue, --new-game, --two-player");
         Console.WriteLine("--continue uses the saved player count and Wish Set; restart uses this launch's settings.");
         Console.WriteLine("--two-player is a developer alias for manual control of every configured seat.");

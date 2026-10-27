@@ -12,9 +12,9 @@ public sealed class ActionCompatibilityTests
             new[]
             {
                 GameActionKind.Explore, GameActionKind.Settle, GameActionKind.BuyEncounter,
-                GameActionKind.FinishDream, GameActionKind.NextDay, GameActionKind.ChooseEventBenefit
+                GameActionKind.FinishDream, GameActionKind.NextDay, GameActionKind.ChooseEventBenefit, GameActionKind.ChooseTailwind
             },
             Enum.GetValues<GameActionKind>());
-        Assert.Equal(new[] { 11, 12, 13, 14, 15, 16 }, Enum.GetValues<GameActionKind>().Select(value => (int)value));
+        Assert.Equal(new[] { 11, 12, 13, 14, 15, 16, 17 }, Enum.GetValues<GameActionKind>().Select(value => (int)value));
     }
 }

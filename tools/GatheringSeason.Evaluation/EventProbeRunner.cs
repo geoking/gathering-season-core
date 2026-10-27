@@ -44,6 +44,14 @@ public static class EventProbeRunner
                 {
                     if (step >= 256) throw new InvalidOperationException("Event probe failed to finish its Day.");
                     var acted = false;
+                    var frozenChoices = new Dictionary<string, GameAction>();
+                    if (start.Day == DuckMatchSettings.StandardDays)
+                        foreach (var seat in EvaluationRunner.PlayerOrder(request.Schedule, start.Day))
+                        {
+                            var issued = match.GetLegalActions(seat);
+                            if (issued.Count > 0)
+                                frozenChoices[seat] = policyByPlayer[seat].Decide(match.GetSnapshot(seat), issued).Action;
+                        }
                     foreach (var id in EvaluationRunner.PlayerOrder(request.Schedule, start.Day))
                     {
                         var actions = match.GetLegalActions(id);
@@ -56,8 +64,8 @@ public static class EventProbeRunner
                             action = actions.Single(candidate => candidate.Id.EndsWith(
                                 choice == "fresh" ? ".fresh-air" : ".warm-dreams", StringComparison.Ordinal));
                         }
-                        action ??= policyByPlayer[id].Decide(view, actions).Action;
-                        if (!actions.Any(candidate => ReferenceEquals(candidate, action)))
+                        action ??= frozenChoices.GetValueOrDefault(id) ?? policyByPlayer[id].Decide(view, actions).Action;
+                        if (!actions.Any(candidate => candidate.Id == action.Id))
                             throw new InvalidOperationException("Probe policy returned an unissued action.");
                         match.Execute(id, action);
                         acted = true;
@@ -67,7 +75,7 @@ public static class EventProbeRunner
                 }
                 var result = match.GetSnapshot("human");
                 yield return new EventProbeResult(request.SourceLabel, request.Seed, request.Swapped,
-                    request.Schedule, stateHash, result.RulesRevision, result.Economy.CurrencyName,
+                    request.Schedule, stateHash, result.RulesRevision, result.Economy.CurrencyName, result.Settings.WishSetId, result.Settings.WishSetVersion,
                     start.Day, eventId, variant, result.Players.Select(player =>
                     {
                         var initial = start.Players.Single(candidate => candidate.Id == player.Id);
@@ -83,7 +91,7 @@ public static class EventProbeRunner
 }
 
 public sealed record EventProbeResult(string SourceLabel, int Seed, bool Swapped,
-    EvaluationSchedule Schedule, string SourceStateHash, int RulesVersion, string Currency,
+    EvaluationSchedule Schedule, string SourceStateHash, int RulesVersion, string Currency, string WishSetId, int WishSetVersion,
     int Day, string EventDefinitionId, string Variant, IReadOnlyList<EventProbePlayer> Players);
 public sealed record EventProbePlayer(string PlayerId, string PolicyId, int StartSpace,
     int StartingTwigs, int RestSpace, int DrawCount, bool IsWornOut, bool IsShelter,

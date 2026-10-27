@@ -34,6 +34,19 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 if (runtime.State.Players.Any(candidate => !candidate.HasGloriousSunshineChoice))
                     return EmptyActions();
             }
+            if (player.PendingTailwindPhysicalChipId != 0)
+            {
+                if (player.PendingTailwindDestination != 0) return EmptyActions();
+                var pending = PendingTailwind(runtime, player)!;
+                var choices = new List<GameAction>
+                {
+                    new GameAction("duck.tailwind.full", GameActionKind.ChooseTailwind, "Move to space " + pending.FullPosition)
+                };
+                if (pending.ShelterPosition.HasValue)
+                    choices.Add(new GameAction("duck.tailwind.shelter", GameActionKind.ChooseTailwind,
+                        "Settle at space " + pending.ShelterPosition.Value));
+                return new ReadOnlyCollection<GameAction>(choices);
+            }
             if (runtime.State.Day == DuckMatchSettings.StandardDays && runtime.State.FinalDayCommits.Any(
                 commit => commit.Beat == runtime.State.FinalDayDecisionBeat && commit.PlayerId == player.Id))
                 return EmptyActions();
@@ -60,6 +73,20 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (legal.Kind == GameActionKind.ChooseEventBenefit)
             {
                 ChooseGloriousSunshineBenefit(runtime, player, legal.Id);
+                return;
+            }
+
+            if (legal.Kind == GameActionKind.ChooseTailwind)
+            {
+                var pending = PendingTailwind(runtime, player)!;
+                player.PendingTailwindSettle = legal.Id == "duck.tailwind.shelter";
+                player.PendingTailwindDestination = legal.Id == "duck.tailwind.shelter" ? pending.ShelterPosition!.Value : pending.FullPosition;
+                if (runtime.State.Day == DuckMatchSettings.StandardDays) CompleteFinalDayCohort(runtime);
+                else
+                {
+                    Explore(runtime, player, legal.Id == "duck.tailwind.shelter");
+                    ResolveNightWhenEveryoneFinished(runtime);
+                }
                 return;
             }
 
@@ -103,15 +130,57 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 commit => commit.Beat == beat && commit.PlayerId == candidate.Id)))
                 return;
 
-            var commits = runtime.State.FinalDayCommits
-                .Where(commit => commit.Beat == beat)
-                .ToDictionary(commit => commit.PlayerId, StringComparer.Ordinal);
-            foreach (var candidate in activeCohort)
-                ResolveAction(runtime, candidate, commits[candidate.Id].ActionKind);
+            if (runtime.Rules.IsWishSetTwo)
+                foreach (var candidate in activeCohort)
+                    if (runtime.State.FinalDayCommits.Single(commit => commit.PlayerId == candidate.Id).ActionKind == GameActionKind.Explore)
+                        ReserveTailwind(runtime, candidate);
+            CompleteFinalDayCohort(runtime);
+        }
 
+        private static void CompleteFinalDayCohort(DuckMatchRuntime runtime)
+        {
+            if (runtime.State.Players.Any(player =>
+                player.PendingTailwindPhysicalChipId != 0 && player.PendingTailwindDestination == 0)) return;
+            var beat = runtime.State.FinalDayDecisionBeat;
+            var commits = runtime.State.FinalDayCommits.ToDictionary(commit => commit.PlayerId, StringComparer.Ordinal);
+            foreach (var candidate in runtime.State.Players.Where(player => !player.HasFinishedDay))
+            {
+                var commit = commits[candidate.Id];
+                if (commit.ActionKind == GameActionKind.Explore)
+                {
+                    var pending = PendingTailwind(runtime, candidate);
+                    Explore(runtime, candidate, pending != null && candidate.PendingTailwindSettle, allowReserve: false);
+                }
+                else ResolveAction(runtime, candidate, commit.ActionKind);
+            }
             runtime.State.FinalDayCommits.Clear();
             runtime.State.FinalDayDecisionBeat = checked(beat + 1);
             ResolveNightWhenEveryoneFinished(runtime);
+        }
+
+        private static bool ReserveTailwind(DuckMatchRuntime runtime, DuckPlayerState player)
+        {
+            var id = player.BagPhysicalChipIds[0];
+            var chip = player.Inventory.Single(candidate => candidate.PhysicalChipId == id);
+            if (!runtime.Rules.IsWishSetTwo
+                || runtime.Rules.Encounter(chip.DefinitionId).EncounterType != DuckEncounterType.Tailwind) return false;
+            player.PendingTailwindPhysicalChipId = id;
+            return true;
+        }
+
+        internal static DuckAdventureState AdventureState(DuckMatchRuntime runtime, DuckPlayerState player) => new DuckAdventureState(
+            player.Position, player.Exhaustion, player.SafeExhaustionMaximum, player.ActiveFlock,
+            player.SplashProtectionArmed, player.LogSlowdownPending, player.GuideProtectionAvailable,
+            player.PocketDriftwoodAwarded, player.FlowersPlaced, DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes),
+            player.PlacedChips.Count > 0 && runtime.Rules.Encounter(player.Inventory.Single(chip => chip.PhysicalChipId == player.PlacedChips.Last().PhysicalChipId).DefinitionId).IsObstacle);
+
+        internal static DuckPendingTailwindView? PendingTailwind(DuckMatchRuntime runtime, DuckPlayerState player)
+        {
+            if (player.PendingTailwindPhysicalChipId == 0) return null;
+            var chip = player.Inventory.Single(candidate => candidate.PhysicalChipId == player.PendingTailwindPhysicalChipId);
+            var placement = DuckAdventureRules.ApplyEncounter(AdventureState(runtime, player), runtime.Rules.Encounter(chip.DefinitionId), runtime.CurrentEvent.EventType, runtime.Rules);
+            var shelter = DuckAdventureRules.FirstReachableShelter(player.Position, placement.State.Position, runtime.Rules);
+            return new DuckPendingTailwindView(chip.DefinitionId, placement.Movement, placement.State.Position, shelter);
         }
 
         private static void ResolveAction(DuckMatchRuntime runtime, DuckPlayerState player, GameActionKind actionKind)
@@ -129,7 +198,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             }
         }
 
-        private static void Explore(DuckMatchRuntime runtime, DuckPlayerState player)
+        private static void Explore(DuckMatchRuntime runtime, DuckPlayerState player, bool settleAtShelter = false, bool allowReserve = true)
         {
             if (player.BagPhysicalChipIds.Count == 0)
                 throw new InvalidOperationException("There is no chip left to explore.");
@@ -140,24 +209,24 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var physicalChipId = player.BagPhysicalChipIds[0];
             var physicalChip = player.Inventory.Single(chip => chip.PhysicalChipId == physicalChipId);
             var definition = runtime.Rules.Encounter(physicalChip.DefinitionId);
-            var before = new DuckAdventureState(
-                player.Position,
-                player.Exhaustion,
-                player.SafeExhaustionMaximum,
-                player.ActiveFlock,
-                player.SplashProtectionArmed,
-                player.LogSlowdownPending,
-                player.GuideProtectionAvailable,
-                player.PocketDriftwoodAwarded,
-                player.FlowersPlaced,
-                DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
-            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType, runtime.Rules);
+            if (allowReserve && player.PendingTailwindPhysicalChipId == 0 && ReserveTailwind(runtime, player)) return;
+            var before = AdventureState(runtime, player);
+            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType, runtime.Rules, settleAtShelter);
             var after = placement.State;
             player.BagPhysicalChipIds.RemoveAt(0);
             if (player.KnownNextPhysicalChipIds.Count > 0)
                 player.KnownNextPhysicalChipIds.RemoveAt(0);
+            if (player.UnorderedNextPhysicalChipIds.Count > 0)
+            {
+                player.UnorderedNextPhysicalChipIds.Remove(physicalChipId);
+                player.KnownNextPhysicalChipIds.AddRange(player.UnorderedNextPhysicalChipIds);
+                player.UnorderedNextPhysicalChipIds.Clear();
+            }
 
             player.Position = after.Position;
+            player.PendingTailwindPhysicalChipId = 0;
+            player.PendingTailwindDestination = 0;
+            player.PendingTailwindSettle = false;
             player.Exhaustion = after.Exhaustion;
             player.SafeExhaustionMaximum = after.SafeExhaustionMaximum;
             player.ActiveFlock = after.ActiveFlock;
@@ -180,6 +249,11 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var encounterLabel = definition.IsWish ? "Wish " : "Obstacle ";
             runtime.AddHistory(player.Id, player.Name + " placed " + encounterLabel + definition.Name + " at space " + player.Position + ".");
 
+            if (settleAtShelter)
+            {
+                FinishAdventure(runtime, player, wornOut: placement.WearsOut, "settled at a shelter");
+                return;
+            }
             if (placement.WearsOut)
             {
                 FinishAdventure(runtime, player, wornOut: true, "became worn out");
@@ -196,13 +270,23 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         private static void RefreshSignpostPreview(DuckMatchRuntime runtime, DuckPlayerState player)
         {
-            var count = runtime.CurrentEvent.EventType switch
+            var count = runtime.CurrentEvent.EventType == DuckWorldEventType.ThickMorningMist ? 0 : runtime.Rules.IsWishSetTwo ? 2 : 1;
+            if (count == 0)
             {
-                DuckWorldEventType.ThickMorningMist => 0,
-                _ => 1
-            };
-            player.KnownNextPhysicalChipIds.Clear();
-            player.KnownNextPhysicalChipIds.AddRange(player.BagPhysicalChipIds.Take(count));
+                player.KnownNextPhysicalChipIds.Clear();
+                player.UnorderedNextPhysicalChipIds.Clear();
+            }
+            else if (!runtime.Rules.IsWishSetTwo || player.KnownNextPhysicalChipIds.Count > 0 || player.BagPhysicalChipIds.Count <= 1)
+            {
+                player.KnownNextPhysicalChipIds.Clear();
+                player.KnownNextPhysicalChipIds.AddRange(player.BagPhysicalChipIds.Take(count));
+                player.UnorderedNextPhysicalChipIds.Clear();
+            }
+            else
+            {
+                player.UnorderedNextPhysicalChipIds.Clear();
+                player.UnorderedNextPhysicalChipIds.AddRange(player.BagPhysicalChipIds.Take(count).OrderBy(id => id));
+            }
         }
 
         private static void FinishAdventure(
@@ -214,6 +298,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             player.HasFinishedDay = true;
             player.IsWornOut = wornOut;
             player.KnownNextPhysicalChipIds.Clear();
+            player.UnorderedNextPhysicalChipIds.Clear();
             player.SplashProtectionArmed = false;
             player.LogSlowdownPending = false;
             player.GuideProtectionAvailable = false;

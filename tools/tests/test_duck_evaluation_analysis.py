@@ -41,6 +41,17 @@ def match(seed=1, swapped=False, winner="human"):
 
 
 class AnalysisTests(unittest.TestCase):
+    def test_wish_sets_have_distinct_comparison_and_duplicate_identities(self):
+        first, second = match(), match()
+        second.update(wishSetId="set-2", wishSetVersion=1)
+        self.assertNotEqual(analysis.comparison_key(first), analysis.comparison_key(second))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "sets.jsonl"
+            path.write_text("\n".join(json.dumps(record) for record in (first, second)))
+            self.assertEqual(2, len(list(analysis.load_records([path]))))
+        second["wishSetVersion"] = 2
+        self.assertNotEqual(analysis.comparison_key(second), analysis.comparison_key(dict(second, wishSetVersion=1)))
+
     def test_policy_a_wins_follow_assignment_when_seats_are_swapped(self):
         records = [match(swapped=False, winner="human"), match(swapped=True, winner="ai")]
         result = analysis.summarize_matchup(analysis.comparison_key(records[0]), records)

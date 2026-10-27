@@ -74,12 +74,14 @@ public sealed class DuckDefinitionTests
         }
     }
 
-    [Fact]
-    public void V1_shop_matches_every_approved_json_offer_and_uses_type_for_variant_limits()
+    [Theory]
+    [InlineData("shop.json", "set-1")]
+    [InlineData("shop-set-2.json", "set-2")]
+    public void Shop_matches_every_approved_json_offer_and_uses_type_for_variant_limits(string fixture, string wishSetId)
     {
-        using var document = ReadReferenceJson("shop.json");
+        using var document = ReadReferenceJson(fixture);
         var offers = document.RootElement.GetProperty("offers").EnumerateArray().ToArray();
-        var rules = DuckRules.V1;
+        var rules = DuckRules.ForWishSet(wishSetId);
 
         Assert.Equal(11, offers.Length);
         Assert.Equal(11, rules.ShopOffers.Count);

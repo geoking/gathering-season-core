@@ -32,7 +32,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 var drawLimit = rules.OpeningBag.Count + (currentDay >= 5 ? 1 : 0);
                 for (var night = 1; night < currentDay; night++)
                     drawLimit += DuckDreamHandler.PurchaseLimitForDay(night);
-                CommandRevision += drawLimit + DuckDreamHandler.PurchaseLimitForDay(currentDay) + 4;
+                CommandRevision += drawLimit * (rules.IsWishSetTwo ? 2 : 1) + DuckDreamHandler.PurchaseLimitForDay(currentDay) + 4;
             }
         }
 
@@ -59,7 +59,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 Headroom(player.FlowersPlaced, 1);
                 Headroom(player.SafeExhaustionMaximum, rules.FreshAirExhaustionBonus);
                 Headroom(player.Position, 7);
-                var maximumTwigs = (long)player.DayReedsTwigs + player.DayEventTwigs
+                var conditionalReeds = rules.IsWishSetTwo
+                    ? player.PlacedChips.Sum(placed => rules.Encounter(player.Inventory.Single(chip => chip.PhysicalChipId == placed.PhysicalChipId).DefinitionId).TwigYield) : 0;
+                var maximumTwigs = (long)player.DayReedsTwigs + conditionalReeds + player.DayEventTwigs
                     + rules.EncounterDefinitions.Max(chip => chip.TwigYield) + 1
                     + rules.BoardSpaces.Max(space => space.Twigs);
                 var economy = rules.Economy;
@@ -86,7 +88,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
                         var before = new DuckAdventureState(player.Position, player.Exhaustion,
                             player.SafeExhaustionMaximum, player.ActiveFlock, player.SplashProtectionArmed,
                             player.LogSlowdownPending, player.GuideProtectionAvailable, player.PocketDriftwoodAwarded,
-                            player.FlowersPlaced, DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
+                            player.FlowersPlaced, DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes),
+                            player.PlacedChips.Count > 0 && rules.Encounter(player.Inventory.Single(item => item.PhysicalChipId == player.PlacedChips.Last().PhysicalChipId).DefinitionId).IsObstacle);
                         var placement = DuckAdventureRules.ApplyEncounter(before, rules.Encounter(chip.DefinitionId),
                             rules.WorldEvent(state.WorldEventDeckDefinitionIds[state.CurrentEventIndex]).EventType, rules);
                         Capacity(placement.State.Exhaustion, capacity.Exhaustion);
@@ -97,7 +100,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                     }
                     Capacity((long)player.DayReedsTwigs + reeds, capacity.ReedsTwigs);
                     Capacity((long)player.DayEventTwigs + eventTwigs, 1);
-                    Capacity((long)player.TotalTwigs + reeds + eventTwigs
+                    Capacity((long)player.TotalTwigs + conditionalReeds + reeds + eventTwigs
                         + rules.BoardSpaces.Max(space => space.Twigs)
                         + (state.Day == DuckMatchSettings.StandardDays ? capacity.DreamTwigs : 0), capacity.TotalTwigs);
                     Capacity((long)player.PermanentFeatherTrail + rules.BoardSpaces.Max(space => space.Feathers),

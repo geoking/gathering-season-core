@@ -37,6 +37,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
         public int StartingFeathers;
         public int PlayerCount;
         public string? WishSetId;
+        public int WishSetVersion;
     }
 
     public sealed class DuckRandomSaveData
@@ -78,6 +79,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
         public int DawnFeathersAwarded;
         public List<DuckPhysicalChipSaveData> Inventory = new List<DuckPhysicalChipSaveData>();
         public List<int> BagPhysicalChipIds = new List<int>();
+        public int PendingTailwindPhysicalChipId;
+        public int PendingTailwindDestination;
+        public bool PendingTailwindSettle;
+        public List<int> UnorderedNextPhysicalChipIds = new List<int>();
         public List<int> KnownNextPhysicalChipIds = new List<int>();
         public List<DuckPlacedChipSaveData> PlacedChips = new List<DuckPlacedChipSaveData>();
         public List<DuckEncounterType> PlacedHelpfulTypes = new List<DuckEncounterType>();

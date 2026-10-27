@@ -31,7 +31,8 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     Days = state.Settings.Days,
                     StartingFeathers = state.Settings.StartingFeathers,
                     PlayerCount = state.Settings.PlayerCount,
-                    WishSetId = state.Settings.WishSetId
+                    WishSetId = state.Settings.WishSetId,
+                    WishSetVersion = state.Settings.WishSetVersion
                 },
                 Day = state.Day,
                 Phase = state.Phase,
@@ -117,7 +118,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 "ProfileId must identify the Duck v1 rules profile.");
             Require(save.RulesVersion == CurrentRulesVersion,
                 "RulesVersion must identify supported Duck rules revision 8.");
-            var rules = DuckRules.V1;
+            DuckRuleDefinitions rules;
             Require(save.Settings != null, "Settings are required.");
             Require(save.Settings.Days == DuckMatchSettings.StandardDays,
                 "Settings.Days must match the ten-Day rules profile.");
@@ -127,8 +128,13 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(playerCount >= 2 && playerCount <= 4,
                 "Settings.PlayerCount must be two, three or four.");
             Require(save.Settings.WishSetId == null || save.Settings.WishSetId.Length == 0
-                    || save.Settings.WishSetId == DuckMatchSettings.StandardWishSetId,
+                    || save.Settings.WishSetId == DuckMatchSettings.StandardWishSetId
+                    || save.Settings.WishSetId == DuckMatchSettings.SecondWishSetId,
                 "Settings.WishSetId is unsupported.");
+            Require(save.Settings.WishSetVersion == DuckMatchSettings.CurrentWishSetVersion
+                    || save.Settings.WishSetVersion == 0 && save.Settings.WishSetId != DuckMatchSettings.SecondWishSetId,
+                "Settings.WishSetVersion is unsupported.");
+            rules = DuckRules.ForWishSet(string.IsNullOrEmpty(save.Settings.WishSetId) ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId);
             Require(save.Day >= 1 && save.Day <= DuckMatchSettings.StandardDays, "Day is outside the supported calendar.");
             Require(Enum.IsDefined(typeof(DuckPhase), save.Phase), "Phase is not defined.");
             Require(save.Phase != DuckPhase.Preparation, "Preparation is not a resumable command boundary.");
@@ -181,7 +187,8 @@ namespace GatheringSeason.Core.Ducks.Persistence
         {
             return new DuckMatchSettings(save.Settings.PlayerCount == 0 ? 2 : save.Settings.PlayerCount,
                 string.IsNullOrEmpty(save.Settings.WishSetId)
-                    ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId);
+                    ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId,
+                save.Settings.WishSetVersion == 0 ? 1 : save.Settings.WishSetVersion);
         }
 
         private static DuckPlayerSaveData CapturePlayer(DuckPlayerState player)
@@ -223,6 +230,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 }).ToList(),
                 BagPhysicalChipIds = player.BagPhysicalChipIds.ToList(),
                 KnownNextPhysicalChipIds = player.KnownNextPhysicalChipIds.ToList(),
+                UnorderedNextPhysicalChipIds = player.UnorderedNextPhysicalChipIds.ToList(),
+                PendingTailwindPhysicalChipId = player.PendingTailwindPhysicalChipId,
+                PendingTailwindDestination = player.PendingTailwindDestination,
+                PendingTailwindSettle = player.PendingTailwindSettle,
                 PlacedChips = player.PlacedChips.Select(chip => new DuckPlacedChipSaveData
                 {
                     PhysicalChipId = chip.PhysicalChipId,
@@ -272,6 +283,10 @@ namespace GatheringSeason.Core.Ducks.Persistence
                 new DuckPhysicalChipState(chip.PhysicalChipId, chip.DefinitionId)));
             player.BagPhysicalChipIds.AddRange(saved.BagPhysicalChipIds);
             player.KnownNextPhysicalChipIds.AddRange(saved.KnownNextPhysicalChipIds);
+            player.UnorderedNextPhysicalChipIds.AddRange(saved.UnorderedNextPhysicalChipIds);
+            player.PendingTailwindPhysicalChipId = saved.PendingTailwindPhysicalChipId;
+            player.PendingTailwindDestination = saved.PendingTailwindDestination;
+            player.PendingTailwindSettle = saved.PendingTailwindSettle;
             player.PlacedChips.AddRange(saved.PlacedChips.Select(chip =>
                 new DuckPlacedChipState(chip.PhysicalChipId, chip.Position, chip.NuisanceSuppressed)));
             player.PlacedHelpfulTypes.UnionWith(saved.PlacedHelpfulTypes);
@@ -425,10 +440,36 @@ namespace GatheringSeason.Core.Ducks.Persistence
             foreach (var id in player.BagPhysicalChipIds)
                 Require(inventoryIds.Contains(id) && bagIds.Add(id),
                     $"Players[{player.Id}] has a missing or duplicate physical chip in pouch order.");
-            Require(player.KnownNextPhysicalChipIds.Count <= 1
+            Require(player.KnownNextPhysicalChipIds.Count <= (rules.IsWishSetTwo ? 2 : 1)
                     && player.KnownNextPhysicalChipIds.SequenceEqual(
                         player.BagPhysicalChipIds.Take(player.KnownNextPhysicalChipIds.Count)),
-                $"Players[{player.Id}] Signpost preview must contain at most one chip and be an exact prefix of pouch order.");
+                $"Players[{player.Id}] ordered Signpost preview must be an exact bounded prefix of pouch order.");
+
+            Require(player.UnorderedNextPhysicalChipIds != null, "Unordered preview is required.");
+            Require(player.UnorderedNextPhysicalChipIds.Count == 0 || rules.IsWishSetTwo
+                    && player.KnownNextPhysicalChipIds.Count == 0 && player.UnorderedNextPhysicalChipIds.Count == 2
+                    && player.UnorderedNextPhysicalChipIds.SequenceEqual(player.BagPhysicalChipIds.Take(2).OrderBy(id => id)),
+                "Unordered Signpost preview must match the next two chips without their order.");
+            Require(!player.HasFinishedDay || player.KnownNextPhysicalChipIds.Count == 0 && player.UnorderedNextPhysicalChipIds.Count == 0,
+                "Finished ducks cannot retain Signpost knowledge.");
+            if (player.PendingTailwindPhysicalChipId != 0)
+            {
+                Require(rules.IsWishSetTwo && save.Phase == DuckPhase.Adventure && !player.HasFinishedDay
+                        && player.BagPhysicalChipIds.Count > 0 && player.PendingTailwindPhysicalChipId == player.BagPhysicalChipIds[0]
+                        && rules.Encounter(inventoryById[player.PendingTailwindPhysicalChipId]).EncounterType == DuckEncounterType.Tailwind,
+                    "A pending Tailwind must reserve the next chip during Adventure.");
+                var before = new DuckAdventureState(player.Position, player.Exhaustion, player.SafeExhaustionMaximum,
+                    player.ActiveFlock, player.SplashProtectionArmed, player.LogSlowdownPending, player.GuideProtectionAvailable,
+                    player.PocketDriftwoodAwarded, player.FlowersPlaced, DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
+                var placement = DuckAdventureRules.ApplyEncounter(before, rules.Encounter(inventoryById[player.PendingTailwindPhysicalChipId]), currentEvent, rules);
+                var shelter = rules.BoardSpaces.FirstOrDefault(space => space.IsShelter && space.Space > player.Position && space.Space <= placement.State.Position);
+                Require(player.PendingTailwindDestination == 0 ? !player.PendingTailwindSettle
+                        : save.Day == DuckMatchSettings.StandardDays && player.PendingTailwindDestination ==
+                            (player.PendingTailwindSettle ? shelter?.Space : placement.State.Position),
+                    "Pending Tailwind destination must be one of its legal choices.");
+            }
+            else Require(player.PendingTailwindDestination == 0 && !player.PendingTailwindSettle, "A Tailwind destination needs a reserved chip.");
+            if (rules.IsWishSetTwo) Require(player.DayReedsTwigs == 0, "Set 2 Reeds are awarded only at Night.");
 
             var placedIds = new HashSet<int>();
             var previousPosition = player.EffectiveStart;
@@ -604,7 +645,13 @@ namespace GatheringSeason.Core.Ducks.Persistence
         private static void ValidateCommits(DuckSaveData save, ISet<string> playerIds)
         {
             Require(save.FinalDayCommits != null, "FinalDayCommits are required.");
-            if (save.FinalDayCommits.Count == 0) return;
+            if (save.FinalDayCommits.Count == 0)
+            {
+                Require(save.Day != DuckMatchSettings.StandardDays
+                        || save.Players.All(player => player.PendingTailwindPhysicalChipId == 0),
+                    "Final-Day Tailwind choices require their complete committed cohort.");
+                return;
+            }
             Require(save.Day == DuckMatchSettings.StandardDays && save.Phase == DuckPhase.Adventure
                     && save.FinalDayDecisionBeat >= 1,
                 "Final-Day commitments can exist only during a positive Day 10 decision beat.");
@@ -616,8 +663,22 @@ namespace GatheringSeason.Core.Ducks.Persistence
                         == save.FinalDayCommits.Count,
                 "FinalDayCommits contains an invalid or duplicate commitment.");
             var activeCount = save.Players.Count(player => !player.HasFinishedDay);
-            Require(save.FinalDayCommits.Count < activeCount,
+            var pendingTailwinds = save.Players.Where(player => player.PendingTailwindPhysicalChipId != 0).ToArray();
+            Require(save.FinalDayCommits.Count < activeCount || pendingTailwinds.Any(player => player.PendingTailwindDestination == 0),
                 "A complete final-Day commitment cohort should already have resolved atomically.");
+            if (pendingTailwinds.Length > 0)
+                Require(save.FinalDayCommits.Count == activeCount && pendingTailwinds.All(player => save.FinalDayCommits.Any(commit => commit.PlayerId == player.Id && commit.ActionKind == GameActionKind.Explore)),
+                    "Final-Day Tailwind choices require a complete committed cohort.");
+            if (save.FinalDayCommits.Count == activeCount)
+                foreach (var commit in save.FinalDayCommits.Where(item => item.ActionKind == GameActionKind.Explore))
+                {
+                    var player = save.Players.Single(candidate => candidate.Id == commit.PlayerId);
+                    Require(player.BagPhysicalChipIds.Count > 0, "A committed draw needs a remaining chip.");
+                    var next = player.Inventory.Single(chip => chip.PhysicalChipId == player.BagPhysicalChipIds[0]);
+                    if (DuckRules.ForWishSet(SettingsFromSave(save).WishSetId).Encounter(next.DefinitionId).EncounterType == DuckEncounterType.Tailwind)
+                        Require(player.PendingTailwindPhysicalChipId == next.PhysicalChipId,
+                            "Every committed Tailwind draw needs a reserved choice before the cohort resolves.");
+                }
             foreach (var commit in save.FinalDayCommits)
             {
                 var player = save.Players.Single(candidate => candidate.Id == commit.PlayerId);
@@ -646,8 +707,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
         {
             var player = save.Players.Single(candidate => candidate.Id == playerId);
             var priorDays = save.Day == 1 ? 0 : new DuckStateLimits(
-                DuckRules.V1, save.Day - 1).CommandRevision;
-            return priorDays + player.PlacedChips.Count + (player.HasFinishedDay ? 1 : 0)
+                DuckRules.ForWishSet(SettingsFromSave(save).WishSetId), save.Day - 1).CommandRevision;
+            return priorDays + player.PlacedChips.Count * (SettingsFromSave(save).WishSetId == DuckMatchSettings.SecondWishSetId ? 2 : 1)
+                + (player.PendingTailwindPhysicalChipId != 0 ? 1 : 0) + (player.PendingTailwindDestination != 0 ? 1 : 0) + (player.HasFinishedDay ? 1 : 0)
                 + (player.HasGloriousSunshineChoice ? 1 : 0) + player.PurchasedEncounterDefinitionIds.Count
                 + (player.HasFinishedDream ? 1 : 0)
                 + (save.FinalDayCommits.Any(commit => commit.PlayerId == playerId) ? 1 : 0);

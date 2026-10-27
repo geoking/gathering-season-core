@@ -29,7 +29,7 @@ public sealed record MultiplayerStudyDay(
     IReadOnlyList<MultiplayerStudyDayPlayer> Players);
 
 public sealed record MultiplayerStudyResult(
-    int SchemaVersion, string SourceLabel, string CoreAssemblyVersion, int RulesRevision,
+    int SchemaVersion, string SourceLabel, string CoreAssemblyVersion, int RulesRevision, string WishSetId, int WishSetVersion,
     int Seed, int PlayerCount, string Scenario, IReadOnlyDictionary<string, string> Styles,
     IReadOnlyList<MultiplayerStudyPlayer> Players, IReadOnlyList<MultiplayerStudyDay> Days,
     IReadOnlyList<string> WinnerIds, int WinningScoreGap, int ActionCount, long DurationMicroseconds);
@@ -74,7 +74,7 @@ public sealed class MultiplayerStudyRunner
         return assignments;
     }
 
-    public MultiplayerStudyResult Run(int seed, int playerCount, MultiplayerStudyAssignment assignment, string sourceLabel)
+    public MultiplayerStudyResult Run(int seed, int playerCount, MultiplayerStudyAssignment assignment, string sourceLabel, string wishSetId = DuckMatchSettings.StandardWishSetId)
     {
         if (string.IsNullOrWhiteSpace(sourceLabel)) throw new ArgumentException("A source label is required.", nameof(sourceLabel));
         ArgumentNullException.ThrowIfNull(assignment);
@@ -83,7 +83,7 @@ public sealed class MultiplayerStudyRunner
             throw new ArgumentException("Assignment must specify every configured seat once.", nameof(assignment));
         var policies = ids.ToDictionary(id => id, id => EvaluationPolicies.Create(assignment.Styles[id]), StringComparer.Ordinal);
 
-        var match = MatchSession.CreateDuck(seed, new DuckMatchSettings(playerCount));
+        var match = MatchSession.CreateDuck(seed, new DuckMatchSettings(playerCount, wishSetId));
         var days = new SortedDictionary<int, DayAccumulator>();
         var players = ids.ToDictionary(id => id, _ => new PlayerAccumulator(), StringComparer.Ordinal);
         var started = Stopwatch.GetTimestamp();
@@ -95,7 +95,7 @@ public sealed class MultiplayerStudyRunner
             CaptureDayStart(match, ids, days);
             var pass = match.GetSnapshot("human");
             var frozenBeat = pass.Day == 10 && pass.Phase == DuckPhase.Adventure
-                && ids.Any(id => match.GetLegalActions(id).Any(action => action.Kind is GameActionKind.Explore or GameActionKind.Settle));
+                && ids.Any(id => match.GetLegalActions(id).Any(action => action.Kind is GameActionKind.Explore or GameActionKind.Settle or GameActionKind.ChooseTailwind));
             var acted = false;
             if (frozenBeat)
             {
@@ -135,10 +135,10 @@ public sealed class MultiplayerStudyRunner
                 days.Values.Count(day => day.Players[id].OasisWorn),
                 observed.PolicyMicroseconds, observed.ExecuteMicroseconds);
         }).OrderBy(player => Array.IndexOf(ids, player.PlayerId)).ToArray();
-        return new MultiplayerStudyResult(2, sourceLabel,
+        return new MultiplayerStudyResult(3, sourceLabel,
             typeof(MatchSession).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? typeof(MatchSession).Assembly.GetName().Version?.ToString() ?? "unknown",
-            final.RulesRevision, seed, playerCount, assignment.Scenario,
+            final.RulesRevision, final.Settings.WishSetId, final.Settings.WishSetVersion, seed, playerCount, assignment.Scenario,
             new Dictionary<string, string>(assignment.Styles, StringComparer.Ordinal), resultPlayers,
             days.Values.Select(day => day.Build(ids)).ToArray(), final.FinalResult.WinnerIds.ToArray(),
             leader - second, actionCount, Microseconds(Stopwatch.GetTimestamp() - started));

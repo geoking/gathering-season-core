@@ -15,6 +15,28 @@ public sealed class DuckPersistenceTests
     };
 
     [Fact]
+    public void Actual_format_one_Set_one_save_continues_through_Night_and_Dawn_without_rerolling()
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "Fixtures", "Duck", "set-1-format-1-continuation.json");
+        using var fixture = JsonDocument.Parse(File.ReadAllText(path));
+        var save = fixture.RootElement.GetProperty("save").Deserialize<DuckSaveData>(SaveJson)!;
+        var match = DuckSaves.Restore(save);
+
+        Assert.Equal("set-1", match.GetSnapshot("human").Settings.WishSetId);
+        Assert.Equal(save.Players[0].KnownNextPhysicalChipIds.Single(),
+            Assert.Single(match.GetSnapshot("human").KnownNextChips).PhysicalChipId);
+        foreach (var command in fixture.RootElement.GetProperty("actions").EnumerateArray())
+        {
+            var playerId = command.GetProperty("playerId").GetString()!;
+            var actionId = command.GetProperty("actionId").GetString()!;
+            match.Execute(playerId, match.GetLegalActions(playerId).Single(action => action.Id == actionId));
+        }
+
+        var actual = JsonSerializer.Serialize(LegacyContinuationState(DuckSaves.Capture(match)), SaveJson);
+        Assert.Equal(fixture.RootElement.GetProperty("expected").GetRawText(), actual);
+    }
+
+    [Fact]
     public void Capture_is_a_detached_complete_value_and_restore_exactly_recreates_an_ordinary_action()
     {
         var runtime = DuckMatchRuntime.Create(seed: 101);
@@ -269,4 +291,24 @@ public sealed class DuckPersistenceTests
     {
         Assert.Equal(JsonSerializer.Serialize(expected, SaveJson), JsonSerializer.Serialize(actual, SaveJson));
     }
+
+    private static object LegacyContinuationState(DuckSaveData save) => new
+    {
+        save.Day, save.Phase, save.CurrentEventIndex, save.DayFiveGooseAdded, save.FinalDayDecisionBeat,
+        save.NextPhysicalChipId, save.Random, save.WorldEventDeckDefinitionIds,
+        Players = save.Players.Select(player => new
+        {
+            player.Id, player.PermanentFeatherTrail, player.TotalTwigs, player.DayReedsTwigs, player.DayEventTwigs,
+            player.Position, player.Exhaustion, player.SafeExhaustionMaximum, player.ActiveFlock,
+            player.SplashProtectionArmed, player.LogSlowdownPending, player.GuideProtectionAvailable,
+            player.PocketDriftwoodAwarded, player.HasGloriousSunshineChoice, player.GloriousSunshineBenefit,
+            player.FlowersPlaced, player.FrozenSleep, player.IsSleepFrozen, player.RemainingSleep,
+            player.PendingMostRestedStep, player.ActiveMostRestedStep, player.EffectiveStart,
+            player.HasFinishedDay, player.HasFinishedDream, player.IsWornOut,
+            player.DawnTwigDeficit, player.DawnFeathersAwarded, player.Inventory, player.BagPhysicalChipIds,
+            player.KnownNextPhysicalChipIds, player.PlacedChips, player.PlacedHelpfulTypes,
+            player.PurchasedEncounterDefinitionIds, player.PurchasedShopTypes, player.LastNightOutcome
+        }),
+        save.PublicAwards, save.FinalDayCommits, save.CommandRevisions
+    };
 }

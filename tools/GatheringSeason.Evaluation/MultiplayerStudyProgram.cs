@@ -6,12 +6,13 @@ public sealed record MultiplayerStudyOptions(
     int SeedStart, int SeedCount, IReadOnlyList<int> PlayerCounts,
     string SourceLabel, string OutputPath, int ProgressEvery)
 {
+    public string WishSetId { get; init; } = "set-1";
     public IReadOnlyList<string>? FocalStyles { get; init; }
     public bool AllMixedSeats { get; init; }
     public const string Help = """
         Gathering Season multiplayer study (separate from historical pairwise evaluation)
         --multiplayer --source-label LABEL [--seed-start N] [--seed-count N]
-        [--players all|2|3|4] [--output JSONL_PATH|-] [--progress-every N]
+        [--players all|2|3|4] [--wish-set set-1|set-2] [--output JSONL_PATH|-] [--progress-every N]
         [--focal-policies ID,ID,...] [--all-mixed-seats]
         Per seed and player count: one all-Normal baseline; Movement and Reeds
         each rotated through every seat against Normal; balanced mixed lobbies.
@@ -19,6 +20,7 @@ public sealed record MultiplayerStudyOptions(
 
     public static MultiplayerStudyOptions Parse(IReadOnlyList<string> args)
     {
+        var wishSetId = "set-1";
         var seedStart = 0;
         var seedCount = 1;
         IReadOnlyList<int> playerCounts = new[] { 2, 3, 4 };
@@ -37,6 +39,7 @@ public sealed record MultiplayerStudyOptions(
             }
             switch (option)
             {
+                case "--wish-set": wishSetId = Value(); break;
                 case "--seed-start": seedStart = Integer(Value(), option); break;
                 case "--seed-count": seedCount = Integer(Value(), option); break;
                 case "--players":
@@ -54,6 +57,7 @@ public sealed record MultiplayerStudyOptions(
                 default: throw new ArgumentException("Unknown multiplayer option: " + option);
             }
         }
+        _ = GatheringSeason.Core.Ducks.Definitions.DuckRules.ForWishSet(wishSetId);
         if (seedCount <= 0) throw new ArgumentOutOfRangeException(nameof(seedCount));
         if (progressEvery < 0) throw new ArgumentOutOfRangeException(nameof(progressEvery));
         if (string.IsNullOrWhiteSpace(sourceLabel))
@@ -62,7 +66,7 @@ public sealed record MultiplayerStudyOptions(
         _ = checked(seedStart + seedCount);
         foreach (var count in playerCounts) _ = MultiplayerStudyRunner.Assignments(count, focalStyles, allMixedSeats);
         return new MultiplayerStudyOptions(seedStart, seedCount, playerCounts, sourceLabel, output, progressEvery)
-            { FocalStyles = focalStyles, AllMixedSeats = allMixedSeats };
+            { FocalStyles = focalStyles, AllMixedSeats = allMixedSeats, WishSetId = wishSetId };
     }
 
     private static int Integer(string value, string option) => int.TryParse(value, out var parsed)
@@ -89,7 +93,7 @@ public static class MultiplayerStudyProgram
             foreach (var playerCount in options.PlayerCounts)
                 foreach (var assignment in MultiplayerStudyRunner.Assignments(playerCount, options.FocalStyles, options.AllMixedSeats))
                 {
-                    var result = runner.Run(seed, playerCount, assignment, options.SourceLabel);
+                    var result = runner.Run(seed, playerCount, assignment, options.SourceLabel, options.WishSetId);
                     output.WriteLine(JsonSerializer.Serialize(result, EvaluationProgram.Json));
                     completed++;
                     if (options.ProgressEvery > 0 && (completed % options.ProgressEvery == 0 || completed == total))

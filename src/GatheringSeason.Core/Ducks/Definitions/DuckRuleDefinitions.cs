@@ -19,8 +19,10 @@ namespace GatheringSeason.Core.Ducks.Definitions
             IEnumerable<DuckEncounterDefinition> encounterDefinitions,
             IEnumerable<DuckShopOffer> shopOffers,
             IEnumerable<DuckWorldEventDefinition> worldEvents,
-            IEnumerable<DuckEncounterDefinition> openingBag)
+            IEnumerable<DuckEncounterDefinition> openingBag,
+            string wishSetId = "set-1")
         {
+            WishSetId = wishSetId;
             Economy = economy ?? throw new ArgumentNullException(nameof(economy));
             BoardSpaces = Freeze(boardSpaces, nameof(boardSpaces));
             EncounterDefinitions = Freeze(encounterDefinitions, nameof(encounterDefinitions));
@@ -37,6 +39,8 @@ namespace GatheringSeason.Core.Ducks.Definitions
         }
 
         public const int NestPosition = 0;
+        public string WishSetId { get; }
+        public bool IsWishSetTwo => WishSetId == "set-2";
         public string ProfileId => "gathering-season.duck.v1";
         public int RulesRevision => DuckRules.CurrentRulesRevision;
         public int FreshAirExhaustionBonus => 2;

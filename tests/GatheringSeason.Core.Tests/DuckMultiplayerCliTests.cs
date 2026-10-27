@@ -13,7 +13,7 @@ public sealed partial class DuckCliTests
     [InlineData("--players", "1")]
     [InlineData("--players=5", "")]
     [InlineData("--players", "three")]
-    [InlineData("--wish-set", "set-2")]
+    [InlineData("--wish-set", "set-3")]
     public void Multiplayer_launch_rejects_unsupported_settings(string option, string value)
     {
         var arguments = value.Length == 0 ? new[] { option } : new[] { option, value };
@@ -44,6 +44,24 @@ public sealed partial class DuckCliTests
         Assert.Contains($"continuing saved game · {count} players · Wish Set set-1", continued.Output);
         Assert.DoesNotContain("Opening recipe", continued.Output);
         Assert.Equal(count, firstFiles.Read().Players.Count);
+    }
+
+    [Fact]
+    public void Second_set_demo_finishes_and_continue_preserves_its_saved_rules()
+    {
+        using var files = new SaveFiles();
+        var result = Run("", "--seed", "42", "--wish-set", "set-2", "--players", "3", "--demo-game", "--save", files.Path);
+        Assert.Equal(0, result.ExitCode);
+        Assert.Equal(DuckPhase.Finished, files.Read().Phase);
+        Assert.Equal("set-2", files.Read().Settings.WishSetId);
+        var continued = Run("", "--continue", "--inspect", "--wish-set", "set-1", "--save", files.Path);
+        Assert.Equal(0, continued.ExitCode);
+        Assert.Contains("3 players · Wish Set set-2", continued.Output);
+        var chance = Run("chance\nq\n", "--wish-set", "set-2", "--seed", "42", "--two-player", "--no-save");
+        Assert.Equal(0, chance.ExitCode);
+        Assert.Contains("Next draw probabilities:", chance.Output);
+        Assert.Contains("Wear-out chance: 0/13", chance.Output);
+        Assert.DoesNotContain("Private Signpost preview for ai", chance.Output);
     }
 
     [Fact]

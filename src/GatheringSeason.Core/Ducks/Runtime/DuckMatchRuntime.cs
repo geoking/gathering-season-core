@@ -23,7 +23,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 FinalDayDecisionBeat = 0,
                 NextPhysicalChipId = 1
             };
-            Rules = DuckRules.V1;
+            Rules = DuckRules.ForWishSet(settings.WishSetId);
             _random = new ResumableRandomSource(seed);
 
             State.WorldEventDeckDefinitionIds.AddRange(Rules.WorldEvents.Select(item => item.DefinitionId));
@@ -119,7 +119,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 DuckNightResolver.Preview(State, Rules, viewer),
                 State.FinalDayDecisionBeat,
                 State.FinalDayCommits.Count > 0,
-                State.FinalResult);
+                State.FinalResult,
+                viewer.UnorderedNextPhysicalChipIds.Select(id => PhysicalChipView(ownInventoryById[id])),
+                DuckAdventureHandler.PendingTailwind(this, viewer),
+                DuckDrawProbability.Calculate(this, viewer));
         }
 
         public IReadOnlyList<GameAction> GetLegalActions(string playerId)

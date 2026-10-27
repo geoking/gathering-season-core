@@ -25,7 +25,8 @@ public sealed record EvaluationMatchRequest(
     bool Swapped,
     EvaluationSchedule Schedule,
     string SourceLabel,
-    bool IncludeActions = false);
+    bool IncludeActions = false,
+    string WishSetId = DuckMatchSettings.StandardWishSetId);
 
 public sealed record EvaluationMatchResult(
     int SchemaVersion,
@@ -33,6 +34,8 @@ public sealed record EvaluationMatchResult(
     string CoreAssemblyVersion,
     string ProfileId,
     int RulesVersion,
+    string WishSetId,
+    int WishSetVersion,
     string Currency,
     int SaveFormatVersion,
     int Seed,

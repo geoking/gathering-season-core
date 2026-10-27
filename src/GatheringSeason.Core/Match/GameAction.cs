@@ -8,7 +8,8 @@ namespace GatheringSeason.Core.Match
         BuyEncounter = 13,
         FinishDream = 14,
         NextDay = 15,
-        ChooseEventBenefit = 16
+        ChooseEventBenefit = 16,
+        ChooseTailwind = 17
     }
 
     /// <summary>A command offered by the current state. Execute validates its ID again; stale actions are rejected.</summary>
