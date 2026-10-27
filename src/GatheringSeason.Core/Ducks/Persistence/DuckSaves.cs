@@ -645,7 +645,13 @@ namespace GatheringSeason.Core.Ducks.Persistence
         private static void ValidateCommits(DuckSaveData save, ISet<string> playerIds)
         {
             Require(save.FinalDayCommits != null, "FinalDayCommits are required.");
-            if (save.FinalDayCommits.Count == 0) return;
+            if (save.FinalDayCommits.Count == 0)
+            {
+                Require(save.Day != DuckMatchSettings.StandardDays
+                        || save.Players.All(player => player.PendingTailwindPhysicalChipId == 0),
+                    "Final-Day Tailwind choices require their complete committed cohort.");
+                return;
+            }
             Require(save.Day == DuckMatchSettings.StandardDays && save.Phase == DuckPhase.Adventure
                     && save.FinalDayDecisionBeat >= 1,
                 "Final-Day commitments can exist only during a positive Day 10 decision beat.");
