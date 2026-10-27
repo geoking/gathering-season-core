@@ -122,6 +122,7 @@ internal sealed class DuckInteractiveCli
             var value = command.Substring("board ".Length).Trim();
             DuckCliRenderer.ShowBoard(view, int.TryParse(value, out var space) ? space : -1);
         }
+        else if (command == "chance") DuckCliRenderer.ShowChance(view);
         else if (command is "pouch" or "bag") DuckCliRenderer.ShowBag(view);
         else if (command is "tokens" or "wishes") DuckCliRenderer.ShowTokens(view);
         else if (command == "shop") DuckCliRenderer.ShowShop(view, issued.TryGetValue(_viewer, out var actions) ? actions : _match.GetLegalActions(_viewer));

@@ -173,9 +173,9 @@ def validate(matches):
         if any(match["styles"].get(player["playerId"]) != player["style"] for player in match["players"]):
             raise ValueError("policy assignment differs from player telemetry")
         by_count[count][match["seed"]].append(match)
-    if len({(match["sourceLabel"], match["rulesRevision"], match["coreAssemblyVersion"])
+    if len({(match["sourceLabel"], match["rulesRevision"], match["coreAssemblyVersion"], match.get("wishSetId", "set-1"), match.get("wishSetVersion", 1))
             for match in matches}) != 1:
-        raise ValueError("input mixes source labels, rules revisions or Core builds")
+        raise ValueError("input mixes source labels, rules revisions, Wish Sets or Core builds")
     if len({tuple(sorted(seeds)) for seeds in by_count.values()}) != 1:
         raise ValueError("player counts must use the same matched seed set")
     matrix = None
@@ -218,24 +218,11 @@ def validate(matches):
     return by_count
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--bootstrap", type=int, default=1000)
-    parser.add_argument("--bootstrap-seed", type=int, default=20260924)
-    args = parser.parse_args()
-    if args.bootstrap < 100:
-        parser.error("--bootstrap must be at least 100")
-    opener = gzip.open if args.input.suffix == ".gz" else open
-    with opener(args.input, "rt") as source:
-        matches = [json.loads(line) for line in source if line.strip()]
-    try:
-        by_count = validate(matches)
-    except ValueError as error:
-        parser.error(str(error))
+def report(matches, args):
+    by_count = validate(matches)
     rng = random.Random(args.bootstrap_seed)
     lines = ["# Multiplayer evaluation", "",
+             f"Wish Set: {matches[0].get('wishSetId', 'set-1')} version {matches[0].get('wishSetVersion', 1)}. "
              f"Source label: `{matches[0]['sourceLabel']}`. Rules revision: {matches[0]['rulesRevision']}. "
              f"Bootstrap seed: {args.bootstrap_seed}; {args.bootstrap} resamples.", "",
              "Each seed is one resampling cluster: its baseline and every rotated seat assignment stay together. "
@@ -256,6 +243,38 @@ def main():
     if oasis:
         lines.append(example("Safe oasis reach", oasis))
     lines.append("")
+    return lines
+
+
+def group_by_wish_set(matches):
+    if not matches:
+        raise ValueError("input contains no matches")
+    if len({(match["sourceLabel"], match["rulesRevision"], match["coreAssemblyVersion"]) for match in matches}) != 1:
+        raise ValueError("input mixes source labels, rules revisions or Core builds")
+    groups = collections.defaultdict(list)
+    for match in matches:
+        groups[(match.get("wishSetId", "set-1"), match.get("wishSetVersion", 1))].append(match)
+    return groups
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--bootstrap", type=int, default=1000)
+    parser.add_argument("--bootstrap-seed", type=int, default=20260924)
+    args = parser.parse_args()
+    if args.bootstrap < 100:
+        parser.error("--bootstrap must be at least 100")
+    opener = gzip.open if args.input.suffix == ".gz" else open
+    with opener(args.input, "rt") as source:
+        matches = [json.loads(line) for line in source if line.strip()]
+    lines = []
+    try:
+        for _, cohort in sorted(group_by_wish_set(matches).items()):
+            lines.extend(report(cohort, args))
+    except ValueError as error:
+        parser.error(str(error))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text("\n".join(lines))
 

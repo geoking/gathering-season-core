@@ -74,7 +74,7 @@ public static class EvaluationProgram
                     swapped,
                     options.Schedule,
                     options.SourceLabel,
-                    includeActions);
+                    includeActions, options.WishSetId);
                 var outcome = runner.Run(request, probes == null ? null : save =>
                 {
                     foreach (var probe in EventProbeRunner.Run(save, request))
@@ -175,6 +175,7 @@ public sealed record EvaluationOptions(
     bool IncludeActions,
     bool ShowHelp)
 {
+    public string WishSetId { get; init; } = "set-1";
     public string? EventProbesPath { get; init; }
 
     public const string Help = """
@@ -186,10 +187,12 @@ public sealed record EvaluationOptions(
           --source-label LABEL          Full source/build label recorded in every match
 
         Match set:
+          --wish-set ID                 set-1|set-2 (default: set-1)
           --seed-start N                First seed (default: 0)
           --seed-count N                Number of seeds (default: 1)
           --policy-a ID                 baseline|normal|cautious|adventurous|movement-heavy|reeds-heavy|sandbag-day3
-                                        flowers-first|seeds-first|sunshine-fresh|sunshine-warm
+                                        flowers-first|seeds-first|splash-heavy|companion-heavy|movement-first-mixed
+                                        cautious-stop|adventurous-stop|sunshine-fresh|sunshine-warm
           --policy-b ID                 Same IDs (default: normal)
           --seat-mode MODE              original|swapped|both (default: original)
           --swapped-seats               Alias for --seat-mode both
@@ -209,6 +212,7 @@ public sealed record EvaluationOptions(
 
     public static EvaluationOptions Parse(IReadOnlyList<string> args)
     {
+        var wishSetId = "set-1";
         var seedStart = 0;
         var seedCount = 1;
         var policyA = "baseline";
@@ -231,6 +235,7 @@ public sealed record EvaluationOptions(
             var arg = args[index];
             switch (arg)
             {
+                case "--wish-set": wishSetId = Value(args, ref index, arg); break;
                 case "--seed-start": seedStart = Int(Value(args, ref index, arg), arg); break;
                 case "--seed-count": seedCount = Int(Value(args, ref index, arg), arg); break;
                 case "--policy-a": policyA = Value(args, ref index, arg); break;
@@ -256,6 +261,7 @@ public sealed record EvaluationOptions(
             return new EvaluationOptions(seedStart, seedCount, policyA, policyB, seatMode, schedule, output,
                 trace, save, representativeSeed, representativeSeat, sourceLabel ?? "help", progressEvery,
                 includeActions, true);
+        _ = GatheringSeason.Core.Ducks.Definitions.DuckRules.ForWishSet(wishSetId);
         if (seedCount <= 0) throw new ArgumentOutOfRangeException(nameof(seedCount), "Seed count must be positive.");
         if (progressEvery < 0) throw new ArgumentOutOfRangeException(nameof(progressEvery));
         if (string.IsNullOrWhiteSpace(sourceLabel))
@@ -267,7 +273,7 @@ public sealed record EvaluationOptions(
         if (representativeSeat == EvaluationSeatMode.Original && seatMode == EvaluationSeatMode.Swapped)
             representativeSeat = EvaluationSeatMode.Swapped;
         return new EvaluationOptions(seedStart, seedCount, policyA, policyB, seatMode, schedule, output,
-            trace, save, representativeSeed, representativeSeat, sourceLabel, progressEvery, includeActions, false) { EventProbesPath = eventProbes };
+            trace, save, representativeSeed, representativeSeat, sourceLabel, progressEvery, includeActions, false) { EventProbesPath = eventProbes, WishSetId = wishSetId };
     }
 
     private static string Value(IReadOnlyList<string> args, ref int index, string option)

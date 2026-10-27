@@ -16,7 +16,7 @@ public sealed class EvaluationRunner
     public EvaluationRunOutcome Run(EvaluationMatchRequest request, Action<DuckSaveData>? beforeDawn = null)
     {
         Validate(request);
-        var match = MatchSession.CreateDuck(request.Seed);
+        var match = MatchSession.CreateDuck(request.Seed, new DuckMatchSettings(2, request.WishSetId));
         var policies = AssignPolicies(request);
         var days = new Dictionary<int, DayBuilder>();
         var traces = request.IncludeActions ? new List<EvaluationActionTrace>() : null;
@@ -32,17 +32,30 @@ public sealed class EvaluationRunner
 
             var acted = false;
             var passView = match.GetSnapshot("human");
+            var cohort = new Dictionary<string, (DuckMatchView View, IReadOnlyList<GameAction> Actions, EvaluationPolicyDecision Decision, long Micros)>();
+            if (passView.Day == DuckMatchSettings.StandardDays && passView.Phase == DuckPhase.Adventure)
+                foreach (var id in PlayerOrder(request.Schedule, passView.Day))
+                {
+                    var actions = match.GetLegalActions(id);
+                    if (actions.Count == 0) continue;
+                    var view = match.GetSnapshot(id);
+                    var timer = Stopwatch.StartNew();
+                    var choice = policies[id].Decide(view, actions);
+                    timer.Stop();
+                    cohort[id] = (view, actions, choice, Microseconds(timer.ElapsedTicks));
+                }
             foreach (var playerId in PlayerOrder(request.Schedule, passView.Day))
             {
                 if (sequence >= MaximumActions)
                     throw new InvalidOperationException($"Evaluation exceeded the {MaximumActions}-action safety bound.");
-                var legalActions = match.GetLegalActions(playerId);
+                var captured = cohort.GetValueOrDefault(playerId);
+                var legalActions = captured.Actions ?? match.GetLegalActions(playerId);
                 if (legalActions.Count == 0) continue;
 
-                var observation = match.GetSnapshot(playerId);
+                var observation = captured.View ?? match.GetSnapshot(playerId);
                 var policy = policies[playerId];
                 var policyTimer = Stopwatch.StartNew();
-                var decision = policy.Decide(observation, legalActions);
+                var decision = captured.Decision ?? policy.Decide(observation, legalActions);
                 policyTimer.Stop();
                 if (decision?.Action == null || !legalActions.Any(action => ReferenceEquals(action, decision.Action)))
                     throw new InvalidOperationException(
@@ -50,7 +63,7 @@ public sealed class EvaluationRunner
                 if (string.IsNullOrWhiteSpace(decision.Reason))
                     throw new InvalidOperationException($"Policy '{policy.Id}' returned an empty decision reason.");
 
-                var policyMicros = Microseconds(policyTimer.ElapsedTicks);
+                var policyMicros = captured.Decision != null ? captured.Micros : Microseconds(policyTimer.ElapsedTicks);
                 lastDecisions[playerId] = decision;
                 RecordPurchaseBeforeExecution(days, observation, playerId, decision, policyMicros);
                 RecordUnspentRewardBeforeFinish(days, observation, playerId, decision.Action);
@@ -67,7 +80,7 @@ public sealed class EvaluationRunner
                 var publicAfter = match.GetSnapshot("human");
                 var hiddenCommit = observation.Day == DuckMatchSettings.StandardDays
                     && observation.Phase == DuckPhase.Adventure
-                    && decision.Action.Kind is GameActionKind.Explore or GameActionKind.Settle
+                    && decision.Action.Kind is GameActionKind.Explore or GameActionKind.Settle or GameActionKind.ChooseTailwind
                     && (publicAfter.AwaitingFinalDayDecisions || publicAfter.FinalDayDecisionBeat > observation.FinalDayDecisionBeat);
                 traces?.Add(new EvaluationActionTrace(
                     sequence, observation.Day, observation.Phase, playerId, policy.Id,
@@ -109,12 +122,14 @@ public sealed class EvaluationRunner
         CaptureDreamEnd(match, finalView, days);
         var final = finalView.FinalResult ?? throw new InvalidOperationException("Finished match has no final result.");
         var result = new EvaluationMatchResult(
-            2,
+            3,
             request.SourceLabel,
             typeof(MatchSession).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? typeof(MatchSession).Assembly.GetName().Version?.ToString() ?? "unknown",
             finalView.ProfileId,
             finalView.RulesRevision,
+            finalView.Settings.WishSetId,
+            finalView.Settings.WishSetVersion,
             finalView.Economy.CurrencyName,
             DuckSaves.CurrentFormatVersion,
             request.Seed,
@@ -245,10 +260,11 @@ public sealed class EvaluationRunner
                 player.SafeExhaustionMaximum,
                 builder.FinishAction ?? GameActionKind.Settle,
                 builder.FinishReason ?? "The authoritative Night boundary completed the Day.");
-            // Reeds and event Twigs are already banked during Adventure. Remove only
-            // the Twig change applied by the Night boundary (plus final Dream Twigs).
+            // Set 1 Reeds and event Twigs are banked during Adventure; Set 2 Reeds
+            // resolve at Night. Remove exactly the Night boundary change.
             builder.PreNightTotalTwigs = player.TotalTwigs
-                - (outcome.PrintedTwigs - outcome.BramblesPenalty + outcome.DreamTwigs);
+                - (outcome.PrintedTwigs - outcome.BramblesPenalty + outcome.DreamTwigs
+                    + (view.Rules.IsWishSetTwo ? outcome.ReedsTwigs : 0));
             builder.EndOfNightTotalTwigs = player.TotalTwigs;
             builder.Night = Night(outcome);
             builder.SunshineChoice = player.HasGloriousSunshineChoice ? player.GloriousSunshineBenefit : null;

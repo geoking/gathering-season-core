@@ -30,6 +30,8 @@ namespace GatheringSeason.Core.Ducks.AI
                 throw new ArgumentException("Legal actions cannot contain null.", nameof(legalActions));
 
             var player = observation.Players.Single(candidate => candidate.Id == observation.ViewerId);
+            if (observation.OwnPendingTailwind != null)
+                return ChooseTailwind(observation, player, legalActions);
             var eventBenefits = legalActions.Where(action => action.Kind == GameActionKind.ChooseEventBenefit).ToArray();
             if (eventBenefits.Length > 0)
             {
@@ -102,14 +104,9 @@ namespace GatheringSeason.Core.Ducks.AI
                 $"after {plan.ImmediateWearChance:P0} immediate wear-out risk ({plan.TotalNodes} total nodes).");
         }
 
-        private static AdventurePlan PlanAdventure(DuckMatchView observation, DuckPlayerView player)
+        private static PlannedAdventureState CurrentPlannedState(DuckMatchView observation, DuckPlayerView player)
         {
-            var definitions = observation.Rules.EncounterDefinitions;
-            var counts = new int[definitions.Count];
-            foreach (var chip in observation.OwnBag)
-                counts[DefinitionIndex(observation, chip.DefinitionId)]++;
-            var known = observation.KnownNextChips.Select(chip => DefinitionIndex(observation, chip.DefinitionId)).ToArray();
-            var state = new PlannedAdventureState(
+            return new PlannedAdventureState(
                 new DuckAdventureState(
                     player.Position,
                     player.Exhaustion,
@@ -121,11 +118,59 @@ namespace GatheringSeason.Core.Ducks.AI
                     observation.CurrentEvent.EventType == DuckWorldEventType.PocketOfDriftwood
                         && player.DayEventTwigs > 0,
                     player.FlowersPlaced,
-                    DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes)),
-                ScoringFinalType(CurrentFinalType(observation, player)),
-                ScoringFinalType(CurrentFinalType(observation, player)).HasValue && CurrentFinalSuppressed(player),
+                    DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes),
+                    player.PlacedChips.LastOrDefault() is { } previous && observation.Rules.Encounter(previous.DefinitionId).IsObstacle),
+                ScoringFinalType(CurrentFinalType(observation, player), observation.Rules.IsWishSetTwo),
+                ScoringFinalType(CurrentFinalType(observation, player), observation.Rules.IsWishSetTwo).HasValue && CurrentFinalSuppressed(player),
                 futureTwigs: 0,
-                wornOut: player.IsWornOut);
+                wornOut: player.IsWornOut,
+                pendingReeds: observation.Rules.IsWishSetTwo ? player.PlacedChips.Sum(chip => observation.Rules.Encounter(chip.DefinitionId).TwigYield) : 0);
+        }
+
+        private static DuckPolicyDecision ChooseTailwind(DuckMatchView observation, DuckPlayerView player, IReadOnlyList<GameAction> actions)
+        {
+            var full = actions.Single(action => action.Id == "duck.tailwind.full");
+            var shelter = actions.FirstOrDefault(action => action.Id == "duck.tailwind.shelter");
+            if (shelter == null) return new DuckPolicyDecision(full, "No shelter is reachable within this Tailwind move.");
+            var state = CurrentPlannedState(observation, player);
+            var counts = new int[observation.Rules.EncounterDefinitions.Count];
+            foreach (var chip in observation.OwnBag) counts[DefinitionIndex(observation, chip.DefinitionId)]++;
+            var index = DefinitionIndex(observation, observation.OwnPendingTailwind!.DefinitionId);
+            // A reserved Tailwind is still in the pouch and at the front of any ordered preview.
+            var known = observation.KnownNextChips.Select(chip => DefinitionIndex(observation, chip.DefinitionId)).ToArray();
+            if (known.Length == 0)
+            {
+                var remainingPeek = observation.UnorderedNextChips.Select(chip => DefinitionIndex(observation, chip.DefinitionId)).ToList();
+                remainingPeek.Remove(index);
+                known = new[] { index }.Concat(remainingPeek).ToArray();
+            }
+            var search = new AdventureSearch(observation, player, MaximumPlanningNodes);
+            var fullValue = double.NegativeInfinity;
+            var shelterValue = double.NegativeInfinity;
+            for (var depth = 1; depth <= Math.Min(MaximumPlanningDepth, counts.Sum()); depth++)
+            {
+                try
+                {
+                    var nextFull = search.TailwindValue(state, counts, known, depth, index, false);
+                    var nextShelter = search.TailwindValue(state, counts, known, depth, index, true);
+                    fullValue = nextFull;
+                    shelterValue = nextShelter;
+                }
+                catch (PlanningLimitExceededException) { break; }
+            }
+            return shelterValue >= fullValue
+                ? new DuckPolicyDecision(shelter, "The reachable shelter and its final rewards are worth more than continuing after the full Tailwind move.")
+                : new DuckPolicyDecision(full, "The full modified Tailwind move keeps the stronger contingent route.");
+        }
+
+        private static AdventurePlan PlanAdventure(DuckMatchView observation, DuckPlayerView player)
+        {
+            var definitions = observation.Rules.EncounterDefinitions;
+            var counts = new int[definitions.Count];
+            foreach (var chip in observation.OwnBag)
+                counts[DefinitionIndex(observation, chip.DefinitionId)]++;
+            var known = observation.KnownNextChips.Select(chip => DefinitionIndex(observation, chip.DefinitionId)).ToArray();
+            var state = CurrentPlannedState(observation, player);
 
             var currentValue = PlannedRestValue(observation, player, state);
             var acceptedValue = currentValue;
@@ -138,7 +183,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 var nodesBeforeDepth = search.Nodes;
                 try
                 {
-                    var value = search.DrawValue(state, counts, known, depth);
+                    var value = search.DrawValue(state, counts, known, depth, observation.UnorderedNextChips.Select(chip => DefinitionIndex(observation, chip.DefinitionId)).ToArray());
                     acceptedValue = value;
                     acceptedDepth = depth;
                     acceptedNodes = search.Nodes - nodesBeforeDepth;
@@ -149,14 +194,15 @@ namespace GatheringSeason.Core.Ducks.AI
                 }
             }
 
-            var firstCandidates = known.Length > 0
+            var unordered = observation.UnorderedNextChips.Select(chip => DefinitionIndex(observation, chip.DefinitionId)).ToArray();
+            var firstCandidates = known.Length == 0 && unordered.Length > 0 ? unordered.Distinct().ToArray() : known.Length > 0
                 ? new[] { known[0] }
                 : Enumerable.Range(0, counts.Length).Where(index => counts[index] > 0).ToArray();
             var firstWearWeight = 0;
             var firstWeight = 0;
             foreach (var index in firstCandidates)
             {
-                var weight = known.Length > 0 ? 1 : counts[index];
+                var weight = known.Length > 0 ? 1 : unordered.Length > 0 ? unordered.Count(candidate => candidate == index) : counts[index];
                 var placement = DuckAdventureRules.ApplyEncounter(
                     state.State,
                     definitions[index],
@@ -201,7 +247,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 state.FinalType,
                 state.FinalSuppressed,
                 state.State.HelpfulTypeMask);
-            value += state.FutureTwigs * 4.0;
+            value += (state.FutureTwigs + DuckWishRewards.ReedsTwigs(observation.Rules, state.PendingReeds, observation.Rules.BoardSpaceAt(state.State.Position).IsShelter)) * 4.0;
             if (state.WornOut)
             {
                 var remainingDays = DuckMatchSettings.StandardDays - observation.Day;
@@ -250,20 +296,21 @@ namespace GatheringSeason.Core.Ducks.AI
                 var count = counts[index];
                 if (count == 0) continue;
                 movement += count * (definition.EncounterType == DuckEncounterType.Companion
-                    ? 4
+                    ? (observation.Rules.IsWishSetTwo ? 1 : 4)
                     : definition.BaseMovement!.Value);
                 if (observation.CurrentEvent.EventType == DuckWorldEventType.RainSoftenedSeeds
                     && definition.EncounterType == DuckEncounterType.Seeds)
                     movement += count;
                 if (observation.CurrentEvent.EventType == DuckWorldEventType.FavourableWinds && definition.IsHelpful)
                     movement += count;
+                if (observation.Rules.IsWishSetTwo && definition.EncounterType == DuckEncounterType.Seeds) movement += count;
                 reedsTwigs += count * definition.TwigYield;
                 if (definition.EncounterType == DuckEncounterType.Wildflowers) flowers += count;
                 if (definition.EncounterType == DuckEncounterType.Companion) flock += count;
                 if (definition.IsHelpful) helpfulTypes.Add(definition.EncounterType);
             }
 
-            var futureTwigs = current.FutureTwigs + reedsTwigs;
+            var futureTwigs = current.FutureTwigs + current.PendingReeds + reedsTwigs;
             if (observation.CurrentEvent.EventType == DuckWorldEventType.PocketOfDriftwood
                 && !current.State.PocketDriftwoodAwarded)
                 futureTwigs++;
@@ -291,7 +338,7 @@ namespace GatheringSeason.Core.Ducks.AI
                         pocketDriftwoodAwarded: true,
                         flowers,
                         DuckAdventureRules.HelpfulTypes(helpfulTypes)),
-                    finalType: null,
+                    finalType: observation.Rules.IsWishSetTwo ? DuckEncounterType.Wildflowers : (DuckEncounterType?)null,
                     finalSuppressed: false,
                     futureTwigs,
                     wornOut: false))
@@ -310,7 +357,7 @@ namespace GatheringSeason.Core.Ducks.AI
             var brambles = state.FinalType == DuckEncounterType.Brambles && !state.FinalSuppressed ? 1 : 0;
             var sleep = FinalSleepUpperBound(observation, player, state, space);
             var mostRestedTwig = state.WornOut || observation.CurrentEvent.EventType == DuckWorldEventType.LowCloud ? 0 : 1;
-            var twigs = player.TotalTwigs + state.FutureTwigs + space.Twigs - brambles
+            var twigs = player.TotalTwigs + state.FutureTwigs + DuckWishRewards.ReedsTwigs(observation.Rules, state.PendingReeds, space.IsShelter) + space.Twigs - brambles
                 + observation.Economy.ConvertFinalRewardToDreamTwigs(sleep) + mostRestedTwig;
             return new FinalScoreBound(twigs, sleep);
         }
@@ -323,8 +370,8 @@ namespace GatheringSeason.Core.Ducks.AI
         {
             var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
-            if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(state.State.FlowersPlaced)
-                + observation.Economy.FinalShelterReward;
+            sleep += DuckWishRewards.FlowerStars(observation.Rules, state.State.FlowersPlaced, state.FinalType ?? DuckEncounterType.Seeds, shelterRewardsEligible);
+            if (shelterRewardsEligible) sleep += observation.Economy.FinalShelterReward;
             if (shelterRewardsEligible && observation.CurrentEvent.EventType == DuckWorldEventType.RestlessNight)
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
             sleep += CollectiveSleepUpperBound(observation, player, state, shelterRewardsEligible);
@@ -332,7 +379,7 @@ namespace GatheringSeason.Core.Ducks.AI
             if (state.State.ActiveFlock > 0
                 && observation.Players.Where(opponent => opponent.Id != player.Id && opponent.HasFinishedDay)
                     .All(opponent => state.State.ActiveFlock >= opponent.ActiveFlock))
-                sleep += observation.Economy.CalculateFlockLeaderReward(state.State.ActiveFlock);
+                sleep += DuckWishRewards.FlockStars(observation.Rules, state.State.ActiveFlock);
             if (state.FinalType == DuckEncounterType.LoosePebbles && !state.FinalSuppressed)
                 sleep = Math.Max(0, sleep - observation.Economy.PebblesPenalty);
             return state.WornOut ? sleep / observation.Economy.WearOutDivisor : sleep;
@@ -380,7 +427,14 @@ namespace GatheringSeason.Core.Ducks.AI
                 ? finalType == DuckEncounterType.Brambles && !CurrentFinalSuppressed(opponent) ? 1 : 0
                 : 1;
             var sleep = fixedRest ? FinishedOpponentSleepLowerBound(observation, opponent) : 0;
-            var twigs = Math.Max(0, opponent.TotalTwigs + printedTwigs - brambles)
+            // Set 2 Reeds remain unbanked until Night. A finished public route
+            // fixes their shelter condition; Set 1 already includes them in TotalTwigs.
+            var pendingReeds = observation.Rules.IsWishSetTwo && fixedRest
+                ? DuckWishRewards.ReedsTwigs(observation.Rules,
+                    opponent.PlacedChips.Select(chip => observation.Rules.Encounter(chip.DefinitionId)),
+                    observation.Rules.BoardSpaceAt(opponent.Position).IsShelter)
+                : 0;
+            var twigs = Math.Max(0, opponent.TotalTwigs + printedTwigs + pendingReeds - brambles)
                 + observation.Economy.ConvertFinalRewardToDreamTwigs(sleep);
             return new FinalScoreBound(twigs, sleep);
         }
@@ -392,8 +446,8 @@ namespace GatheringSeason.Core.Ducks.AI
             var space = observation.Rules.BoardSpaceAt(opponent.Position);
             var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
-            if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(opponent.FlowersPlaced)
-                + observation.Economy.FinalShelterReward;
+            sleep += DuckWishRewards.FlowerStars(observation.Rules, opponent.FlowersPlaced, CurrentFinalType(observation, opponent) ?? DuckEncounterType.Seeds, shelterRewardsEligible);
+            if (shelterRewardsEligible) sleep += observation.Economy.FinalShelterReward;
             if (shelterRewardsEligible && observation.CurrentEvent.EventType == DuckWorldEventType.RestlessNight)
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
             sleep += GloriousSunshineReward(observation, opponent);
@@ -416,14 +470,14 @@ namespace GatheringSeason.Core.Ducks.AI
             var space = observation.Rules.BoardSpaceAt(position);
             var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
-            if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(flowers);
+            sleep += DuckWishRewards.FlowerStars(observation.Rules, flowers, finalType ?? DuckEncounterType.Seeds, shelterRewardsEligible);
             if (shelterRewardsEligible && observation.Day == DuckMatchSettings.StandardDays)
                 sleep += observation.Economy.FinalShelterReward;
             if (shelterRewardsEligible && observation.CurrentEvent.EventType == DuckWorldEventType.RestlessNight)
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
             if (activeFlock > 0
                 && LeadsFlock(observation, player.Id, activeFlock))
-                sleep += observation.Economy.CalculateFlockLeaderReward(activeFlock);
+                sleep += DuckWishRewards.FlockStars(observation.Rules, activeFlock);
             sleep += CollectiveSleep(observation, player, position, wornOut, finalType, helpfulTypeMask);
             sleep += GloriousSunshineReward(observation, player);
             if (finalType == DuckEncounterType.LoosePebbles && !finalSuppressed)
@@ -474,14 +528,14 @@ namespace GatheringSeason.Core.Ducks.AI
             var space = observation.Rules.BoardSpaceAt(player.Position);
             var shelterRewardsEligible = space.IsShelter;
             var sleep = space.Reward;
-            if (shelterRewardsEligible) sleep += observation.Economy.CalculateFlowerReward(player.FlowersPlaced);
+            sleep += DuckWishRewards.FlowerStars(observation.Rules, player.FlowersPlaced, CurrentFinalType(observation, player) ?? DuckEncounterType.Seeds, shelterRewardsEligible);
             if (shelterRewardsEligible && observation.Day == DuckMatchSettings.StandardDays)
                 sleep += observation.Economy.FinalShelterReward;
             if (shelterRewardsEligible && observation.CurrentEvent.EventType == DuckWorldEventType.RestlessNight)
                 sleep = Math.Max(0, sleep - observation.Economy.RestlessNightPenalty);
             if (player.ActiveFlock > 0
                 && LeadsFlock(observation, player.Id, player.ActiveFlock))
-                sleep += observation.Economy.CalculateFlockLeaderReward(player.ActiveFlock);
+                sleep += DuckWishRewards.FlockStars(observation.Rules, player.ActiveFlock);
             sleep += CollectiveSleep(
                 observation,
                 player,
@@ -552,8 +606,8 @@ namespace GatheringSeason.Core.Ducks.AI
         private static bool CurrentFinalSuppressed(DuckPlayerView player) =>
             player.PlacedChips.LastOrDefault()?.NuisanceSuppressed ?? false;
 
-        private static DuckEncounterType? ScoringFinalType(DuckEncounterType? type) =>
-            type == DuckEncounterType.Brambles || type == DuckEncounterType.LoosePebbles ? type : null;
+        private static DuckEncounterType? ScoringFinalType(DuckEncounterType? type, bool retainFlowers) =>
+            type == DuckEncounterType.Brambles || type == DuckEncounterType.LoosePebbles || retainFlowers && type == DuckEncounterType.Wildflowers ? type : null;
 
         private static DuckPolicyDecision ChoosePurchase(
             DuckMatchView observation,
@@ -673,10 +727,10 @@ namespace GatheringSeason.Core.Ducks.AI
             var definition = offer.Encounter;
             var usableDays = DuckMatchSettings.StandardDays - observation.Day;
             var movement = definition.EncounterType == DuckEncounterType.Companion
-                ? 2.5
+                ? (observation.Rules.IsWishSetTwo ? 1.0 : 2.5)
                 : definition.BaseMovement!.Value;
             var movementValue = movement * (1.0 + usableDays * 0.12);
-            var twigValue = definition.TwigYield * (observation.Day >= 7 ? 5.0 : 2.0);
+            var twigValue = definition.TwigYield * (observation.Day >= 7 ? 5.0 : 2.0) * (observation.Rules.IsWishSetTwo ? 0.6 : 1.0);
             var abilityValue = definition.EncounterType switch
             {
                 DuckEncounterType.Signpost => 1.3,
@@ -720,9 +774,16 @@ namespace GatheringSeason.Core.Ducks.AI
                 PlannedAdventureState state,
                 int[] counts,
                 int[] known,
-                int depth)
+                int depth,
+                int[]? unordered = null)
             {
                 CountNode();
+                if (unordered != null && unordered.Length > 0 && known.Length == 0)
+                {
+                    // The next two identities are known, but neither order is observable.
+                    var direct = CandidateValue(state, counts, unordered, depth, unordered[0]);
+                    return unordered.Length == 1 ? direct : (direct + CandidateValue(state, counts, unordered.Reverse().ToArray(), depth, unordered[1])) / 2.0;
+                }
                 if (depth <= 0) return PlannedRestValue(_observation, _player, state);
 
                 var remainingCount = counts.Sum();
@@ -745,33 +806,47 @@ namespace GatheringSeason.Core.Ducks.AI
                 return total;
             }
 
+            internal double TailwindValue(PlannedAdventureState state, int[] counts, int[] known, int depth, int index, bool shelter) =>
+                CandidateValue(state, counts, known, depth, index, shelter);
+
             private double CandidateValue(
                 PlannedAdventureState state,
                 int[] counts,
                 int[] known,
                 int depth,
-                int definitionIndex)
+                int definitionIndex,
+                bool? forceShelter = null)
             {
                 CountNode();
                 var remaining = (int[])counts.Clone();
                 remaining[definitionIndex]--;
                 var definition = _observation.Rules.EncounterDefinitions[definitionIndex];
+                if (!forceShelter.HasValue && _observation.Rules.IsWishSetTwo && definition.EncounterType == DuckEncounterType.Tailwind)
+                {
+                    var projected = DuckAdventureRules.ApplyEncounter(state.State, definition, _observation.CurrentEvent.EventType, _observation.Rules);
+                    if (DuckAdventureRules.FirstReachableShelter(state.State.Position, projected.State.Position, _observation.Rules).HasValue)
+                        return Math.Max(CandidateValue(state, counts, known, depth, definitionIndex, false),
+                            CandidateValue(state, counts, known, depth, definitionIndex, true));
+                }
                 var placement = DuckAdventureRules.ApplyEncounter(
                     state.State,
                     definition,
-                    _observation.CurrentEvent.EventType, _observation.Rules);
+                    _observation.CurrentEvent.EventType, _observation.Rules, forceShelter == true);
                 var after = new PlannedAdventureState(
                     placement.State,
-                    ScoringFinalType(placement.EncounterType),
-                    ScoringFinalType(placement.EncounterType).HasValue && placement.NuisanceSuppressed,
+                    ScoringFinalType(placement.EncounterType, _observation.Rules.IsWishSetTwo),
+                    ScoringFinalType(placement.EncounterType, _observation.Rules.IsWishSetTwo).HasValue && placement.NuisanceSuppressed,
                     state.FutureTwigs + placement.ReedsTwigsAwarded + placement.EventTwigsAwarded,
-                    placement.WearsOut);
+                    placement.WearsOut,
+                    state.PendingReeds + (_observation.Rules.IsWishSetTwo ? definition.TwigYield : 0));
                 var nextKnown = known.Length <= 1 ? NoKnownChips : known.Skip(1).ToArray();
-                if (placement.WearsOut || placement.State.Position == 43 || remaining.Sum() == 0 || depth == 1)
+                if (forceShelter == true || placement.WearsOut || placement.State.Position == 43 || remaining.Sum() == 0 || depth == 1)
                     return PlannedRestValue(_observation, _player, after);
 
                 if (placement.EncounterType == DuckEncounterType.Signpost)
                 {
+                    if (_observation.Rules.IsWishSetTwo && _observation.CurrentEvent.EventType != DuckWorldEventType.ThickMorningMist)
+                        return UnorderedRevealedDecisionValue(after, remaining, nextKnown, depth - 1);
                     var previewCount = _observation.CurrentEvent.EventType switch
                     {
                         DuckWorldEventType.ThickMorningMist => 0,
@@ -792,6 +867,31 @@ namespace GatheringSeason.Core.Ducks.AI
                 var settleValue = PlannedRestValue(_observation, _player, state);
                 var continueValue = DrawValue(state, counts, known, depth);
                 return Math.Max(settleValue, continueValue);
+            }
+
+            private double UnorderedRevealedDecisionValue(PlannedAdventureState state, int[] counts, int[] known, int depth)
+            {
+                var total = counts.Sum();
+                if (known.Length >= 2) return DecisionValue(state, counts, known, depth);
+                if (total <= 1) return DecisionValue(state, counts, Enumerable.Range(0, counts.Length).Where(index => counts[index] > 0).ToArray(), depth);
+                var result = 0.0;
+                for (var first = 0; first < counts.Length; first++)
+                {
+                    if (counts[first] == 0 || known.Length > 0 && known[0] != first) continue;
+                    var firstWeight = known.Length > 0 ? 1.0 : counts[first] / (double)total;
+                    for (var second = 0; second < counts.Length; second++)
+                    {
+                        var copies = counts[second] - (first == second ? 1 : 0);
+                        if (copies == 0) continue;
+                        var pair = new[] { first, second };
+                        var draw = known.Length > 0
+                            ? DrawValue(state, counts, pair, depth)
+                            : DrawValue(state, counts, NoKnownChips, depth, pair);
+                        result += firstWeight * copies / (total - 1.0)
+                            * Math.Max(PlannedRestValue(_observation, _player, state), draw);
+                    }
+                }
+                return result;
             }
 
             private double RevealedDecisionValue(
@@ -854,8 +954,10 @@ namespace GatheringSeason.Core.Ducks.AI
                 DuckEncounterType? finalType,
                 bool finalSuppressed,
                 int futureTwigs,
-                bool wornOut)
+                bool wornOut,
+                int pendingReeds = 0)
             {
+                PendingReeds = pendingReeds;
                 State = state;
                 FinalType = finalType;
                 FinalSuppressed = finalSuppressed;
@@ -866,6 +968,7 @@ namespace GatheringSeason.Core.Ducks.AI
             internal DuckAdventureState State { get; }
             internal DuckEncounterType? FinalType { get; }
             internal bool FinalSuppressed { get; }
+            internal int PendingReeds { get; }
             internal int FutureTwigs { get; }
             internal bool WornOut { get; }
         }

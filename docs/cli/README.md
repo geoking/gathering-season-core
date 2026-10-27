@@ -17,7 +17,8 @@ The duck game is the default. If a save exists, choose `c` to continue, `n` to
 start over or `q` to leave it alone. Otherwise a new game starts. The opening
 text shows the seed, player count, Wish Set and autosave path. Add `--players 3`
 or `--players 4` to choose two or three opponents; the default is two players
-(one opponent). `--wish-set set-1` is the supported Wish-set identity.
+(one opponent). Choose `--wish-set set-1` (the default) or `--wish-set set-2`;
+the selected set applies to every duck.
 
 To see launch options without starting or saving a match:
 
@@ -31,11 +32,13 @@ this guide assume the repository root is your current directory.
 ## Your first Day
 
 1. Read the weather report. It affects every duck for this Day. Type `event` to
-   review its effect, and `tokens` or `wishes` if you do not recognize a chip. On Glorious
+   review its effect, and `tokens` or `wishes` if you do not recognise a chip. On Glorious
    Sunshine choose Fresh Air (+2 safe Exhaustion today) or Starry Night (+2 Stars
    tonight); everyone must choose before exploring.
 2. Enter the number beside **Explore**. Core draws a chip, moves your duck and
-   resolves its power. You must draw at least once each Day.
+   resolves its power. You must draw at least once each Day. With Set 2 Tailwind,
+   choose the full modified move or the first reachable shelter, which settles
+   your duck immediately. These choices appear as ordinary numbered actions.
 3. Review your position, Exhaustion and the CPUs' public progress. Use `board`
    to compare rewards and shelters. `pouch` shows the opening recipe before your
    first draw; afterwards, remember your additions from each Night.
@@ -54,7 +57,9 @@ AI or change the saved game.
 Days 1–9 expose completed actions so you can react to the other ducks. The CLI
 paces Normal around successful gameplay actions and lets it finish when you
 have settled. On Day 10 only, all active ducks commit privately before each
-beat is revealed. The AI's hidden commitment and private Signpost preview are
+beat is revealed. When that beat draws a Set 2 Tailwind, its owner first
+chooses a landing; the cohort is revealed together after every landing choice.
+The AI's hidden commitment and private Signpost preview are
 not shown to you.
 
 ## Commands while playing
@@ -67,6 +72,7 @@ not shown to you.
 | `board` | All 43 spaces, printed rewards and named shelters |
 | `board 4` | Inspect a particular space |
 | `pouch` | Opening recipe before the first draw, and your explicit Signpost peek |
+| `chance` | Core's exact next-draw probabilities and total wear-out chance |
 | `tokens` or `wishes` | Wish powers and Obstacle nuisances |
 | `shop` | All offers at this match's prices, spending allowance and current availability |
 | `event` | The active Weather report and its effect |
@@ -76,10 +82,15 @@ not shown to you.
 | `q` or `quit` | Quit; previously completed actions remain saved |
 | `r` or `restart` | Start over and replace the active save |
 
-The changing pouch contents and accumulated purchases are deliberately hidden.
+`chance` shows exact probabilities from your remaining pouch and authorised
+Signpost knowledge. In normal play, opponents' pouches and hidden draw order
+remain private, and there is no accumulated purchase ledger.
 During Night, `night` shows what every duck has just bought as it enters the
 pouch. That receipt disappears at Dawn. Placed chips remain public. Signpost
-can reveal your actual next chip; weather may alter its preview. Board rewards
+reveals the next chip in order with Set 1. Set 2 reveals the next two without
+order; after drawing one, the remaining chip is known. Mist suppresses the peek.
+`chance` uses this knowledge and the current protection and weather; it is
+unavailable during a pending choice or when no draw is legal. Board rewards
 are **printed values**, not a prediction of your final payout: chip effects,
 Weather reports, shelter bonuses and wear-out are resolved by Core at Night.
 
@@ -94,19 +105,33 @@ In revision 8, Stars are that Night's currency. Normally five Exhaustion is safe
 Fresh Air adds two to the safe limit for its Day. From Day 5 each pouch gains one Grumpy Goose. An unprotected Goose lowers the
 safe maximum to four for that Day. Worn-out ducks keep earned Twigs and receive
 half their total Stars, rounded down, and cannot win
-Most Rested. Splash blocks the next obstacle's nuisance, not its Exhaustion.
+Most Rested. In Set 1, Splash blocks the next obstacle's nuisance while its
+Exhaustion still applies. In Set 2, Splash prevents the next chip's normal
+Exhaustion increment; the obstacle nuisance still applies.
 
 Current revision 8 shelters are at **4, 10, 17, 21, 25, 32, 36 and 43**. Finishing there grants
 Trail Feathers, which permanently move your later starts forward one step each.
 Dawn Delivery grants catch-up Trail Feathers from the gap to the Twig leader:
 0 for a 0–2 gap, 1 for 3–6, 2 for 7–10 and 3 for 11 or more.
-Trail Feathers are never spent. A shelter with one or more Wildflowers gives +1 Star total; positive flock leaders also gain +1 Star. Exhausted ducks keep these bonuses and shelter Trail Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day, except during Low Cloud. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
+Trail Feathers are never spent. In Set 1, a shelter with one or more Wildflowers
+gives +1 Star total, and positive flock leaders gain +1 Star. In Set 2, a final
+Wildflowers chip gives +2 Stars on any space, and positive flock leaders gain
++2 Stars, including ties. Exhausted ducks keep these bonuses and shelter Trail Feathers; their complete Star total is then halved. Most Rested is a separate temporary +1 start next Day, except during Low Cloud. Pebbles and shelter Thundery Skies each deduct 1 Star, to a minimum of zero. Golden Sunset keeps its special condition that no duck is exhausted.
 
 At Night, buy at most one chip of each helpful type: two Tailwind variants
 still count as the same type. Nest capacity allows one purchase on Nights 1–3,
 two on Nights 4–6 and three on Nights 7–9. The shop has unlimited stock.
 Reeds quantities mean Twig yield, not movement; all Reeds move one space.
-New matches use Star prices: Seeds **0**, Tailwinds **1/2/3**, Signpost **2**, Splash **1**, Reeds **2/3/4**, Companion **2** and Wildflowers **1**. Free Seeds still use a purchase slot and the one-per-type limit.
+Set 1 prices in Stars: Seeds **0**, Tailwinds **1/2/3**, Signpost **2**, Splash
+**1**, Reeds **2/3/4**, Companion **2** and Wildflowers **1**. Set 2 prices:
+Seeds **0**, Tailwinds **2/3/4**, Signpost **2**, Splash **2**, Reeds **1/2/3**,
+Companion **1** and Wildflowers **1**. Free Seeds still use a purchase slot and
+the one-per-type limit.
+
+Set 2 Seeds move one extra space immediately after an obstacle. Companion
+moves one space. Reeds pay their printed Twig yield only when the final rest
+is a shelter, including a worn-out rest; they do not bank Twigs on placement.
+Use `wishes` for the selected set's full powers and weather interactions.
 
 Night 10 has no shop. A shelter adds one extra Star before any exhaustion halving; each retained Star becomes one Dream Twig. The safe Most
 Rested duck, including tied winners, also earns one Dream Twig, except during
@@ -121,7 +146,7 @@ The CLI's legal-action list remains authoritative for what you can do now.
 ## Saving, Continue and restart
 
 Interactive games autosave after each completed action, including an unrevealed
-Day 10 commitment or pending weather choice. The default file is `GatheringSeason/ducks-save.json` beneath the
+Day 10 commitment, Tailwind choice or pending weather choice. The default file is `GatheringSeason/ducks-save.json` beneath the
 platform's local application-data directory; **the CLI prints the exact path**.
 Quitting with `q` does not start a new game. To open a save from this baseline stored
 elsewhere, provide its explicit `--save` path; automatic discovery is limited
@@ -175,7 +200,7 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release -- --no-sav
 | Option | Purpose |
 | --- | --- |
 | `--players 2`, `3` or `4` | Total players, including the human, for new games and restarts |
-| `--wish-set set-1` | Supported Wish set; unknown IDs are rejected |
+| `--wish-set set-1` or `set-2` | Shared Wish set for a new game; unknown IDs are rejected |
 | `--seed 42` | Use a fixed seed for new games and restarts |
 | `--inspect` | Print the current catalogue and exit |
 | `--demo-day` | Script Day 1, Night 1 purchases and the transition to Day 2 |
@@ -203,7 +228,8 @@ Developer mode accepts `human:1`, `ai:1`, `ai-2:1` and `ai-3:1` for seats in
 the current match. `view:human` or `view:ai-2` selects that seat's observation,
 including its private Signpost preview. It is a testing tool rather than a
 concealed-information multiplayer interface. Normal play blocks every CPU
-private view. Neither mode provides changing pouch composition.
+private view. Neither mode reveals draw order beyond the selected duck's
+authorised Signpost peek or provides an accumulated purchase ledger.
 
 The CLI exposes only Gathering Season rules and options. The `ducks` profile
 alias remains for existing scripts; `classic` is reported as unsupported.

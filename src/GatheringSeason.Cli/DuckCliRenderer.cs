@@ -29,7 +29,7 @@ internal static class DuckCliRenderer
             if (activeEffects.Count > 0) Console.WriteLine("  Active: " + string.Join(" · ", activeEffects));
             if (view.Day > 1)
                 Console.WriteLine($"  Dawn deficit {Quantity(player.DawnTwigDeficit, "Twig")} · Dawn delivery {Quantity(player.DawnFeathersAwarded, "Trail Feather")}");
-            ShowPlaced(player);
+            ShowPlaced(view, player);
         }
 
         var own = view.Players.Single(player => player.Id == view.ViewerId);
@@ -74,6 +74,20 @@ internal static class DuckCliRenderer
             Console.WriteLine("Track your pouch from the opening recipe, placed chips and each Night's purchases.");
         ShowPreview(view);
         Console.WriteLine();
+    }
+
+    internal static void ShowChance(DuckMatchView view)
+    {
+        if (view.DrawProbability is not { } chance)
+        {
+            Console.WriteLine("No draw is currently available.\n");
+            return;
+        }
+        Console.WriteLine("Next draw probabilities:");
+        foreach (var outcome in chance.Outcomes)
+            Console.WriteLine($"  {view.Rules.Encounter(outcome.DefinitionId).Name}: {outcome.Numerator}/{outcome.Denominator}" +
+                (outcome.WearsOut ? " · wears out" : string.Empty));
+        Console.WriteLine($"Wear-out chance: {chance.WearOutNumerator}/{chance.Denominator} ({chance.WearOutProbability:P1}).\n");
     }
 
     internal static void ShowTokens(DuckMatchView view)
@@ -179,7 +193,7 @@ internal static class DuckCliRenderer
 
     internal static void ShowHelp(bool twoPlayer, IReadOnlyList<string> seatIds)
     {
-        Console.WriteLine("Commands: action number, help, status, board [1-43], pouch, wishes/tokens, shop, event, night, history, r/restart, q/quit");
+        Console.WriteLine("Commands: action number, help, status, board [1-43], pouch, chance, wishes/tokens, shop, event, night, history, r/restart, q/quit");
         Console.WriteLine(twoPlayer
             ? $"Developer controls: seat:N executes an issued action; view:seat selects its private observation. Seats: {string.Join(", ", seatIds)}."
             : "view:human reviews your observation. CPU private views are unavailable.");
@@ -199,12 +213,12 @@ internal static class DuckCliRenderer
 
     private static DuckPlayerView Player(DuckMatchView view) => view.Players.Single(player => player.Id == view.ViewerId);
 
-    private static void ShowPlaced(DuckPlayerView player)
+    private static void ShowPlaced(DuckMatchView view, DuckPlayerView player)
     {
         if (player.PlacedChips.Count == 0) return;
         var placed = player.PlacedChips.Select(chip =>
         {
-            var name = DuckRules.V1.Encounter(chip.DefinitionId).Name;
+            var name = view.Rules.Encounter(chip.DefinitionId).Name;
             return $"{name}@{chip.Position}" + (chip.NuisanceSuppressed ? "(protected)" : string.Empty);
         });
         Console.WriteLine("  Placed route: " + string.Join(" → ", placed));
@@ -227,9 +241,12 @@ internal static class DuckCliRenderer
 
     private static void ShowPreview(DuckMatchView view)
     {
-        if (view.KnownNextChips.Count == 0) return;
-        Console.WriteLine($"Private Signpost preview for {view.ViewerId}, in order: " + string.Join(", ",
-            view.KnownNextChips.Select(chip => DuckRules.V1.Encounter(chip.DefinitionId).Name)));
+        if (view.KnownNextChips.Count > 0)
+            Console.WriteLine($"Private Signpost preview for {view.ViewerId}, in order: " + string.Join(", ",
+                view.KnownNextChips.Select(chip => view.Rules.Encounter(chip.DefinitionId).Name)));
+        if (view.UnorderedNextChips.Count > 0)
+            Console.WriteLine($"Private Signpost preview for {view.ViewerId}, unordered: " + string.Join(", ",
+                view.UnorderedNextChips.Select(chip => view.Rules.Encounter(chip.DefinitionId).Name)));
     }
 
     private static string Reward(DuckBoardSpace space, DuckEconomyDefinition economy) =>

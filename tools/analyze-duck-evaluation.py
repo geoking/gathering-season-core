@@ -113,6 +113,7 @@ def comparison_key(record):
         record["sourceLabel"], record["policies"]["policyA"]["id"],
         record["policies"]["policyB"]["id"], record["schedule"],
         record.get("rulesVersion", 1), record.get("currency", "Sleep"),
+        record.get("wishSetId", "set-1"), record.get("wishSetVersion", 1),
     )
 
 
@@ -283,6 +284,7 @@ def summarize_matchup(key, records):
             "matches": len(outcomes), "finalDraws": sum(row[2] for row in outcomes),
             "leaderOutrightWin": clustered_rate(leader_wins), "trailerOutrightWin": clustered_rate(recoveries)})
     return {"sourceLabel": key[0], "policyA": key[1], "policyB": key[2], "schedule": key[3],
+        "wishSetId": key[6], "wishSetVersion": key[7],
         "currency": sorted({r.get("currency", "Sleep") for r in records}),
         "rulesVersions": sorted({r.get("rulesVersion", 1) for r in records}),
         "sharedMostRestedNights": sum(sum(p["night"].get("isMostRested", False) for p in d["players"]) > 1 for r in records for d in r["days"]),
@@ -302,7 +304,7 @@ def render_markdown(report):
         "Equal-policy win scores do not establish balance. Sparse cohorts remain inconclusive.", ""]
     for match in report["matchups"]:
         lines += [f"## {match['policyA']} vs {match['policyB']} — {match['schedule']}", "",
-            f"Source `{match['sourceLabel']}`; {match['matches']} matches / {match['seeds']} seeds.", "",
+            f"Source `{match['sourceLabel']}`, {match['wishSetId']} version {match['wishSetVersion']}; {match['matches']} matches / {match['seeds']} seeds.", "",
             f"Outcomes: {match['outcomes']}. Policy A score: {match['policyAScore']['rate']:.1%}.", "",
             "| Policy | Mean final Twigs | Draws / Day | One-draw Days | Worn-out Days | Safe oasis / player-match |",
             "| --- | ---: | ---: | ---: | ---: | ---: |"]

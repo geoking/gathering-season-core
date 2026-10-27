@@ -18,7 +18,7 @@ public static class EvaluationPolicies
     {
         "baseline", "normal", "cautious", "adventurous",
         "movement-heavy", "reeds-heavy", "movement-first-mixed", "cautious-stop", "adventurous-stop",
-        "flowers-first", "seeds-first", "sunshine-fresh", "sunshine-warm", "sandbag-day3"
+        "flowers-first", "seeds-first", "splash-heavy", "companion-heavy", "sunshine-fresh", "sunshine-warm", "sandbag-day3"
     });
 
     public static IEvaluationPolicy Create(string id) => id switch
@@ -33,6 +33,8 @@ public static class EvaluationPolicies
         "cautious-stop" => new StoppingPolicy(false),
         "adventurous-stop" => new StoppingPolicy(true),
         "sandbag-day3" => new SandbagPolicy(),
+        "splash-heavy" => new TypeFirstPolicy(DuckEncounterType.Splash, id),
+        "companion-heavy" => new TypeFirstPolicy(DuckEncounterType.Companion, id),
         "flowers-first" => new TypeFirstPolicy(DuckEncounterType.Wildflowers, id),
         "seeds-first" => new TypeFirstPolicy(DuckEncounterType.Seeds, id),
         "sunshine-fresh" => new SunshinePolicy(DuckGloriousSunshineBenefit.FreshAir, id),
@@ -47,7 +49,9 @@ public static class EvaluationPolicies
         public string Id => "baseline";
         public string Description => $"Frozen M4 Normal baseline (source SHA-256 {M4BaselinePolicy.SourceSha256}).";
         public EvaluationPolicyDecision Decide(DuckMatchView observation, IReadOnlyList<GameAction> legalActions) =>
-            _policy.Evaluate(observation, legalActions);
+            legalActions.Any(action => action.Kind == GameActionKind.ChooseTailwind)
+                ? new NormalAdapter().Decide(observation, legalActions)
+                : _policy.Evaluate(observation, legalActions);
     }
 
     private sealed class NormalAdapter : IEvaluationPolicy
@@ -94,7 +98,9 @@ public static class EvaluationPolicies
                 .FirstOrDefault();
             if (buy != null)
                 return Decision(buy, "The cautious reference buys the cheapest available protection-oriented offer.");
-            return Fallback(legalActions, "The cautious reference finishes the current phase.");
+            return legalActions.Any(action => action.Kind == GameActionKind.ChooseTailwind)
+                ? new NormalAdapter().Decide(observation, legalActions)
+                : Fallback(legalActions, "The cautious reference finishes the current phase.");
         }
 
         private static int SafetyOrder(DuckEncounterType type) => type switch
@@ -134,7 +140,9 @@ public static class EvaluationPolicies
                 .FirstOrDefault();
             if (buy != null)
                 return Decision(buy, "The adventurous reference buys the highest-priced legal offer.");
-            return Fallback(legalActions, "The adventurous reference finishes the current phase.");
+            return legalActions.Any(action => action.Kind == GameActionKind.ChooseTailwind)
+                ? new NormalAdapter().Decide(observation, legalActions)
+                : Fallback(legalActions, "The adventurous reference finishes the current phase.");
         }
     }
 
@@ -163,7 +171,7 @@ public static class EvaluationPolicies
                     .ThenByDescending(action => observation.Rules.ShopOffer(action.DefinitionId).Price)
                     .FirstOrDefault()
                 : buys.Where(action => observation.Rules.ShopOffer(action.DefinitionId).ShopType != DuckEncounterType.Reeds)
-                    .OrderByDescending(action => Movement(observation.Rules.ShopOffer(action.DefinitionId).Encounter))
+                    .OrderByDescending(action => Movement(observation.Rules.ShopOffer(action.DefinitionId).Encounter, observation.Rules.IsWishSetTwo))
                     .ThenByDescending(action => observation.Rules.ShopOffer(action.DefinitionId).Price)
                     .ThenBy(action => action.DefinitionId, StringComparer.Ordinal)
                     .FirstOrDefault();
@@ -173,8 +181,8 @@ public static class EvaluationPolicies
                 : "The Reeds-heavy diagnostic selects the largest legal Reeds yield.");
         }
 
-        private static int Movement(DuckEncounterDefinition encounter) =>
-            encounter.EncounterType == DuckEncounterType.Companion ? 4 : encounter.BaseMovement ?? 0;
+        private static int Movement(DuckEncounterDefinition encounter, bool secondSet) =>
+            encounter.EncounterType == DuckEncounterType.Companion ? (secondSet ? 1 : 4) : encounter.BaseMovement ?? 0;
     }
 
     private sealed class MovementFirstMixedPolicy : IEvaluationPolicy
@@ -211,7 +219,7 @@ public static class EvaluationPolicies
             Validate(observation, legalActions);
             var explore = Action(legalActions, GameActionKind.Explore);
             var settle = Action(legalActions, GameActionKind.Settle);
-            if (explore == null || settle == null || observation.KnownNextChips.Count > 0)
+            if (explore == null || settle == null || observation.KnownNextChips.Count > 0 || observation.UnorderedNextChips.Count > 0)
                 return _normal.Decide(observation, legalActions);
             var player = observation.Players.Single(candidate => candidate.Id == observation.ViewerId);
             var shouldStop = adventurous ? player.Exhaustion >= player.SafeExhaustionMaximum
