@@ -70,13 +70,40 @@ public sealed class DuckMultiplayerEvaluationTests
     }
 
     [Fact]
+    public void Second_set_movement_shopper_uses_fixed_Companion_movement()
+    {
+        var runtime = DuckMatchRuntime.Create(42, new DuckMatchSettings(2, "set-2"));
+        runtime.State.Phase = DuckPhase.Night;
+        var player = runtime.Player("human");
+        player.FrozenSleep = player.RemainingSleep = 2;
+        player.IsSleepFrozen = true;
+        var match = new MatchSession<DuckMatchView>(runtime);
+        var choice = EvaluationPolicies.Create("movement-heavy").Decide(match.GetSnapshot("human"), match.GetLegalActions("human"));
+        Assert.Equal(2, runtime.Rules.ShopOffer(choice.Action.DefinitionId).Encounter.BaseMovement);
+    }
+
+    [Fact]
+    public void Second_set_multiplayer_study_completes_with_conditional_Reeds_telemetry()
+    {
+        var assignment = MultiplayerStudyRunner.Assignments(4).First(candidate => candidate.Scenario.StartsWith("mixed-"));
+        var result = new MultiplayerStudyRunner().Run(42, 4, assignment, "test", "set-2");
+        Assert.Equal("set-2", result.WishSetId);
+        Assert.Equal(1, result.WishSetVersion);
+        Assert.Equal(10, result.Days.Count);
+        Assert.NotEmpty(result.WinnerIds);
+        Assert.All(result.Days.SelectMany(day => day.Players), player => Assert.Equal(
+            player.StartTwigs + player.Night.TotalTwigsEarned + player.Night.DreamTwigs, player.EndTwigs));
+    }
+
+    [Fact]
     public void Multiplayer_options_validate_count_and_required_provenance()
     {
         Assert.Throws<ArgumentException>(() => MultiplayerStudyOptions.Parse(new[] { "--players", "5", "--source-label", "test" }));
         Assert.Throws<ArgumentException>(() => MultiplayerStudyOptions.Parse(new[] { "--players", "4" }));
-        var options = MultiplayerStudyOptions.Parse(new[] { "--players", "3", "--seed-count", "24", "--source-label", "test" });
+        var options = MultiplayerStudyOptions.Parse(new[] { "--players", "3", "--seed-count", "24", "--source-label", "test", "--wish-set", "set-2" });
         Assert.Equal(new[] { 3 }, options.PlayerCounts);
         Assert.Equal(24, options.SeedCount);
+        Assert.Equal("set-2", options.WishSetId);
     }
 
     [Fact]
@@ -90,7 +117,7 @@ public sealed class DuckMultiplayerEvaluationTests
         var normal = EvaluationPolicies.Create("normal").Decide(view, legal).Action.Id;
         Assert.Equal(normal, EvaluationPolicies.Create("movement-heavy").Decide(view, legal).Action.Id);
         Assert.Equal(normal, EvaluationPolicies.Create("reeds-heavy").Decide(view, legal).Action.Id);
-        foreach (var style in new[] { "movement-first-mixed", "flowers-first", "seeds-first", "sunshine-fresh", "sunshine-warm" })
+        foreach (var style in new[] { "movement-first-mixed", "flowers-first", "seeds-first", "splash-heavy", "companion-heavy", "sunshine-fresh", "sunshine-warm" })
             Assert.Equal(normal, EvaluationPolicies.Create(style).Decide(view, legal).Action.Id);
     }
 
@@ -156,7 +183,7 @@ public sealed class DuckMultiplayerEvaluationTests
     {
         var runner = new MultiplayerStudyRunner();
         var result = runner.Run(10, 4, MultiplayerStudyRunner.Assignments(4).First(), "test");
-        Assert.Equal(2, result.SchemaVersion);
+        Assert.Equal(3, result.SchemaVersion);
         Assert.Equal(8, result.RulesRevision);
         Assert.Equal(10, result.Days.Select(day => day.EventId).Distinct().Count());
         foreach (var day in result.Days)

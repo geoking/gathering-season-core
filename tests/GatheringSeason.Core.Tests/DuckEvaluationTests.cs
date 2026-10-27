@@ -12,6 +12,24 @@ namespace GatheringSeason.Core.Tests;
 public sealed class DuckEvaluationTests
 {
     [Fact]
+    public void Second_set_evaluation_finishes_Tailwind_stages_and_accounts_for_delayed_Reeds()
+    {
+        var options = EvaluationOptions.Parse(new[] { "--source-label", "test", "--wish-set", "set-2", "--policy-a", "movement-first-mixed" });
+        var outcome = new EvaluationRunner().Run(new EvaluationMatchRequest(42, 0,
+            EvaluationPolicies.Create(options.PolicyA), EvaluationPolicies.Create("movement-first-mixed"),
+            false, EvaluationSchedule.Cli, "test", true, options.WishSetId));
+        Assert.Equal("set-2", outcome.Result.WishSetId);
+        Assert.Equal(1, outcome.Result.WishSetVersion);
+        Assert.Equal("set-2", outcome.FinalSave.Settings.WishSetId);
+        Assert.Contains(outcome.Result.Actions!, action => action.Kind == GameActionKind.ChooseTailwind);
+        Assert.Contains(outcome.Result.Actions!, action => action.Day == 10 && action.Kind == GameActionKind.ChooseTailwind && action.HiddenFinalDayCommit);
+        Assert.All(outcome.Result.Days.SelectMany(day => day.Players), player => Assert.Equal(
+            player.Night.PrintedTwigs + player.Night.ReedsTwigs - player.Night.BramblesPenalty + player.Night.DreamTwigs,
+            player.EndOfNightTotalTwigs - player.PreNightTotalTwigs));
+        Assert.Equal(DuckPhase.Finished, DuckSaves.Restore(outcome.FinalSave).GetSnapshot("human").Phase);
+    }
+
+    [Fact]
     public void Telemetry_accounts_for_every_authoritative_night_and_inventory_change()
     {
         var result = Run(seed: 17, "baseline", "cautious").Result;
@@ -156,7 +174,7 @@ public sealed class DuckEvaluationTests
     public void Star_telemetry_records_currency_free_purchases_and_the_actual_Sunshine_choice()
     {
         var outcome = Run(10, "sunshine-fresh", "sunshine-warm");
-        Assert.Equal(2, outcome.Result.SchemaVersion);
+        Assert.Equal(3, outcome.Result.SchemaVersion);
         Assert.Equal(8, outcome.Result.RulesVersion);
         Assert.Equal("Stars", outcome.Result.Currency);
         var sunshine = Assert.Single(outcome.Result.Days, day => day.EventDefinitionId == "glorious_sunshine");

@@ -24,6 +24,40 @@ public sealed class DuckNormalPolicyTests
     }
 
     [Fact]
+    public void Second_set_Tailwind_protects_placed_Reeds_by_choosing_the_reachable_shelter()
+    {
+        var scenario = AdventureScenario(8, 4, new[] { "tailwind_6", "grumpy_goose" }, "tailwind_6", wishSetId: "set-2");
+        var player = scenario.Runtime.Player("human");
+        var previous = player.Inventory.Single(chip => chip.PhysicalChipId == player.PlacedChips[0].PhysicalChipId);
+        player.Inventory.Remove(previous);
+        player.Inventory.Add(new DuckPhysicalChipState(previous.PhysicalChipId, "reeds_3"));
+        player.PlacedHelpfulTypes.Clear();
+        player.PlacedHelpfulTypes.Add(DuckEncounterType.Reeds);
+        var explore = scenario.Match.GetLegalActions("human").Single(action => action.Kind == GameActionKind.Explore);
+        scenario.Match.Execute("human", explore);
+        Assert.NotNull(scenario.Match.GetSnapshot("human").OwnPendingTailwind);
+        var decision = Choose(scenario);
+        Assert.Equal("duck.tailwind.shelter", decision.Id);
+        scenario.Match.Execute("human", decision);
+        Assert.Equal(10, scenario.Match.GetSnapshot("human").Players.Single(candidate => candidate.Id == "human").Position);
+    }
+
+    [Fact]
+    public void Second_set_unordered_preview_does_not_turn_either_identity_into_a_known_first_draw()
+    {
+        var scenario = AdventureScenario(8, 4, new[] { "seeds", "grumpy_goose" }, wishSetId: "set-2");
+        var player = scenario.Runtime.Player("human");
+        player.UnorderedNextPhysicalChipIds.AddRange(player.BagPhysicalChipIds);
+        var first = Evaluate(scenario);
+        player.UnorderedNextPhysicalChipIds.Reverse();
+        player.BagPhysicalChipIds.Reverse();
+        var reversed = Evaluate(scenario);
+        Assert.Empty(scenario.Match.GetSnapshot("human").KnownNextChips);
+        Assert.Equal(first.Action.Id, reversed.Action.Id);
+        Assert.Equal(first.Reason, reversed.Reason);
+    }
+
+    [Fact]
     public void Exact_preview_changes_the_decision_but_unknown_bag_order_does_not()
     {
         var seedPreview = AdventureScenario(position: 8, exhaustion: 4, bag: new[] { "seeds", "grumpy_goose" },
@@ -375,6 +409,29 @@ public sealed class DuckNormalPolicyTests
     }
 
     [Fact]
+    public void Final_Day_recovers_from_a_finished_opponents_visible_unbanked_second_set_Reeds()
+    {
+        var scenario = AdventureScenario(position: 4, exhaustion: 4,
+            bag: new[] { "reeds_3", "tailwind_6", "grumpy_goose" }, day: 10, wishSetId: "set-2");
+        scenario.Runtime.Player("human").TotalTwigs = 10;
+        SetFinishedOpponent(scenario.Runtime, position: 4);
+        var opponent = scenario.Runtime.Player("ai");
+        opponent.TotalTwigs = 12;
+        var placed = opponent.Inventory.Single(chip => chip.PhysicalChipId == opponent.PlacedChips[0].PhysicalChipId);
+        opponent.Inventory.Remove(placed);
+        opponent.Inventory.Add(new DuckPhysicalChipState(placed.PhysicalChipId, "reeds_3"));
+        opponent.PlacedHelpfulTypes.Clear();
+        opponent.PlacedHelpfulTypes.Add(DuckEncounterType.Reeds);
+
+        var decision = Evaluate(scenario);
+
+        Assert.Equal(GameActionKind.Explore, decision.Action.Kind);
+        Assert.Contains("current final score is provably behind", decision.Reason, StringComparison.Ordinal);
+        opponent.HasFinishedDay = false;
+        Assert.DoesNotContain("provably behind", Evaluate(scenario).Reason, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void Final_Day_visible_bag_upper_bound_keeps_a_recovery_open_beyond_the_search_horizon()
     {
         var scenario = AdventureScenario(
@@ -522,9 +579,10 @@ public sealed class DuckNormalPolicyTests
         int exhaustion,
         string[] bag,
         string? knownDefinitionId = null,
-        int day = 1)
+        int day = 1,
+        string wishSetId = "set-1")
     {
-        var runtime = DuckMatchRuntime.Create(seed: 211);
+        var runtime = DuckMatchRuntime.Create(seed: 211, new DuckMatchSettings(2, wishSetId));
         runtime.State.Day = day;
         runtime.State.FinalDayDecisionBeat = day == DuckMatchSettings.StandardDays ? 1 : 0;
         runtime.State.WorldEventDeckDefinitionIds[runtime.State.CurrentEventIndex] = "home_before_dark";
