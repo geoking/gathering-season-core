@@ -5,8 +5,11 @@ One human faces one to three Normal AI opponents. **Most Twigs wins**; tied tota
 Stars on the final Night, then a draw. Core v2 supports only rules revision 8.
 Older and unknown revisions cannot be continued; their save files are preserved.
 
-The current powers are named **Wish Set 1**; that set name is distinct from
-technical rules revision 8. The standard rules below describe the current setup.
+Choose **Wish Set 1** or **Wish Set 2** when starting a gathering. Every duck
+uses the same set; Continue restores that choice. Wish-set identity and version
+are separate from technical rules revision 8. Set 1 remains the default, with
+its existing powers and prices. The shared rules below apply to both sets;
+[encounters](encounters.md) describes each set's powers.
 
 ## A Day and a Night
 
@@ -20,7 +23,8 @@ technical rules revision 8. The standard rules below describe the current setup.
 3. Days 1–9 publish actions immediately so players can react. On Day 10 only,
    all active ducks privately commit Draw/Settle and reveal each beat together.
 4. Once everyone finishes, bank the destination’s cumulative route Twigs plus
-   Reeds/weather Twigs, after any Brambles deduction. Compute Stars and bonuses.
+   eligible Reeds/weather Twigs, after any Brambles deduction. Set 2 Reeds pay
+   only at a shelter. Compute Stars and bonuses.
    Worn-out ducks retain earned Twigs and half their Stars, rounded down.
 5. Compare frozen Stars among safe ducks. All tied Most Rested ducks receive a
    Most Rested marker: one temporary extra starting step tomorrow, never a Feather.
@@ -41,7 +45,9 @@ Start with two each of Log, Mud, Pebbles and Brambles, two Seeds, one Tailwind
 One Goose is added to each pouch once on Day 5 and remains thereafter.
 Normally five Exhaustion is safe and six wears you out. An unprotected Goose
 reduces the safe maximum by one for that Day. Fresh Air adds two to the limit.
-Splash protects only the immediately next chip’s nuisance, never its Exhaustion.
+Splash protects only the immediately next chip. In Set 1 it suppresses an
+obstacle's nuisance, never its Exhaustion. In Set 2 it prevents the obstacle's
+Exhaustion but leaves its nuisance active. A helpful chip uses up either protection.
 There is no flask, rewind or rescue.
 
 Helpful chips are **Wishes**: Seeds, Tailwind, Signpost, Splash, Reeds,
@@ -54,9 +60,11 @@ arrows show movement, Reeds ×1/×2/×3 show Twig yield, always moving one. See
 ## Shelters, Trail Feathers and catch-up
 
 The 43 spaces have eight shelters at **4, 10, 17, 21, 25, 32, 36 and 43**.
-Shelter finishes give Feathers and, when at least one Wildflowers chip was
-placed, +1 Star total, even when exhausted. Positive flock leaders gain +1 Star,
-with tied leaders and exhausted ducks qualifying. Exhaustion ends the adventure,
+Shelter finishes give Feathers. Set 1 Wildflowers grants +1 Star total at a
+shelter if any was placed, even when exhausted. Set 2 Wildflowers grants +2
+Stars only when it is the final placed chip, anywhere. Positive flock leaders
+gain +1 Star in Set 1 or +2 in Set 2, with tied leaders and exhausted ducks
+qualifying before worn-out halving. Exhaustion ends the adventure,
 halves the complete Star total (rounded down), and prevents Most Rested; it does
 not remove Twigs, Feathers or ordinary bonuses. Golden Sunset retains its
 special requirement that everyone finish without exhaustion.
@@ -76,5 +84,11 @@ Most Rested’s temporary step is separate. Final-Day Feathers are recorded but
 there is no Day 11 or exchange into victory points. [Exact board and prices](board-and-shop.md)
 and [fifteen weather reports](world-events.md) are the current numeric authorities.
 
-An available Signpost can be read without drawing. Core reveals the private
-preview and preserves that exact chip as the next draw.
+An available Signpost can be read without drawing. Set 1 reveals the exact next
+chip. Set 2 reveals the next two chips without their order; after drawing one,
+the other is known. Previously established knowledge is retained across peeks.
+
+The next-draw probability view uses the viewer's remaining pouch composition
+and Signpost knowledge. It gives exact probabilities by chip variant and the
+chance of becoming worn out on the next draw. It never reveals hidden draw
+order or another duck's pouch, consumes no randomness and changes no chip.

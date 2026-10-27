@@ -38,8 +38,10 @@ Weather Twigs are Twigs earned that Day. They are retained when worn out, count
 toward final victory and can be reduced by an unsuppressed final Brambles. No
 weather awards a Feather or changes permanent starting progress.
 
-Splash and Clearing Breeze suppress Obstacle nuisances. They never suppress
-weather or other shared effects. Movement bonuses from a weather report are included
+Set 1 Splash and Clearing Breeze suppress Obstacle nuisances. Set 2 Splash
+prevents the next chip's Exhaustion if it is an Obstacle, leaving its nuisance
+active. Neither set's Splash suppresses weather or other shared effects.
+Movement bonuses from a weather report are included
 before a pending Log halves movement, except for the single-halving rule on
 Still Air below.
 
@@ -49,8 +51,9 @@ Still Air below.
 
 Gentle rain softens the earth along the route.
 
-**Every placed Seed gains +1 movement today.** A Seed therefore moves 2 before
-other modifiers. This applies to every Seed each player places. It grants no
+**Every placed Seed gains +1 movement today.** A Set 1 Seed therefore moves 2;
+a Set 2 Seed moves 3 if it follows an Obstacle, otherwise 2, before Log modifiers.
+This applies to every Seed each player places. It grants no
 Star and does not add Exhaustion.
 
 ### 2. Glorious Sunshine
@@ -58,7 +61,8 @@ Star and does not add Exhaustion.
 **Before anyone explores, each duck publicly chooses one generous benefit:**
 
 - **Fresh Air:** +2 safe Exhaustion for this Day. Seven is safe instead of five.
-  An unprotected Goose reduces that to six; a protected Goose leaves it seven.
+  A Goose with an active nuisance reduces that to six; nuisance protection
+  leaves it seven. Set 2 Splash alone does not prevent that reduction.
   Obstacles still add Exhaustion and apply any unprotected nuisance.
 - **Starry Night:** +2 Stars at Night. Add it before Pebbles and worn-out halving,
   before frozen Most Rested comparison, and before final-Day Dream Twig conversion.
@@ -85,7 +89,8 @@ penalty, or a Goose from lowering the safe maximum.
 
 This protection is used on the first placed Obstacle even if its nuisance would
 have no effect. If Splash also protects that Obstacle, both protections are used
-there; neither moves to another token. The draw consumes any older pending Log;
+there; neither moves to another token. In Set 2 the combined effects prevent
+both Exhaustion and nuisance. The draw consumes any older pending Log;
 Clearing Breeze suppresses only the newly drawn nuisance. Its protection expires at Day cleanup if no Obstacle is placed.
 
 ### 4. Windfall Gusts
@@ -155,9 +160,10 @@ Thunder keeps shelter ducks awake.
 
 **A player who finishes at a shelter receives 1 less Star from that
 shelter, to a minimum of 0.** Apply this once to the shelter-related Star subtotal
-after adding its printed Star, Wildflowers bonus and Day 10 shelter +1, but
+after adding its printed Star, Set 1 Wildflowers bonus and Day 10 shelter +1, but
 before Most Rested and Day 10 conversion. It does not reduce flock Star or any
-other separately earned weather Star.
+other separately earned weather Star. Set 2's final-chip Wildflowers reward
+is independent of the shelter and is not reduced.
 
 Thundery Skies never removes Twigs or Feathers. It also applies to exhausted
 ducks, before the complete Star total is halved. Splash and
@@ -174,14 +180,17 @@ can deduct one Twig from the complete daily Twig reward, once as usual.
 ### 12. Refreshing Showers
 
 **Every placed Splash recovers 1 current Exhaustion, to a minimum of zero.** It
-still arms its normal protection for the next chip. Recovery changes neither
+still arms its selected Wish set's protection for the next chip. In Set 2,
+one Splash can therefore recover one Exhaustion and prevent the next chip's
+Exhaustion if that chip is an Obstacle. Recovery changes neither
 the safe Exhaustion maximum nor any earlier Goose reduction. Repeated Splashes
 can recover repeatedly. A duck that has already worn out cannot draw again.
 
 ### 13. Favourable Winds
 
 **Every placed Wish gains +1 movement.** Calculate normal movement first,
-including a Companion's new active flock count and normal cap of four, then
+including Set 1 Companion's new active flock count and normal cap of four
+(Set 2 Companion moves one before the bonus), then
 add one, then apply any incoming Log halving. White Obstacles move normally.
 Movement still stops at space 43. Other Wish powers are unchanged.
 

@@ -1,6 +1,7 @@
 # Gathering Season encounter rules and timing
 
-The implemented encounter contract for the supported rules revision 8. See [Weather reports](world-events.md)
+The implemented encounter contract for rules revision 8, Wish Sets 1 and 2.
+See [Weather reports](world-events.md)
 for shared weather and [board/shop](board-and-shop.md) for exact values.
 
 ## Draw and placement order
@@ -26,6 +27,11 @@ For a Draw action, resolve one encounter at a time:
    halve its resulting movement, rounding up to at least one; a white chip moves
    normally. The new chip's nuisance resolves afterwards, so an unprotected new
    Log arms its own next-chip slowdown.
+   A Set 2 Tailwind is revealed before the player chooses its full movement or
+   the first reachable shelter and immediate settlement. Reserve the chip until
+   that choice; it cannot be replaced, skipped or drawn twice. On Day 10, collect
+   all Draw/Settle commitments, then any Tailwind choices, before resolving and
+   revealing the whole cohort together.
 3. Place the chip once on its final destination. The printed Twig value is the
    route total collected so far, added to Nest Twigs once at Night; do not sum passed numerals.
 4. Resolve the chip's nonmovement ability or nuisance, including Exhaustion.
@@ -42,7 +48,7 @@ anyone can draw. Weather movement is added before Log halves the total unless th
 says otherwise. The Still Air report and pending
 Log halve Tailwind movement only once together; the Log is consumed normally.
 
-## Helpful encounters
+## Helpful encounters in Wish Set 1
 
 A token type means one of the seven helpful kinds listed below. Tailwind
 strengths and Reeds quantities remain variants of their respective types.
@@ -62,25 +68,46 @@ not movement or a universal strength.
 
 
 
-### Active Companion flock
+## Helpful encounters in Wish Set 2
 
-Each duck starts every Day with active flock count zero. A placed Companion
+Movement modifiers from weather and an incoming Log still apply. The starting
+pouch, obstacle powers and permanent Feather rules are shared with Set 1.
+
+| Encounter | Set 2 rule |
+| --- | --- |
+| **Seeds** | Move 1, plus 1 if the immediately preceding placed chip today was an Obstacle, even if protected. Apply weather and Log modifiers afterwards. |
+| **Tailwind →2/→4/→6** | Choose the full modified movement or the first shelter ahead within that distance. Choosing the shelter ends the adventure there after the chip resolves. |
+| **Signpost →2** | Move 2, then privately see the next two chips without their order, or the single remaining chip. No selection, discard or reordering. Drawing one of a pair makes the other known; overlapping peeks retain already established knowledge. Mist suppresses the peek. |
+| **Refreshing splash** | Move 1 and arm protection for the immediately next placed chip. If it is an Obstacle, prevent its Exhaustion while allowing its nuisance. A helpful chip consumes protection. Consecutive Splashes re-arm one protection; they never accumulate charges. |
+| **Nesting reeds ×1/×2/×3** | Move 1. Each placed Reed pays its printed Twigs at Night only if the duck finishes at a shelter, including a worn-out shelter finish. Otherwise it pays zero. No Reeds Twigs are banked before settlement. |
+| **Companion duck** | Move 1 and increment the active flock. Mud still removes one active companion. All tied positive flock leaders earn +2 Stars once at Night, before worn-out halving. |
+| **Wildflowers** | Move 1. At Night award +2 Stars once if the final placed chip is Wildflowers, at any space. Earlier Wildflowers grant no reward. |
+
+Set 2 Splash does not prevent Goose from lowering the safe maximum. A duck
+already at five Exhaustion can therefore wear out when a protected Goose lowers
+its maximum to four, despite adding no Exhaustion. Clearing Breeze independently
+suppresses the nuisance of the first Obstacle; both effects can apply to the same
+chip. Refreshing Showers still recovers one Exhaustion on each placed Splash.
+
+## Active Companion flock
+
+Each duck starts every Day with active flock count zero. In Set 1, a placed Companion
 increments the current count before its movement: count one moves 2, count two
 moves 3, and count three or more moves 4. Companions need not be consecutive.
 
 Mud reduces the active count by one, to a minimum of zero. It does not remove an
 owned or placed Companion and never moves an earlier chip. The next Companion
-increments the reduced count and uses the formula above. A Companion still
+increments the reduced count and uses that set's movement rule. A Companion still
 counts as physically placed for rules that inspect encountered token types, while
 movement and the Night flock contest use the reduced active count.
 
 After every duck's adventure ends, compare positive active flock counts among
 all ducks, including exhausted ducks. A larger exhausted flock blocks a smaller
 flock; all tied leaders qualify. Each leader gains
-+1 Star once. Add it before exhaustion halves the total and before freezing Stars for
++1 Star in Set 1 or +2 Stars in Set 2 once. Add it before exhaustion halves the total and before freezing Stars for
 Most Rested. Companion has no shield or nuisance-cancelling ability.
 
-## Immediate-next Splash protection
+## Immediate-next Splash protection in Wish Set 1
 
 Placing Splash arms protection for the **immediately next placed chip only**.
 That protection expires after that chip regardless of its token type, or at Day
@@ -158,7 +185,7 @@ During Day 5 preparation, add exactly one Goose to each duck's pouch. It remains
 for Days 5–10; do not add another each dawn. Goose is a white Obstacle, moves one
 and adds one Exhaustion.
 
-Unless its nuisance is protected by Splash or Clearing Breeze, Goose also sets
+Unless its nuisance is protected by Set 1 Splash or Clearing Breeze, Goose also sets
 that Day's safe Exhaustion maximum to four before checking for wear-out. The
 maximum stays four for the rest of that Day and resets to five next dawn.
 Fresh Air adds two to both limits: seven normally, six after an unprotected
@@ -186,9 +213,11 @@ wear-out. Include each eligible weather payout once in the following order:
    shared bonus requires every duck to finish without exhaustion.
 2. If the final chip is unsuppressed Brambles, subtract one from today's earned
    Twigs, floor zero. Previously collected Nest Twigs cannot be lost.
-3. Ducks on shelters receive the printed Feathers and +1 Star total if they
-   placed one or more Wildflowers, even when exhausted. On Day 10 a shelter
-   adds one further Star. Thundery Skies reduces the shelter subtotal by one.
+3. Ducks on shelters receive the printed Feathers. Set 1 adds +1 Star total if
+   they placed any Wildflowers, even when exhausted. Set 2 instead adds +2 Stars
+   if the final chip is Wildflowers, regardless of the final space. On Day 10 a
+   shelter adds one further Star. Thundery Skies reduces the shelter subtotal
+   by one; Set 2's independent Wildflowers reward is outside that subtotal.
    Count each earned weather reward once, not again here if already included.
 4. After everyone finishes, award the active-flock Star bonus across all ducks.
 5. Apply any unsuppressed final Pebbles deduction to total earned Star, floor

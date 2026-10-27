@@ -40,11 +40,11 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 var pending = PendingTailwind(runtime, player)!;
                 var choices = new List<GameAction>
                 {
-                    new GameAction("duck.tailwind.full", GameActionKind.ChooseTailwind, "Move " + pending.FullMovement + " spaces")
+                    new GameAction("duck.tailwind.full", GameActionKind.ChooseTailwind, "Move to space " + pending.FullPosition)
                 };
                 if (pending.ShelterPosition.HasValue)
                     choices.Add(new GameAction("duck.tailwind.shelter", GameActionKind.ChooseTailwind,
-                        "Settle at shelter " + pending.ShelterPosition.Value));
+                        "Settle at space " + pending.ShelterPosition.Value));
                 return new ReadOnlyCollection<GameAction>(choices);
             }
             if (runtime.State.Day == DuckMatchSettings.StandardDays && runtime.State.FinalDayCommits.Any(
