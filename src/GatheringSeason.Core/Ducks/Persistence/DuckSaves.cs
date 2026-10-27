@@ -443,7 +443,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(player.KnownNextPhysicalChipIds.Count <= (rules.IsWishSetTwo ? 2 : 1)
                     && player.KnownNextPhysicalChipIds.SequenceEqual(
                         player.BagPhysicalChipIds.Take(player.KnownNextPhysicalChipIds.Count)),
-                $"Players[{player.Id}] Signpost preview must contain at most one chip and be an exact prefix of pouch order.");
+                $"Players[{player.Id}] ordered Signpost preview must be an exact bounded prefix of pouch order.");
 
             Require(player.UnorderedNextPhysicalChipIds != null, "Unordered preview is required.");
             Require(player.UnorderedNextPhysicalChipIds.Count == 0 || rules.IsWishSetTwo
@@ -663,6 +663,16 @@ namespace GatheringSeason.Core.Ducks.Persistence
             if (pendingTailwinds.Length > 0)
                 Require(save.FinalDayCommits.Count == activeCount && pendingTailwinds.All(player => save.FinalDayCommits.Any(commit => commit.PlayerId == player.Id && commit.ActionKind == GameActionKind.Explore)),
                     "Final-Day Tailwind choices require a complete committed cohort.");
+            if (save.FinalDayCommits.Count == activeCount)
+                foreach (var commit in save.FinalDayCommits.Where(item => item.ActionKind == GameActionKind.Explore))
+                {
+                    var player = save.Players.Single(candidate => candidate.Id == commit.PlayerId);
+                    Require(player.BagPhysicalChipIds.Count > 0, "A committed draw needs a remaining chip.");
+                    var next = player.Inventory.Single(chip => chip.PhysicalChipId == player.BagPhysicalChipIds[0]);
+                    if (DuckRules.ForWishSet(SettingsFromSave(save).WishSetId).Encounter(next.DefinitionId).EncounterType == DuckEncounterType.Tailwind)
+                        Require(player.PendingTailwindPhysicalChipId == next.PhysicalChipId,
+                            "Every committed Tailwind draw needs a reserved choice before the cohort resolves.");
+                }
             foreach (var commit in save.FinalDayCommits)
             {
                 var player = save.Players.Single(candidate => candidate.Id == commit.PlayerId);

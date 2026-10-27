@@ -75,7 +75,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
         public IReadOnlyList<DuckShopOffer> ShopOffers { get; }
         /// <summary>The viewer knows these next two chips, but not their order.</summary>
         public IReadOnlyList<DuckPhysicalChipView> UnorderedNextChips { get; }
+        /// <summary>A reserved chip remains in OwnBag until its choice resolves; no placement is public yet.</summary>
         public DuckPendingTailwindView? OwnPendingTailwind { get; }
+        /// <summary>Null unless the viewer currently has a legal Explore decision.</summary>
         public DuckDrawProbabilityView? DrawProbability { get; }
         public IReadOnlyList<DuckHistoryEntry> History { get; }
         public IReadOnlyList<DuckPublicAwardView> PublicAwards { get; }

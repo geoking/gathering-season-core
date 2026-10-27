@@ -38,8 +38,13 @@ namespace GatheringSeason.Core.Ducks.Runtime
             {
                 if (player.PendingTailwindDestination != 0) return EmptyActions();
                 var pending = PendingTailwind(runtime, player)!;
-                var choices = new List<GameAction> { new GameAction("duck.tailwind.full", GameActionKind.ChooseTailwind, "Move " + pending.FullMovement + " spaces") };
-                if (pending.ShelterPosition.HasValue) choices.Add(new GameAction("duck.tailwind.shelter", GameActionKind.ChooseTailwind, "Settle at shelter " + pending.ShelterPosition.Value));
+                var choices = new List<GameAction>
+                {
+                    new GameAction("duck.tailwind.full", GameActionKind.ChooseTailwind, "Move " + pending.FullMovement + " spaces")
+                };
+                if (pending.ShelterPosition.HasValue)
+                    choices.Add(new GameAction("duck.tailwind.shelter", GameActionKind.ChooseTailwind,
+                        "Settle at shelter " + pending.ShelterPosition.Value));
                 return new ReadOnlyCollection<GameAction>(choices);
             }
             if (runtime.State.Day == DuckMatchSettings.StandardDays && runtime.State.FinalDayCommits.Any(
@@ -134,7 +139,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         private static void CompleteFinalDayCohort(DuckMatchRuntime runtime)
         {
-            if (runtime.State.Players.Any(player => player.PendingTailwindPhysicalChipId != 0 && player.PendingTailwindDestination == 0)) return;
+            if (runtime.State.Players.Any(player =>
+                player.PendingTailwindPhysicalChipId != 0 && player.PendingTailwindDestination == 0)) return;
             var beat = runtime.State.FinalDayDecisionBeat;
             var commits = runtime.State.FinalDayCommits.ToDictionary(commit => commit.PlayerId, StringComparer.Ordinal);
             foreach (var candidate in runtime.State.Players.Where(player => !player.HasFinishedDay))
@@ -155,7 +161,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
         private static bool ReserveTailwind(DuckMatchRuntime runtime, DuckPlayerState player)
         {
             var id = player.BagPhysicalChipIds[0];
-            if (!runtime.Rules.IsWishSetTwo || runtime.Rules.Encounter(player.Inventory.Single(chip => chip.PhysicalChipId == id).DefinitionId).EncounterType != DuckEncounterType.Tailwind) return false;
+            var chip = player.Inventory.Single(candidate => candidate.PhysicalChipId == id);
+            if (!runtime.Rules.IsWishSetTwo
+                || runtime.Rules.Encounter(chip.DefinitionId).EncounterType != DuckEncounterType.Tailwind) return false;
             player.PendingTailwindPhysicalChipId = id;
             return true;
         }
