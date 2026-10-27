@@ -131,10 +131,12 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     || save.Settings.WishSetId == DuckMatchSettings.StandardWishSetId
                     || save.Settings.WishSetId == DuckMatchSettings.SecondWishSetId,
                 "Settings.WishSetId is unsupported.");
-            Require(save.Settings.WishSetVersion == DuckMatchSettings.CurrentWishSetVersion
-                    || save.Settings.WishSetVersion == 0 && save.Settings.WishSetId != DuckMatchSettings.SecondWishSetId,
+            var wishSetId = string.IsNullOrEmpty(save.Settings.WishSetId)
+                ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId;
+            Require(save.Settings.WishSetVersion == DuckMatchSettings.CurrentVersionForWishSet(wishSetId)
+                    || save.Settings.WishSetVersion == 0 && wishSetId == DuckMatchSettings.StandardWishSetId,
                 "Settings.WishSetVersion is unsupported.");
-            rules = DuckRules.ForWishSet(string.IsNullOrEmpty(save.Settings.WishSetId) ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId);
+            rules = DuckRules.ForWishSet(wishSetId);
             Require(save.Day >= 1 && save.Day <= DuckMatchSettings.StandardDays, "Day is outside the supported calendar.");
             Require(Enum.IsDefined(typeof(DuckPhase), save.Phase), "Phase is not defined.");
             Require(save.Phase != DuckPhase.Preparation, "Preparation is not a resumable command boundary.");
@@ -188,7 +190,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             return new DuckMatchSettings(save.Settings.PlayerCount == 0 ? 2 : save.Settings.PlayerCount,
                 string.IsNullOrEmpty(save.Settings.WishSetId)
                     ? DuckMatchSettings.StandardWishSetId : save.Settings.WishSetId,
-                save.Settings.WishSetVersion == 0 ? 1 : save.Settings.WishSetVersion);
+                save.Settings.WishSetVersion == 0 ? DuckMatchSettings.CurrentWishSetVersion : save.Settings.WishSetVersion);
         }
 
         private static DuckPlayerSaveData CapturePlayer(DuckPlayerState player)

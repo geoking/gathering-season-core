@@ -77,18 +77,20 @@ changes Twig yield; it never changes movement or how many chips are purchased.
 | Wish | Set 1 stars | Set 2 stars |
 | --- | ---: | ---: |
 | Seeds | 0 | 0 |
-| Tailwind →2 | 1 | 2 |
-| Tailwind →4 | 2 | 3 |
+| Tailwind →2 | 1 | 1 |
+| Tailwind →4 | 2 | 2 |
 | Tailwind →6 | 3 | 4 |
 | Signpost →2 | 2 | 2 |
 | Refreshing splash | 1 | 2 |
 | Nesting reeds ×1 | 2 | 1 |
-| Nesting reeds ×2 | 3 | 2 |
-| Nesting reeds ×3 | 4 | 3 |
-| Companion duck | 2 | 1 |
+| Nesting reeds ×2 | 3 | 3 |
+| Nesting reeds ×3 | 4 | 4 |
+| Companion duck | 2 | 2 |
 | Wildflowers | 1 | 1 |
 
-[Set 1 shop data](../../tests/GatheringSeason.Core.Tests/Fixtures/Duck/Rules/shop.json) records the default prices. Both sets share the purchasing policy: all Wishes are available
+[Set 1 shop data](../../tests/GatheringSeason.Core.Tests/Fixtures/Duck/Rules/shop.json) and
+[Set 2 shop data](../../tests/GatheringSeason.Core.Tests/Fixtures/Duck/Rules/shop-set-2.json)
+record the current prices. Both sets share the purchasing policy: all Wishes are available
 from Night 1 with unlimited stock; a duck may buy one per helpful type per Night
 within the shared calendar’s 1/2/3 purchase limits. Free Seeds still use a
 purchase slot and the one-per-type limit. Different Tailwind or Reeds variants

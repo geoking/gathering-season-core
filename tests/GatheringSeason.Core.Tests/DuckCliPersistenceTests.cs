@@ -211,19 +211,23 @@ public sealed partial class DuckCliTests
         Assert.Equal("not a save", File.ReadAllText(files.Path));
     }
 
-    // Unsupported rules must fail Continue without replacing either recovery file.
+    // Unsupported rules and Wish sets must preserve both recovery files.
     [Theory]
-    [InlineData(0)]
-    [InlineData(7)]
-    [InlineData(9)]
-    public void Unsupported_rules_in_primary_and_backup_fail_without_rewriting_either_file(int rulesVersion)
+    [InlineData(0, "set-1", 1, "RulesVersion")]
+    [InlineData(7, "set-1", 1, "RulesVersion")]
+    [InlineData(9, "set-1", 1, "RulesVersion")]
+    [InlineData(8, "set-2", 1, "Settings.WishSetVersion")]
+    public void Unsupported_rules_or_Wish_set_versions_fail_without_rewriting_either_file(
+        int rulesVersion, string wishSetId, int wishSetVersion, string errorField)
     {
         using var files = new SaveFiles();
-        var primary = DuckSaves.Capture(MatchSession.CreateDuck(42));
+        var primary = DuckSaves.Capture(MatchSession.CreateDuck(42, new DuckMatchSettings(2, wishSetId)));
         primary.RulesVersion = rulesVersion;
+        primary.Settings.WishSetVersion = wishSetVersion;
         files.Write(primary);
-        var backup = DuckSaves.Capture(MatchSession.CreateDuck(43));
+        var backup = DuckSaves.Capture(MatchSession.CreateDuck(43, new DuckMatchSettings(2, wishSetId)));
         backup.RulesVersion = rulesVersion;
+        backup.Settings.WishSetVersion = wishSetVersion;
         files.Write(backup, backup: true);
         var primaryBytes = File.ReadAllBytes(files.Path);
         var backupBytes = File.ReadAllBytes(files.Path + ".bak");
@@ -231,7 +235,7 @@ public sealed partial class DuckCliTests
         var result = Run("", "--continue", "--save", files.Path);
 
         Assert.Equal(3, result.ExitCode);
-        Assert.Contains("RulesVersion", result.Error);
+        Assert.Contains(errorField, result.Error);
         Assert.DoesNotContain("all ducks start at the nest", result.Output);
         Assert.Equal(primaryBytes, File.ReadAllBytes(files.Path));
         Assert.Equal(backupBytes, File.ReadAllBytes(files.Path + ".bak"));

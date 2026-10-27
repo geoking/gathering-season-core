@@ -13,14 +13,14 @@
       "family": "Tailwind",
       "intrinsic_movement": 2,
       "bundle_quantity": null,
-      "star_price": 2
+      "star_price": 1
     },
     {
       "id": "tailwind_4",
       "family": "Tailwind",
       "intrinsic_movement": 4,
       "bundle_quantity": null,
-      "star_price": 3
+      "star_price": 2
     },
     {
       "id": "tailwind_6",
@@ -55,21 +55,21 @@
       "family": "Nesting reeds",
       "intrinsic_movement": 1,
       "bundle_quantity": 2,
-      "star_price": 2
+      "star_price": 3
     },
     {
       "id": "reeds_3",
       "family": "Nesting reeds",
       "intrinsic_movement": 1,
       "bundle_quantity": 3,
-      "star_price": 3
+      "star_price": 4
     },
     {
       "id": "companion",
       "family": "Companion duck",
       "intrinsic_movement": 1,
       "bundle_quantity": null,
-      "star_price": 1
+      "star_price": 2
     },
     {
       "id": "wildflowers",
@@ -99,5 +99,5 @@
   "purchase_policy_status": "All Wishes have unlimited stock; one purchase per helpful type within nest capacity.",
   "rules_revision": 8,
   "wish_set_id": "set-2",
-  "wish_set_version": 1
+  "wish_set_version": 2
 }

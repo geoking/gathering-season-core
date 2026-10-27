@@ -46,15 +46,15 @@ namespace GatheringSeason.Core.Ducks.Definitions
             var shopOffers = new[]
             {
                 Offer("seeds", 0),
-                Offer("tailwind_2", setTwo ? 2 : 1),
-                Offer("tailwind_4", setTwo ? 3 : 2),
+                Offer("tailwind_2", 1),
+                Offer("tailwind_4", 2),
                 Offer("tailwind_6", setTwo ? 4 : 3),
                 Offer("signpost", 2),
                 Offer("splash", setTwo ? 2 : 1),
                 Offer("reeds_1", setTwo ? 1 : 2),
-                Offer("reeds_2", setTwo ? 2 : 3),
-                Offer("reeds_3", setTwo ? 3 : 4),
-                Offer("companion", setTwo ? 1 : 2),
+                Offer("reeds_2", 3),
+                Offer("reeds_3", 4),
+                Offer("companion", 2),
                 Offer("wildflowers", 1)
             };
 

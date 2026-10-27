@@ -104,7 +104,9 @@ reward fields remain unchanged. Previously saved history remains verbatim.
 ## Match setup and seats
 
 `DuckMatchSettings` validates two to four players and `WishSetId` equal to
-`"set-1"` or `"set-2"`, each with `WishSetVersion = 1`.
+`"set-1"` with `WishSetVersion = 1` or `"set-2"` with `WishSetVersion = 2`.
+Each set has one current catalogue. The version is a save-validation stamp,
+not a selectable pricing mode.
 Defaults remain two players, ten Days and zero starting Feathers. Set identity
 names the encounter powers; it is distinct from the numeric rules revision.
 The ordered player IDs are `human`, `ai`, `ai-2`, `ai-3`, using as many as the
@@ -113,7 +115,9 @@ setup needs. Every seat uses the same player state and legal-action contracts.
 Format-1 `Settings.PlayerCount` and `Settings.WishSetId` are additive fields.
 A missing/zero count means two players; a missing/empty set means Set 1 in the
 current rules catalogue. Missing/zero `Settings.WishSetVersion` means version 1
-only for legacy Set 1 data. Set 2 saves require explicit version 1. Unknown sets
+only for legacy Set 1 data. Set 2 saves require explicit version 2. Obsolete
+Set 2 version 1 saves are unsupported, including saves before shopping or after
+Dawn; no old-price catalogue or migration is provided. Unknown sets
 or versions, unsupported counts, mismatched player records and invalid
 command/result references fail validation before state construction. Continue
 preserves the recorded setup. The existing two-argument settings constructor is
