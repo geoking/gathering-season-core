@@ -124,8 +124,8 @@ two on Nights 4–6 and three on Nights 7–9. The shop has unlimited stock.
 Reeds quantities mean Twig yield, not movement; all Reeds move one space.
 Set 1 prices in Stars: Seeds **0**, Tailwinds **1/2/3**, Signpost **2**, Splash
 **1**, Reeds **2/3/4**, Companion **2** and Wildflowers **1**. Set 2 prices:
-Seeds **0**, Tailwinds **2/3/4**, Signpost **2**, Splash **2**, Reeds **1/2/3**,
-Companion **1** and Wildflowers **1**. Free Seeds still use a purchase slot and
+Seeds **0**, Tailwinds **1/2/4**, Signpost **2**, Splash **2**, Reeds **1/3/4**,
+Companion **2** and Wildflowers **1**. Free Seeds still use a purchase slot and
 the one-per-type limit.
 
 Set 2 Seeds move one extra space immediately after an obstacle. Companion
@@ -151,6 +151,10 @@ platform's local application-data directory; **the CLI prints the exact path**.
 Quitting with `q` does not start a new game. To open a save from this baseline stored
 elsewhere, provide its explicit `--save` path; automatic discovery is limited
 to the current default directory. Pre-baseline game profiles are unsupported; start a new game.
+
+Set 2 saves require the current catalogue stamp, version 2. Earlier Set 2
+saves cannot Continue; start a new gathering. A failed Continue leaves the
+source save and backup intact. Set 1 saves retain their existing support.
 
 Continue directly:
 
