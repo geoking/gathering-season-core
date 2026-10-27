@@ -79,7 +79,7 @@ public sealed class DuckMultiplayerEvaluationTests
         player.IsSleepFrozen = true;
         var match = new MatchSession<DuckMatchView>(runtime);
         var choice = EvaluationPolicies.Create("movement-heavy").Decide(match.GetSnapshot("human"), match.GetLegalActions("human"));
-        Assert.Equal(2, runtime.Rules.ShopOffer(choice.Action.DefinitionId).Encounter.BaseMovement);
+        Assert.Equal("tailwind_4", choice.Action.DefinitionId);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public sealed class DuckMultiplayerEvaluationTests
         var assignment = MultiplayerStudyRunner.Assignments(4).First(candidate => candidate.Scenario.StartsWith("mixed-"));
         var result = new MultiplayerStudyRunner().Run(42, 4, assignment, "test", "set-2");
         Assert.Equal("set-2", result.WishSetId);
-        Assert.Equal(1, result.WishSetVersion);
+        Assert.Equal(2, result.WishSetVersion);
         Assert.Equal(10, result.Days.Count);
         Assert.NotEmpty(result.WinnerIds);
         Assert.All(result.Days.SelectMany(day => day.Players), player => Assert.Equal(

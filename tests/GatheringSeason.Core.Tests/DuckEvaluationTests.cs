@@ -19,7 +19,7 @@ public sealed class DuckEvaluationTests
             EvaluationPolicies.Create(options.PolicyA), EvaluationPolicies.Create("movement-first-mixed"),
             false, EvaluationSchedule.Cli, "test", true, options.WishSetId));
         Assert.Equal("set-2", outcome.Result.WishSetId);
-        Assert.Equal(1, outcome.Result.WishSetVersion);
+        Assert.Equal(2, outcome.Result.WishSetVersion);
         Assert.Equal("set-2", outcome.FinalSave.Settings.WishSetId);
         Assert.Contains(outcome.Result.Actions!, action => action.Kind == GameActionKind.ChooseTailwind);
         Assert.Contains(outcome.Result.Actions!, action => action.Day == 10 && action.Kind == GameActionKind.ChooseTailwind && action.HiddenFinalDayCommit);

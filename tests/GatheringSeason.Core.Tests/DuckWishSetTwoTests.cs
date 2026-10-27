@@ -298,15 +298,50 @@ public sealed class DuckWishSetTwoTests
     }
 
     [Fact]
-    public void Save_versions_reject_unknown_sets_versions_and_forged_pending_choices()
+    public void Night_purchases_use_current_prices_and_restore_the_same_Stars_and_receipt()
+    {
+        var runtime = Runtime();
+        PlaceFinal(runtime, runtime.Player("human"), 4, "seeds");
+        FinishOther(runtime);
+        DuckNightResolver.Resolve(runtime.State, runtime.Rules);
+        var match = new MatchSession<DuckMatchView>(runtime);
+        Assert.Equal(3, runtime.Player("human").RemainingSleep);
+        var actions = match.GetLegalActions("human");
+        Assert.Equal(2, actions.Single(action => action.DefinitionId == "tailwind_4").Cost);
+        Assert.DoesNotContain(actions, action => action.DefinitionId == "reeds_3");
+        var purchase = actions.Single(action => action.DefinitionId == "reeds_2");
+        Assert.Equal(3, purchase.Cost);
+        match.Execute("human", purchase);
+
+        var save = DuckSaves.Capture(match);
+        Assert.Equal(2, save.Settings.WishSetVersion);
+        var restored = DuckSaves.Restore(save);
+        var buyer = restored.GetSnapshot("human").Players.Single(player => player.Id == "human");
+        Assert.Equal(0, buyer.RemainingStars);
+        Assert.Equal("reeds_2", Assert.Single(buyer.PurchasedEncounterDefinitionIds));
+        Assert.DoesNotContain(restored.GetLegalActions("human"), action => action.Kind == GameActionKind.BuyEncounter);
+        Assert.Equal(Serialize(save), Serialize(DuckSaves.Capture(restored)));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(3)]
+    public void Unsupported_Second_set_versions_fail_before_state_validation(int version)
+    {
+        Assert.Throws<ArgumentException>(() => new DuckMatchSettings(2, "set-2", version));
+        var save = DuckSaves.Capture(MatchSession.CreateDuck(991, new DuckMatchSettings(2, "set-2")));
+        save.Settings.WishSetVersion = version;
+        save.Random = null!;
+        var error = Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(save));
+        Assert.Contains("Settings.WishSetVersion", error.Message);
+    }
+
+    [Fact]
+    public void Saves_reject_unknown_sets_and_forged_pending_choices_and_keep_legacy_First_set()
     {
         var match = MatchSession.CreateDuck(991, new DuckMatchSettings(2, "set-2"));
         var save = DuckSaves.Capture(match);
-        save.Settings.WishSetVersion = 0;
-        Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(save));
-        save.Settings.WishSetVersion = 2;
-        Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(save));
-        save.Settings.WishSetVersion = 1;
         save.Settings.WishSetId = "set-3";
         Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(save));
         save.Settings.WishSetId = "set-2";
