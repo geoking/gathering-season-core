@@ -243,6 +243,9 @@ public sealed class DuckWishSetTwoTests
         var forged = DuckSaves.Capture(match);
         forged.Players[1].PendingTailwindPhysicalChipId = 0;
         Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(forged));
+        var missingCohort = DuckSaves.Capture(match);
+        missingCohort.FinalDayCommits.Clear();
+        Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(missingCohort));
         var resumed = DuckSaves.Restore(DuckSaves.Capture(match));
         foreach (var player in runtime.State.Players.Take(3))
         {
