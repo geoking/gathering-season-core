@@ -11,7 +11,16 @@ namespace GatheringSeason.Core.Ducks.Definitions
         /// <summary>The current catalogue for the Duck v1 product profile.</summary>
         public static DuckRuleDefinitions V1 { get; } = CreateV1();
 
-        private static DuckRuleDefinitions CreateV1()
+        public static DuckRuleDefinitions Set2 { get; } = CreateV1(true);
+
+        public static DuckRuleDefinitions ForWishSet(string wishSetId) => wishSetId switch
+        {
+            "set-1" => V1,
+            "set-2" => Set2,
+            _ => throw new System.ArgumentException("Unsupported Wish set ID.", nameof(wishSetId))
+        };
+
+        private static DuckRuleDefinitions CreateV1(bool setTwo = false)
         {
             var encounters = new[]
             {
@@ -24,7 +33,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
                 Helpful("reeds_1", "Nesting reeds 1", DuckEncounterType.Reeds, 1, 1),
                 Helpful("reeds_2", "Nesting reeds 2", DuckEncounterType.Reeds, 1, 2),
                 Helpful("reeds_3", "Nesting reeds 3", DuckEncounterType.Reeds, 1, 3),
-                new DuckEncounterDefinition("companion", "Companion duck", DuckEncounterType.Companion, null, 0, 0),
+                new DuckEncounterDefinition("companion", "Companion duck", DuckEncounterType.Companion, setTwo ? 1 : (int?)null, 0, 0),
                 Helpful("wildflowers", "Wildflowers", DuckEncounterType.Wildflowers, 1),
                 Obstacle("fallen_log", "Fallen log", DuckEncounterType.FallenLog),
                 Obstacle("mud_puddle", "Mud puddle", DuckEncounterType.MudPuddle),
@@ -37,15 +46,15 @@ namespace GatheringSeason.Core.Ducks.Definitions
             var shopOffers = new[]
             {
                 Offer("seeds", 0),
-                Offer("tailwind_2", 1),
-                Offer("tailwind_4", 2),
-                Offer("tailwind_6", 3),
+                Offer("tailwind_2", setTwo ? 2 : 1),
+                Offer("tailwind_4", setTwo ? 3 : 2),
+                Offer("tailwind_6", setTwo ? 4 : 3),
                 Offer("signpost", 2),
-                Offer("splash", 1),
-                Offer("reeds_1", 2),
-                Offer("reeds_2", 3),
-                Offer("reeds_3", 4),
-                Offer("companion", 2),
+                Offer("splash", setTwo ? 2 : 1),
+                Offer("reeds_1", setTwo ? 1 : 2),
+                Offer("reeds_2", setTwo ? 2 : 3),
+                Offer("reeds_3", setTwo ? 3 : 4),
+                Offer("companion", setTwo ? 1 : 2),
                 Offer("wildflowers", 1)
             };
 
@@ -62,12 +71,12 @@ namespace GatheringSeason.Core.Ducks.Definitions
             };
 
             return new DuckRuleDefinitions(
-                CreateEconomy(),
+                CreateEconomy(setTwo),
                 CreateBoard(),
                 encounters,
                 shopOffers,
                 CreateWorldEvents(),
-                openingBagIds.Select(id => byId[id]));
+                openingBagIds.Select(id => byId[id]), setTwo ? "set-2" : "set-1");
 
             DuckShopOffer Offer(string id, int price) => new DuckShopOffer(id, byId[id], price);
         }
@@ -87,12 +96,12 @@ namespace GatheringSeason.Core.Ducks.Definitions
             return new DuckEncounterDefinition(id, name, type, 1, 0, 1);
         }
 
-        private static DuckEconomyDefinition CreateEconomy()
+        private static DuckEconomyDefinition CreateEconomy(bool setTwo)
         {
             return new DuckEconomyDefinition(
                 "Stars", usesStars: true,
-                flowersPerChipReward: 1, flowersRewardLimit: 1,
-                flockLeaderPerCompanionReward: 1, flockLeaderRewardLimit: 1,
+                flowersPerChipReward: setTwo ? 2 : 1, flowersRewardLimit: setTwo ? 2 : 1,
+                flockLeaderPerCompanionReward: setTwo ? 2 : 1, flockLeaderRewardLimit: setTwo ? 2 : 1,
                 warmDreamsReward: 2,
                 allTuckedInReward: 1,
                 homeBeforeDarkReward: 1,

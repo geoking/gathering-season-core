@@ -82,6 +82,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
         public int DawnFeathersAwarded { get; set; }
         public List<DuckPhysicalChipState> Inventory { get; } = new List<DuckPhysicalChipState>();
         public List<int> BagPhysicalChipIds { get; } = new List<int>();
+        public int PendingTailwindPhysicalChipId { get; set; }
+        public int PendingTailwindDestination { get; set; }
+        public bool PendingTailwindSettle { get; set; }
+        public List<int> UnorderedNextPhysicalChipIds { get; } = new List<int>();
         public List<int> KnownNextPhysicalChipIds { get; } = new List<int>();
         public List<DuckPlacedChipState> PlacedChips { get; } = new List<DuckPlacedChipState>();
         public HashSet<DuckEncounterType> PlacedHelpfulTypes { get; } = new HashSet<DuckEncounterType>();

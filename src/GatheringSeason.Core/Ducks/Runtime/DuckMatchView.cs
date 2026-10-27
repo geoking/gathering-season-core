@@ -27,7 +27,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
             DuckRestPreview? restPreview,
             int finalDayDecisionBeat,
             bool awaitingFinalDayDecisions,
-            DuckFinalResult? finalResult)
+            DuckFinalResult? finalResult,
+            IEnumerable<DuckPhysicalChipView>? unorderedNextChips = null,
+            DuckPendingTailwindView? ownPendingTailwind = null,
+            DuckDrawProbabilityView? drawProbability = null)
         {
             Rules = rules ?? throw new ArgumentNullException(nameof(rules));
             Settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -48,6 +51,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
             FinalDayDecisionBeat = finalDayDecisionBeat;
             AwaitingFinalDayDecisions = awaitingFinalDayDecisions;
             FinalResult = finalResult;
+            UnorderedNextChips = Freeze(unorderedNextChips ?? Array.Empty<DuckPhysicalChipView>());
+            OwnPendingTailwind = ownPendingTailwind;
+            DrawProbability = drawProbability;
         }
 
         public DuckRuleDefinitions Rules { get; }
@@ -67,6 +73,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
         /// <summary>The viewer's exact known future chips, in draw order.</summary>
         public IReadOnlyList<DuckPhysicalChipView> KnownNextChips { get; }
         public IReadOnlyList<DuckShopOffer> ShopOffers { get; }
+        /// <summary>The viewer knows these next two chips, but not their order.</summary>
+        public IReadOnlyList<DuckPhysicalChipView> UnorderedNextChips { get; }
+        public DuckPendingTailwindView? OwnPendingTailwind { get; }
+        public DuckDrawProbabilityView? DrawProbability { get; }
         public IReadOnlyList<DuckHistoryEntry> History { get; }
         public IReadOnlyList<DuckPublicAwardView> PublicAwards { get; }
         public DuckRestPreview? RestPreview { get; }

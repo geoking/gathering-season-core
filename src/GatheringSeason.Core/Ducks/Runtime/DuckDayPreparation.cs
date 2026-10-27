@@ -61,6 +61,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 player.PurchasedEncounterDefinitionIds.Clear();
                 player.PurchasedShopTypes.Clear();
                 player.KnownNextPhysicalChipIds.Clear();
+                player.UnorderedNextPhysicalChipIds.Clear();
+                player.PendingTailwindPhysicalChipId = 0;
+                player.PendingTailwindDestination = 0;
 
                 player.DawnTwigDeficit = deficits[player.Id];
                 player.DawnFeathersAwarded = DawnFeathersForDeficit(player.DawnTwigDeficit);

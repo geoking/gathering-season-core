@@ -15,7 +15,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
             DuckAdventureState state,
             DuckEncounterDefinition definition,
             DuckWorldEventType worldEvent,
-            DuckRuleDefinitions rules)
+            DuckRuleDefinitions rules,
+            bool stopAtFirstShelter = false)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
             if (definition == null) throw new ArgumentNullException(nameof(definition));
@@ -26,19 +27,21 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var splashSuppression = state.SplashProtectionArmed && definition.IsObstacle;
             var guideSuppression = definition.IsObstacle && guideProtectionAvailable;
             if (guideSuppression) guideProtectionAvailable = false;
-            var nuisanceSuppressed = splashSuppression || guideSuppression;
+            var nuisanceSuppressed = (!rules.IsWishSetTwo && splashSuppression) || guideSuppression;
 
             var activeFlock = state.ActiveFlock;
             int movement;
             if (type == DuckEncounterType.Companion)
             {
                 activeFlock = checked(activeFlock + 1);
-                movement = Math.Min(checked(activeFlock + 1), 4);
+                movement = rules.IsWishSetTwo ? 1 : Math.Min(checked(activeFlock + 1), 4);
             }
             else
             {
                 movement = definition.BaseMovement!.Value;
             }
+
+            if (rules.IsWishSetTwo && type == DuckEncounterType.Seeds && state.PreviousWasObstacle) movement++;
 
             if (worldEvent == DuckWorldEventType.RainSoftenedSeeds && type == DuckEncounterType.Seeds)
                 movement++;
@@ -68,6 +71,13 @@ namespace GatheringSeason.Core.Ducks.Runtime
             movement = Math.Max(1, movement);
 
             var position = Math.Min(43, checked(state.Position + movement));
+            if (stopAtFirstShelter)
+            {
+                if (!rules.IsWishSetTwo || type != DuckEncounterType.Tailwind)
+                    throw new InvalidOperationException("Only Set 2 Tailwind can stop at a shelter.");
+                position = FirstReachableShelter(state.Position, position, rules)
+                    ?? throw new InvalidOperationException("No shelter is within Tailwind reach.");
+            }
             var exhaustion = state.Exhaustion;
             var safeExhaustionMaximum = state.SafeExhaustionMaximum;
             var flowersPlaced = state.FlowersPlaced;
@@ -83,7 +93,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 switch (type)
                 {
                     case DuckEncounterType.Reeds:
-                        reedsTwigs = definition.TwigYield;
+                        reedsTwigs = rules.IsWishSetTwo ? 0 : definition.TwigYield;
                         break;
                     case DuckEncounterType.Splash:
                         splashProtectionArmed = true;
@@ -97,7 +107,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             }
             else
             {
-                exhaustion = checked(exhaustion + definition.ExhaustionValue);
+                exhaustion = checked(exhaustion + (rules.IsWishSetTwo && splashSuppression ? 0 : definition.ExhaustionValue));
                 if (!nuisanceSuppressed)
                 {
                     switch (type)
@@ -133,7 +143,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 guideProtectionAvailable,
                 pocketDriftwoodAwarded,
                 flowersPlaced,
-                helpfulTypeMask);
+                helpfulTypeMask,
+                definition.IsObstacle);
             return new DuckAdventurePlacement(
                 next,
                 type,
@@ -142,6 +153,13 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 reedsTwigs,
                 eventTwigs,
                 exhaustion > safeExhaustionMaximum);
+        }
+
+        internal static int? FirstReachableShelter(int position, int fullPosition, DuckRuleDefinitions rules)
+        {
+            foreach (var space in rules.BoardSpaces)
+                if (space.IsShelter && space.Space > position && space.Space <= fullPosition) return space.Space;
+            return null;
         }
 
         internal static int HelpfulTypes(IEnumerable<DuckEncounterType> types)
@@ -190,7 +208,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
             bool guideProtectionAvailable,
             bool pocketDriftwoodAwarded,
             int flowersPlaced,
-            int helpfulTypeMask)
+            int helpfulTypeMask,
+            bool previousWasObstacle = false)
         {
             Position = position;
             Exhaustion = exhaustion;
@@ -202,6 +221,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             PocketDriftwoodAwarded = pocketDriftwoodAwarded;
             FlowersPlaced = flowersPlaced;
             HelpfulTypeMask = helpfulTypeMask;
+            PreviousWasObstacle = previousWasObstacle;
         }
 
         internal int Position { get; }
@@ -214,6 +234,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
         internal bool PocketDriftwoodAwarded { get; }
         internal int FlowersPlaced { get; }
         internal int HelpfulTypeMask { get; }
+        internal bool PreviousWasObstacle { get; }
     }
 
     internal readonly struct DuckAdventurePlacement

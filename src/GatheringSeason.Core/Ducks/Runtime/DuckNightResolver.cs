@@ -23,7 +23,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         internal static DuckRestPreview? Preview(DuckMatchState state, DuckRuleDefinitions rules, DuckPlayerState viewer)
         {
-            if (state.Phase != DuckPhase.Adventure || viewer.PlacedChips.Count == 0) return null;
+            if (state.Phase != DuckPhase.Adventure || viewer.PlacedChips.Count == 0
+                || viewer.PendingTailwindPhysicalChipId != 0) return null;
 
             var worldEvent = CurrentEventType(state, rules);
             var eventStars = CollectiveEventAward(rules, worldEvent);
@@ -60,7 +61,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var highOutcome = maximum.ToOutcome(mostRested != DuckRestBonusStatus.Unavailable);
             return new DuckRestPreview(
                 lowOutcome.TotalTwigsEarned,
-                lowOutcome.PrintedTwigs - lowOutcome.BramblesPenalty,
+                lowOutcome.PrintedTwigs + (rules.IsWishSetTwo ? lowOutcome.ReedsTwigs : 0) - lowOutcome.BramblesPenalty,
                 lowOutcome.FeathersAwarded,
                 lowOutcome.FrozenSleep,
                 highOutcome.FrozenSleep,
@@ -127,8 +128,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 .Select(player => player.ActiveFlock).DefaultIfEmpty(0).Max();
 
         private static int FlockAward(DuckRuleDefinitions rules, DuckPlayerState viewer) =>
-            viewer.ActiveFlock > 0
-                ? rules.Economy.CalculateFlockLeaderReward(viewer.ActiveFlock) : 0;
+            DuckWishRewards.FlockStars(rules, viewer.ActiveFlock);
 
         private static DuckRestBonusStatus FlockStatus(
             DuckMatchState state, DuckPlayerState viewer, int award)
@@ -154,7 +154,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             foreach (var player in state.Players)
             {
                 var outcome = outcomes[player.Id];
-                player.TotalTwigs += outcome.PrintedTwigs - outcome.BramblesPenalty + outcome.DreamTwigs;
+                player.TotalTwigs += outcome.PrintedTwigs + (rules.IsWishSetTwo ? outcome.ReedsTwigs : 0) - outcome.BramblesPenalty + outcome.DreamTwigs;
                 player.FrozenSleep = outcome.FrozenSleep;
                 player.RemainingSleep = state.Day == DuckMatchSettings.StandardDays ? 0 : outcome.FrozenSleep;
                 player.IsSleepFrozen = true;
@@ -200,7 +200,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             private readonly DuckEconomyDefinition _economy;
             private readonly bool _mostRestedBenefit;
             private readonly int _day, _printedSleep, _printedTwigs, _brambles, _flowers, _finalShelter, _restless,
-                _eventSleep, _sunshineSleep, _flock, _pebbles, _beforeWear, _totalTwigs, _feathers;
+                _eventSleep, _sunshineSleep, _flock, _pebbles, _beforeWear, _totalTwigs, _feathers, _reeds;
 
             internal NightAmounts(int day, DuckPlayerState player, DuckRuleDefinitions rules,
                 DuckWorldEventType worldEvent, int eventSleep, int greatestFlock)
@@ -216,22 +216,25 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 var space = rules.BoardSpaceAt(player.Position);
                 _printedSleep = space.Sleep;
                 _printedTwigs = space.Twigs;
-                var grossTwigs = space.Twigs + player.DayReedsTwigs + player.DayEventTwigs;
+                _reeds = rules.IsWishSetTwo
+                    ? DuckWishRewards.ReedsTwigs(rules, player.PlacedChips.Select(placed => rules.Encounter(player.Inventory.Single(chip => chip.PhysicalChipId == placed.PhysicalChipId).DefinitionId)), space.IsShelter)
+                    : player.DayReedsTwigs;
+                var grossTwigs = space.Twigs + _reeds + player.DayEventTwigs;
                 _brambles = finalType == DuckEncounterType.Brambles && !final.NuisanceSuppressed ? Math.Min(1, grossTwigs) : 0;
                 _totalTwigs = grossTwigs - _brambles;
                 var shelterRewardsEligible = space.IsShelter;
                 var economy = rules.Economy;
-                _flowers = shelterRewardsEligible ? economy.CalculateFlowerReward(player.FlowersPlaced) : 0;
+                _flowers = DuckWishRewards.FlowerStars(rules, player.FlowersPlaced, finalType, shelterRewardsEligible);
                 _finalShelter = shelterRewardsEligible && day == DuckMatchSettings.StandardDays ? economy.FinalShelterReward : 0;
                 var shelterSleep = space.Sleep + _flowers + _finalShelter;
                 _restless = shelterRewardsEligible && worldEvent == DuckWorldEventType.RestlessNight
-                    ? Math.Min(economy.RestlessNightPenalty, shelterSleep) : 0;
+                    ? Math.Min(economy.RestlessNightPenalty, space.Sleep + (rules.IsWishSetTwo ? 0 : _flowers) + _finalShelter) : 0;
                 _eventSleep = eventSleep;
                 _sunshineSleep = worldEvent == DuckWorldEventType.GloriousSunshine
                     && player.HasGloriousSunshineChoice
                     && player.GloriousSunshineBenefit == DuckGloriousSunshineBenefit.WarmDreams ? economy.WarmDreamsReward : 0;
                 _flock = player.ActiveFlock > 0 && player.ActiveFlock == greatestFlock
-                    ? economy.CalculateFlockLeaderReward(player.ActiveFlock) : 0;
+                    ? DuckWishRewards.FlockStars(rules, player.ActiveFlock) : 0;
                 var grossSleep = shelterSleep - _restless + _eventSleep + _sunshineSleep + _flock;
                 _pebbles = finalType == DuckEncounterType.LoosePebbles && !final.NuisanceSuppressed
                     ? Math.Min(economy.PebblesPenalty, grossSleep) : 0;
@@ -241,7 +244,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
             }
 
             internal DuckNightOutcome ToOutcome(bool mostRested) => new DuckNightOutcome(
-                _day, _printedSleep, _printedTwigs, Player.DayReedsTwigs, Player.DayEventTwigs,
+                _day, _printedSleep, _printedTwigs, _reeds, Player.DayEventTwigs,
                 _brambles, _flowers, _finalShelter, _restless, _eventSleep, _sunshineSleep, _flock, _pebbles,
                 _beforeWear, FrozenSleep, _totalTwigs, _feathers, mostRested,
                 mostRested && _mostRestedBenefit && _day < DuckMatchSettings.StandardDays ? 1 : 0,

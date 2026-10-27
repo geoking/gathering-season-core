@@ -10,6 +10,7 @@ namespace GatheringSeason.Core.Ducks.Reference
     public static class DuckDisplayReference
     {
         public const string WishSetName = "Wish Set 1";
+        public static string WishSetNameFor(DuckRuleDefinitions rules) => rules.IsWishSetTwo ? "Wish Set 2" : WishSetName;
 
         public static string HowToPlay(DuckEconomyDefinition economy)
         {
@@ -23,7 +24,7 @@ namespace GatheringSeason.Core.Ducks.Reference
         public static string Glossary(DuckRuleDefinitions rules)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
-            return "Wishes: Helpful chips for the journey. Draw them by Day and bring new ones home from the shop at Night.\n"
+            return (rules.IsWishSetTwo ? "Wish Set 2: Splash protects the next chip from obstacle exhaustion; Clearing Breeze separately suppresses nuisance. Reeds pay at Night only at a shelter.\n" : string.Empty) + "Wishes: Helpful chips for the journey. Draw them by Day and bring new ones home from the shop at Night.\n"
                 + "Obstacles and Exhaustion: White chips move 1 space and add 1 Exhaustion. Protection hushes only their nuisance; movement and Exhaustion still happen.\n"
                 + "Stars: Tonight's Wish-buying budget. Unspent Stars fade at Dawn; on Final Night, each retained Star becomes 1 Dream Twig.\n"
                 + "Nest Twigs: Your victory score. The Twig number at your resting space is the whole route total; Reeds and weather Twigs are added to your nest.\n"
@@ -36,6 +37,19 @@ namespace GatheringSeason.Core.Ducks.Reference
             if (encounter == null) throw new ArgumentNullException(nameof(encounter));
             if (rules == null) throw new ArgumentNullException(nameof(rules));
             var freshAirExhaustionBonus = rules.FreshAirExhaustionBonus;
+            if (rules.IsWishSetTwo)
+            {
+                switch (encounter.EncounterType)
+                {
+                    case DuckEncounterType.Seeds: return "Move 1 space, plus 1 if the immediately preceding placed chip was an obstacle, including a protected obstacle. Apply weather and Log afterwards.";
+                    case DuckEncounterType.Tailwind: return $"After drawing, choose the full modified movement of {encounter.BaseMovement} spaces or stop at the first shelter ahead within that reach and immediately settle.";
+                    case DuckEncounterType.Signpost: return "Move 2 spaces and privately see the next two chips, without their order. One remaining chip is certain; after drawing one, the other is certain. Never choose or reorder.";
+                    case DuckEncounterType.Splash: return "Move 1 space and protect only the immediately next chip from its +1 exhaustion if it is an obstacle. Its nuisance still applies. A helpful chip uses up this protection too.";
+                    case DuckEncounterType.Reeds: return $"Move 1 space. At Night, gather the printed {encounter.TwigYield} twigs only if your final space is a shelter, including when worn out.";
+                    case DuckEncounterType.Companion: return "Move 1 space and add one active companion. The largest positive flock gains +2 stars once at Night, including ties and worn-out ducks, before halving.";
+                    case DuckEncounterType.Wildflowers: return "Move 1 space. Gain +2 stars once at Night only if your final placed chip is wildflowers, at any space, before worn-out halving.";
+                }
+            }
             return encounter.EncounterType switch
             {
                 DuckEncounterType.Seeds => "A nice snack, as simple as that.",
@@ -64,6 +78,10 @@ namespace GatheringSeason.Core.Ducks.Reference
             if (rules == null) throw new ArgumentNullException(nameof(rules));
             var economy = rules.Economy;
             var freshAirExhaustionBonus = rules.FreshAirExhaustionBonus;
+            if (rules.IsWishSetTwo && type == DuckWorldEventType.RefreshingShowers)
+                return "Each placed Splash recovers 1 current exhaustion, to a minimum of 0, and protects only the next chip from its obstacle exhaustion. Its nuisance still applies; Clearing Breeze separately protects the first obstacle nuisance.";
+            if (rules.IsWishSetTwo && type == DuckWorldEventType.RainSoftenedSeeds)
+                return "Every Seed gains +1 movement after its power, before a pending Log halves movement.";
 
             return type switch
             {
