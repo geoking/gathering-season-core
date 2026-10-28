@@ -247,4 +247,4 @@ Most Rested safe-duck eligibility rule.
 All 11 Wishes are available from Night 1 with unlimited stock. Each duck
 may buy at most one chip per token type per Night, within the Night 1/2/3
 purchase cap; variants share a type and unspent Stars expire at Dawn. Night 10 has no
-shopping. There is no flask, rewind or redraw in this ruleset.
+shopping. There is no flask, rewind or redraw under these rules.
