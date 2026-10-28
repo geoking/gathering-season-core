@@ -40,8 +40,8 @@ internal static class DuckCli
             Console.WriteLine(resume
                 ? $"Gathering Season · 10 Days · continuing saved game · {initial.Settings.PlayerCount} players · Wish Set {initial.Settings.WishSetId}"
                 : $"Gathering Season · 10 Days · seed {seed} · {initial.Settings.PlayerCount} players · Wish Set {initial.Settings.WishSetId} · all ducks start at the nest");
-            Console.WriteLine($"Rules revision {initial.RulesRevision} · {initial.Economy.CurrencyName}" +
-                " buy Wishes; Obstacles remain in your pouch.");
+            Console.WriteLine("The rules");
+            Console.WriteLine("Stars buy wishes; obstacles remain in your pouch.");
             DuckCliRenderer.ShowStatus(initial);
             if (options.InspectOnly)
             {

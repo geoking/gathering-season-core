@@ -1,6 +1,6 @@
 # Gathering Season encounter rules and timing
 
-The implemented encounter contract for rules revision 8, Wish Sets 1 and 2.
+These encounter rules cover Wish Sets 1 and 2.
 See [Weather reports](world-events.md)
 for shared weather and [board/shop](board-and-shop.md) for exact values.
 

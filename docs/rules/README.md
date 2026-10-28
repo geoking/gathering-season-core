@@ -2,13 +2,13 @@
 
 Play ten Days as a duck adventuring through wetlands, meadow and wasteland.
 One human faces one to three Normal AI opponents. **Most Twigs wins**; tied totals compare retained
-Stars on the final Night, then a draw. Core v2 supports only rules revision 8.
-Older and unknown revisions cannot be continued; their save files are preserved.
+Stars on the final Night, then a draw. These are the rules supported by Core.
+Incompatible games cannot be continued; their save files are preserved.
 
 Choose **Wish Set 1** or **Wish Set 2** when starting a gathering. Every duck
-uses the same set; Continue restores that choice. Wish-set identity and version
-are separate from technical rules revision 8. Set 1 remains the default, with
-its existing powers and prices. The shared rules below apply to both sets;
+uses the same set; Continue restores that choice. Wish sets choose chip powers
+within the same game rules. Set 1 remains the default, with its existing powers
+and prices. The shared rules below apply to both sets;
 [encounters](encounters.md) describes each set's powers.
 
 ## A Day and a Night

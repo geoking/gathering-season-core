@@ -13,6 +13,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
     {
         public int FormatVersion;
         public string ProfileId = string.Empty;
+        /// <summary>Compatibility stamp retained under the original save field name.</summary>
         public int RulesVersion;
         public DuckSaveSettingsData Settings = new DuckSaveSettingsData();
         public int Day;

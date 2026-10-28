@@ -31,10 +31,10 @@ dotnet run --project src/GatheringSeason.Cli --configuration Release -- --seed 4
 - [Board and shop](docs/rules/board-and-shop.md), [encounters](docs/rules/encounters.md) and [Weather reports](docs/rules/world-events.md)
 - [Core save compatibility](docs/architecture/compatibility.md)
 
-Core v2 supports only rules revision 8. It preserves the current format-1 wire
-identity and gameplay while retiring support for revision 1–7 saves and the
-revision-selection API. Unsupported saves are rejected without deletion or
-migration; see [save compatibility](docs/architecture/compatibility.md).
+Core implements the Gathering Season rules. Historical rules are unsupported.
+Saves must match the current compatibility contract and are rejected before
+restoration otherwise, without deletion or migration; see
+[save compatibility](docs/architecture/compatibility.md).
 
 ## Releases
 
@@ -43,7 +43,7 @@ A release identifies an exact source revision and its built Core DLL. Stable
 releases use Git tags and GitHub releases: `v1` initially, `v1.1` for compatible
 incremental releases, and `v2` or later for substantial or incompatible upgrades.
 Compatible corrections may use patch versions. Release versioning does not
-change rules revisions or the supported save/catalogue contracts by itself.
+change the rules or supported save/catalogue contracts by itself.
 
 Publish a new Core version when a distributed application adopts a changed
 Core revision. Reuse the existing version when its exact DLL is unchanged.

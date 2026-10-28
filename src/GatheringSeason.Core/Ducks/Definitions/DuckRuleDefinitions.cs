@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace GatheringSeason.Core.Ducks.Definitions
 {
-    /// <summary>Validated immutable definition registry for one Duck rules version.</summary>
+    /// <summary>Validated immutable definition registry for the rules.</summary>
     public sealed class DuckRuleDefinitions
     {
         private readonly IReadOnlyDictionary<string, DuckBoardSpace> _boardById;
@@ -42,7 +42,8 @@ namespace GatheringSeason.Core.Ducks.Definitions
         public string WishSetId { get; }
         public bool IsWishSetTwo => WishSetId == "set-2";
         public string ProfileId => "gathering-season.duck.v1";
-        public int RulesRevision => DuckRules.CurrentRulesRevision;
+        /// <summary>Compatibility alias for DuckRules.CompatibilityStamp; does not select rules.</summary>
+        public int RulesRevision => DuckRules.CompatibilityStamp;
         public int FreshAirExhaustionBonus => 2;
         public int FreshAirSafeExhaustionMaximum => 5 + FreshAirExhaustionBonus;
         public int FreshAirGooseSafeExhaustionMaximum => 4 + FreshAirExhaustionBonus;

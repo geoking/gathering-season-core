@@ -6,12 +6,16 @@ namespace GatheringSeason.Core.Ducks.Definitions
     /// <summary>Authoritative, Unity-independent Duck rules catalogue.</summary>
     public static class DuckRules
     {
-        public const int CurrentRulesRevision = 8;
+        /// <summary>Compatibility stamp for supported saves and telemetry; does not select rules.</summary>
+        public const int CompatibilityStamp = 8;
 
-        /// <summary>The current catalogue for the Duck v1 product profile.</summary>
-        public static DuckRuleDefinitions V1 { get; } = CreateV1();
+        /// <summary>Compatibility alias for CompatibilityStamp; does not select rules.</summary>
+        public const int CurrentRulesRevision = CompatibilityStamp;
 
-        public static DuckRuleDefinitions Set2 { get; } = CreateV1(true);
+        /// <summary>The current Wish Set 1 catalogue.</summary>
+        public static DuckRuleDefinitions V1 { get; } = CreateCatalogue();
+
+        public static DuckRuleDefinitions Set2 { get; } = CreateCatalogue(true);
 
         public static DuckRuleDefinitions ForWishSet(string wishSetId) => wishSetId switch
         {
@@ -20,7 +24,7 @@ namespace GatheringSeason.Core.Ducks.Definitions
             _ => throw new System.ArgumentException("Unsupported Wish set ID.", nameof(wishSetId))
         };
 
-        private static DuckRuleDefinitions CreateV1(bool setTwo = false)
+        private static DuckRuleDefinitions CreateCatalogue(bool setTwo = false)
         {
             var encounters = new[]
             {

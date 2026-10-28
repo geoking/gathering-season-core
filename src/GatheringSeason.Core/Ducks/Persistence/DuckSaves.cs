@@ -9,11 +9,12 @@ using GatheringSeason.Core.Randomness;
 
 namespace GatheringSeason.Core.Ducks.Persistence
 {
-    /// <summary>Captures and restores the complete authoritative state of Duck rules v1.</summary>
+    /// <summary>Captures and restores the complete authoritative state under the rules.</summary>
     public static class DuckSaves
     {
         public const int CurrentFormatVersion = 1;
-        public const int CurrentRulesVersion = DuckRules.CurrentRulesRevision;
+        /// <summary>Compatibility alias for DuckRules.CompatibilityStamp; does not select rules.</summary>
+        public const int CurrentRulesVersion = DuckRules.CompatibilityStamp;
 
         public static DuckSaveData Capture(MatchSession<DuckMatchView> session)
         {
@@ -25,7 +26,7 @@ namespace GatheringSeason.Core.Ducks.Persistence
             {
                 FormatVersion = CurrentFormatVersion,
                 ProfileId = state.ProfileId,
-                RulesVersion = state.RulesRevision,
+                RulesVersion = DuckRules.CompatibilityStamp,
                 Settings = new DuckSaveSettingsData
                 {
                     Days = state.Settings.Days,
@@ -115,9 +116,9 @@ namespace GatheringSeason.Core.Ducks.Persistence
             Require(save.FormatVersion == CurrentFormatVersion,
                 "FormatVersion must identify Duck save format version 1.");
             Require(string.Equals(save.ProfileId, DuckRules.V1.ProfileId, StringComparison.Ordinal),
-                "ProfileId must identify the Duck v1 rules profile.");
-            Require(save.RulesVersion == CurrentRulesVersion,
-                "RulesVersion must identify supported Duck rules revision 8.");
+                "ProfileId must identify the Gathering Season game profile.");
+            Require(save.RulesVersion == DuckRules.CompatibilityStamp,
+                "RulesVersion compatibility stamp is unsupported.");
             DuckRuleDefinitions rules;
             Require(save.Settings != null, "Settings are required.");
             Require(save.Settings.Days == DuckMatchSettings.StandardDays,

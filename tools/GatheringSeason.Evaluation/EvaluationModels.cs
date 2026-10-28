@@ -28,6 +28,7 @@ public sealed record EvaluationMatchRequest(
     bool IncludeActions = false,
     string WishSetId = DuckMatchSettings.StandardWishSetId);
 
+/// <param name="RulesVersion">Compatibility stamp retained under the original telemetry field name.</param>
 public sealed record EvaluationMatchResult(
     int SchemaVersion,
     string SourceLabel,

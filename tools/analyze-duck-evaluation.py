@@ -18,14 +18,12 @@ import random
 import statistics
 
 
-def normalize_record(value):
-    """Schema 1 called Night amounts Sleep; schema 2 declares their currency."""
-    if isinstance(value, dict):
-        return {key.replace("Sleep", "Reward").replace("sleep", "reward"): normalize_record(item)
-                for key, item in value.items()}
-    if isinstance(value, list):
-        return [normalize_record(item) for item in value]
-    return value
+COMPATIBILITY_STAMP = 8
+
+
+def validate_compatibility_stamp(record):
+    if record.get("rulesVersion") != COMPATIBILITY_STAMP:
+        raise ValueError("rulesVersion compatibility stamp is unsupported or missing")
 
 
 def percentile(values, fraction):
@@ -99,25 +97,27 @@ def load_records(paths):
             for line_number, line in enumerate(stream, 1):
                 if not line.strip():
                     continue
-                record = normalize_record(json.loads(line))
+                record = json.loads(line)
+                validate_record(record)
                 key = (*comparison_key(record), record["seed"], record["seatAssignment"]["swapped"])
                 if key in seen:
                     raise ValueError(f"Duplicate match at {path}:{line_number}: {key}")
                 seen.add(key)
-                validate_record(record)
                 yield record
 
 
 def comparison_key(record):
+    validate_compatibility_stamp(record)
     return (
         record["sourceLabel"], record["policies"]["policyA"]["id"],
         record["policies"]["policyB"]["id"], record["schedule"],
-        record.get("rulesVersion", 1), record.get("currency", "Sleep"),
+        record["rulesVersion"], record["currency"],
         record.get("wishSetId", "set-1"), record.get("wishSetVersion", 1),
     )
 
 
 def validate_record(record):
+    validate_compatibility_stamp(record)
     days = record["days"]
     if [day["day"] for day in days] != list(range(1, 11)):
         raise ValueError("A complete match must contain each Day 1-10 exactly once")
@@ -140,7 +140,9 @@ def validate_record(record):
 
 
 def summarize_player(records, policy_id):
-    records = [normalize_record(record) for record in records]
+    records = list(records)
+    for record in records:
+        validate_compatibility_stamp(record)
     rows, final_scores, policy_games = [], [], []
     type_purchases, offers, bundles = Counter(), Counter(), Counter()
     timing_rows = []
@@ -244,7 +246,9 @@ def summarize_player(records, policy_id):
 
 
 def summarize_matchup(key, records):
-    records = [normalize_record(record) for record in records]
+    records = list(records)
+    for record in records:
+        validate_compatibility_stamp(record)
     wins, seed_scores = Counter(), defaultdict(list)
     by_seat, lead_groups = defaultdict(lambda: defaultdict(list)), defaultdict(list)
     lead_changes, final_margins = [], []
@@ -285,8 +289,8 @@ def summarize_matchup(key, records):
             "leaderOutrightWin": clustered_rate(leader_wins), "trailerOutrightWin": clustered_rate(recoveries)})
     return {"sourceLabel": key[0], "policyA": key[1], "policyB": key[2], "schedule": key[3],
         "wishSetId": key[6], "wishSetVersion": key[7],
-        "currency": sorted({r.get("currency", "Sleep") for r in records}),
-        "rulesVersions": sorted({r.get("rulesVersion", 1) for r in records}),
+        "currency": sorted({r["currency"] for r in records}),
+        "rulesVersions": sorted({r["rulesVersion"] for r in records}),
         "sharedMostRestedNights": sum(sum(p["night"].get("isMostRested", False) for p in d["players"]) > 1 for r in records for d in r["days"]),
         "matches": len(records), "seeds": len(seed_scores), "outcomes": dict(wins),
         "policyAScore": clustered_rate(seed_scores),

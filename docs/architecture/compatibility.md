@@ -12,24 +12,31 @@ NextDay=15 and ChooseEventBenefit=16. ChooseTailwind=17 is appended for the
 pending Set 2 destination choice. Legacy JSON adapters retain required
 wire fields without changing runtime terminology.
 
-Core v2 executes only rules revision 8: ten Days, 43 spaces, zero starting
-Feathers, Stars and Wishes, the current meadow shelters at 17/21/25 and fifteen
-weather reports (play ten, leave five). `DuckRules.V1` remains the unchanged
-Set 1 catalogue; `DuckRules.Set2` supplies the alternate powers and prices.
-`DuckRules.ForWishSet(id)` resolves either immutable catalogue. `V1` names the
-stable product profile, not a release or rules revision. There is no rules
-revision selector in the API or CLI; Wish-set selection is separate.
+Core executes the Gathering Season rules: ten Days, 43 spaces, zero starting
+Feathers, Stars and Wishes, meadow shelters at 17/21/25 and fifteen weather
+reports (play ten, leave five). `DuckRules.V1` supplies Wish Set 1;
+`DuckRules.Set2` supplies Wish Set 2. `DuckRules.ForWishSet(id)` resolves the
+chosen chip powers and prices within those rules. `V1` is a retained product
+profile name. There is no historical-rules selector in the API or CLI.
 
-Core v2 is a breaking compatibility release: revisions 1–7, missing/zero and
-future rules revisions are rejected before state construction. Earlier ten-card
-revision-8 saves are also invalid. There is no migration or automatic deletion.
-Continue preserves source files on failure and can recover a valid current
-backup. Accepted saves preserve paid Stars, earned rewards, weather and pouch
-order, pending weather choices and final-Day commitments exactly.
+`DuckRules.CompatibilityStamp` is fixed at `8`. Existing serialized
+`RulesVersion`, evaluation `rulesVersion`/`rulesRevision`, and public
+`CurrentRulesRevision`, `RulesRevision` and `CurrentRulesVersion` names remain
+compatibility metadata only. They do not identify selectable game modes or
+retained implementations. Saves and current evaluation tools require the exact
+stamp; missing or different values are unsupported. Numeric reference fixtures
+use the neutral `compatibility_stamp` name.
+
+Save validation also requires the current board and fifteen-report deck. A
+matching stamp never bypasses structural validation. Unsupported data fails
+before state construction, with no migration or automatic deletion. Continue
+preserves source files on failure and can recover a valid current backup.
+Accepted saves preserve paid Stars, earned rewards, weather and pouch order,
+pending weather choices and final-Day commitments exactly.
 
 Format-1 saves retain their established `Sleep` wire names; these values mean
-Stars. `RulesVersion = 8`, `FormatVersion = 1` and profile ID
-`gathering-season.duck.v1` remain unchanged. The
+Stars. `FormatVersion = 1` and profile ID `gathering-season.duck.v1` remain
+unchanged. The
 public API remains neutral for current clients: board `Reward`/`Stars` retains
 legacy `Sleep`; shop `Price`/`StarsPrice` retains `SleepPrice`; player
 `FrozenReward`/`FrozenStars` retain `FrozenSleep`, and
@@ -40,9 +47,9 @@ Reward outcomes expose `PrintedReward`, `FlowerReward`, `FinalShelterReward`,
 `PrintedSleep`, `FlowerSleep`, `FinalShelterSleep`, `CollectiveEventSleep`,
 `GloriousSunshineSleep`, `FlockSleep`, `SleepBeforeWear`, and `FrozenSleep`.
 Final standings similarly expose `FrozenNightTenReward` beside
-`FrozenNightTenSleep`. `DuckMatchView` carries
-`RulesRevision`, immutable `Rules`, and immutable `Economy`; clients should use
-those observations instead of inferring units from a saved field name.
+`FrozenNightTenSleep`. `DuckMatchView` carries immutable `Rules` and `Economy`;
+clients should use those observations instead of inferring units from a saved
+field name.
 
 Default CLI saves use the platform application-data `GatheringSeason` directory.
 Use `--save /path/to/existing.json --continue` to open an existing save outside
@@ -108,7 +115,7 @@ reward fields remain unchanged. Previously saved history remains verbatim.
 Each set has one current catalogue. The version is a save-validation stamp,
 not a selectable pricing mode.
 Defaults remain two players, ten Days and zero starting Feathers. Set identity
-names the encounter powers; it is distinct from the numeric rules revision.
+names the encounter powers; it is separate from the fixed compatibility stamp.
 The ordered player IDs are `human`, `ai`, `ai-2`, `ai-3`, using as many as the
 setup needs. Every seat uses the same player state and legal-action contracts.
 
@@ -192,9 +199,8 @@ the authority after settlement. Stars convert one for one into final Dream Twigs
 
 ## Pending Fallen Log
 
-`LogSlowdownPending` retains its format-1 wire name. In revision 8 it is consumed
+`LogSlowdownPending` retains its format-1 wire name. It is consumed
 by the immediately next actual chip draw: a Wish moves half its total, rounded
 up, and a white Obstacle moves normally. A new unprotected Log then arms a fresh
 pending slowdown; a protected Log does not. Signpost previews and detached
-observations do not consume it. Restore validates `RulesVersion = 8`; no
-save-field migration occurs.
+observations do not consume it. Restore preserves this state without migration.
