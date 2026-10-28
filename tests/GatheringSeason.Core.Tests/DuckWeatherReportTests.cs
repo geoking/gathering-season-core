@@ -70,6 +70,5 @@ public sealed class DuckWeatherReportTests
         restored.Execute("human", restoredAction);
         Assert.Equal(JsonSerializer.Serialize(DuckSaves.Capture(match), options),
             JsonSerializer.Serialize(DuckSaves.Capture(restored), options));
-        Assert.Equal(8, view.RulesRevision);
     }
 }

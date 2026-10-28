@@ -14,7 +14,7 @@ public sealed class DuckDefinitionTests
         var root = document.RootElement;
         var rules = DuckRules.V1;
 
-        Assert.Equal(DuckRules.CurrentRulesRevision, root.GetProperty("rules_revision").GetInt32());
+        Assert.Equal(DuckRules.CompatibilityStamp, root.GetProperty("compatibility_stamp").GetInt32());
         Assert.Equal(0, DuckRuleDefinitions.NestPosition);
         Assert.False(root.GetProperty("nest").GetProperty("scorable").GetBoolean());
         Assert.Equal(DuckRuleDefinitions.NestPosition, root.GetProperty("nest").GetProperty("index").GetInt32());
@@ -112,15 +112,12 @@ public sealed class DuckDefinitionTests
     }
 
     [Fact]
-    public void Current_catalogue_uses_revision_eight_with_the_approved_Stars_economy()
+    public void Current_catalogue_uses_the_approved_Stars_economy()
     {
-        Assert.Equal(8, DuckRules.CurrentRulesRevision);
         var view = MatchSession.CreateDuck(seed: 4001).GetSnapshot("human");
-        Assert.Equal(8, view.RulesRevision);
         Assert.Same(DuckRules.V1, view.Rules);
         Assert.Same(view.Rules.Economy, view.Economy);
 
-        Assert.Equal(8, DuckRules.V1.RulesRevision);
         Assert.Equal(2, DuckRules.V1.FreshAirExhaustionBonus);
         Assert.Equal(7, DuckRules.V1.FreshAirSafeExhaustionMaximum);
         Assert.Equal(6, DuckRules.V1.FreshAirGooseSafeExhaustionMaximum);

@@ -14,6 +14,9 @@ from pathlib import Path
 import statistics
 
 
+COMPATIBILITY_STAMP = 8
+
+
 def measures(player):
     night = player["night"]
     return {
@@ -39,6 +42,8 @@ def summarize(rows):
 def analyze(records):
     states = defaultdict(dict)
     for record in records:
+        if record.get("rulesVersion") != COMPATIBILITY_STAMP:
+            raise ValueError("rulesVersion compatibility stamp is unsupported or missing")
         if record["currency"] != "Stars":
             raise ValueError("This probe report requires Stars records")
         key = (record["sourceLabel"], record["seed"], record["swapped"], record["schedule"], record["day"], record["sourceStateHash"])

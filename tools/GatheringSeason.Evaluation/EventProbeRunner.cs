@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
+using GatheringSeason.Core.Ducks.Definitions;
 using GatheringSeason.Core.Ducks.Persistence;
 using GatheringSeason.Core.Ducks.Runtime;
 using GatheringSeason.Core.Match;
@@ -75,7 +76,7 @@ public static class EventProbeRunner
                 }
                 var result = match.GetSnapshot("human");
                 yield return new EventProbeResult(request.SourceLabel, request.Seed, request.Swapped,
-                    request.Schedule, stateHash, result.RulesRevision, result.Economy.CurrencyName, result.Settings.WishSetId, result.Settings.WishSetVersion,
+                    request.Schedule, stateHash, DuckRules.CompatibilityStamp, result.Economy.CurrencyName, result.Settings.WishSetId, result.Settings.WishSetVersion,
                     start.Day, eventId, variant, result.Players.Select(player =>
                     {
                         var initial = start.Players.Single(candidate => candidate.Id == player.Id);
@@ -90,6 +91,7 @@ public static class EventProbeRunner
     }
 }
 
+/// <param name="RulesVersion">Compatibility stamp retained under the original telemetry field name.</param>
 public sealed record EventProbeResult(string SourceLabel, int Seed, bool Swapped,
     EvaluationSchedule Schedule, string SourceStateHash, int RulesVersion, string Currency, string WishSetId, int WishSetVersion,
     int Day, string EventDefinitionId, string Variant, IReadOnlyList<EventProbePlayer> Players);

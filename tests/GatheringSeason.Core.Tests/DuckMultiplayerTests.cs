@@ -112,7 +112,6 @@ public sealed class DuckMultiplayerTests
 
         var restored = DuckSaves.Restore(save);
         var view = restored.GetSnapshot("human");
-        Assert.Equal(8, view.RulesRevision);
         Assert.Equal(2, view.Settings.PlayerCount);
         Assert.Equal("set-1", view.Settings.WishSetId);
         Assert.Equal(1, view.ShopOffers.Single(offer => offer.DefinitionId == "tailwind_2").Price);

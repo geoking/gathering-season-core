@@ -58,7 +58,8 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         public DuckRuleDefinitions Rules { get; }
         public DuckEconomyDefinition Economy => Rules.Economy;
-        public int RulesRevision => Rules.RulesRevision;
+        /// <summary>Compatibility alias for DuckRules.CompatibilityStamp; does not select rules.</summary>
+        public int RulesRevision => DuckRules.CompatibilityStamp;
         public DuckMatchSettings Settings { get; }
         public int Day { get; }
         public int NestLevel { get; }

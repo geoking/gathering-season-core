@@ -149,11 +149,20 @@ def example(label, match):
             f"winner end-of-Day deficits D1–D10 {winner_track}; Day 10 rests {ten}; oasis reaches {oasis_text}.")
 
 
+COMPATIBILITY_STAMP = 8
+
+
+def validate_compatibility_stamp(match):
+    if match.get("rulesRevision") != COMPATIBILITY_STAMP:
+        raise ValueError("rulesRevision compatibility stamp is unsupported or missing")
+
+
 def validate(matches):
     if not matches:
         raise ValueError("input contains no matches")
     by_count = collections.defaultdict(lambda: collections.defaultdict(list))
     for match in matches:
+        validate_compatibility_stamp(match)
         count = match["playerCount"]
         if count not in (2, 3, 4):
             raise ValueError("unsupported player count")
@@ -175,7 +184,7 @@ def validate(matches):
         by_count[count][match["seed"]].append(match)
     if len({(match["sourceLabel"], match["rulesRevision"], match["coreAssemblyVersion"], match.get("wishSetId", "set-1"), match.get("wishSetVersion", 1))
             for match in matches}) != 1:
-        raise ValueError("input mixes source labels, rules revisions, Wish Sets or Core builds")
+        raise ValueError("input mixes source labels, rules compatibility stamps, Wish Sets or Core builds")
     if len({tuple(sorted(seeds)) for seeds in by_count.values()}) != 1:
         raise ValueError("player counts must use the same matched seed set")
     matrix = None
@@ -223,7 +232,7 @@ def report(matches, args):
     rng = random.Random(args.bootstrap_seed)
     lines = ["# Multiplayer evaluation", "",
              f"Wish Set: {matches[0].get('wishSetId', 'set-1')} version {matches[0].get('wishSetVersion', 1)}. "
-             f"Source label: `{matches[0]['sourceLabel']}`. Rules revision: {matches[0]['rulesRevision']}. "
+             f"Source label: `{matches[0]['sourceLabel']}`. "
              f"Bootstrap seed: {args.bootstrap_seed}; {args.bootstrap} resamples.", "",
              "Each seed is one resampling cluster: its baseline and every rotated seat assignment stay together. "
              "Intervals describe variation over sampled seeds; they do not establish an optimal policy. "
@@ -249,8 +258,10 @@ def report(matches, args):
 def group_by_wish_set(matches):
     if not matches:
         raise ValueError("input contains no matches")
+    for match in matches:
+        validate_compatibility_stamp(match)
     if len({(match["sourceLabel"], match["rulesRevision"], match["coreAssemblyVersion"]) for match in matches}) != 1:
-        raise ValueError("input mixes source labels, rules revisions or Core builds")
+        raise ValueError("input mixes source labels, rules compatibility stamps or Core builds")
     groups = collections.defaultdict(list)
     for match in matches:
         groups[(match.get("wishSetId", "set-1"), match.get("wishSetVersion", 1))].append(match)

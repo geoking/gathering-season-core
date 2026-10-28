@@ -90,7 +90,6 @@ public sealed class DuckNextChipLogTests
         Explore(match);
         var pending = DuckSaves.Capture(match);
         var restored = DuckSaves.Restore(JsonSerializer.Deserialize<DuckSaveData>(JsonSerializer.Serialize(pending, SaveJson), SaveJson)!);
-        Assert.Equal(8, restored.GetSnapshot("human").RulesRevision);
         Assert.True(restored.GetSnapshot("human").Players.Single(p => p.Id == "human").LogSlowdownPending);
         Explore(match); Explore(restored);
         Assert.False(restored.GetSnapshot("human").Players.Single(p => p.Id == "human").LogSlowdownPending);

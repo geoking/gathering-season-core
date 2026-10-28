@@ -19,7 +19,6 @@ namespace GatheringSeason.Core.Ducks.Runtime
 
         public DuckMatchSettings Settings { get; }
         public string ProfileId => DuckRules.V1.ProfileId;
-        public int RulesRevision => DuckRules.CurrentRulesRevision;
         public int Day { get; set; }
         public DuckPhase Phase { get; set; }
         public int CurrentEventIndex { get; set; }

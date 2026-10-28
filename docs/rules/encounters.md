@@ -1,6 +1,6 @@
 # Gathering Season encounter rules and timing
 
-The implemented encounter contract for rules revision 8, Wish Sets 1 and 2.
+These encounter rules cover Wish Sets 1 and 2.
 See [Weather reports](world-events.md)
 for shared weather and [board/shop](board-and-shop.md) for exact values.
 
@@ -247,4 +247,4 @@ Most Rested safe-duck eligibility rule.
 All 11 Wishes are available from Night 1 with unlimited stock. Each duck
 may buy at most one chip per token type per Night, within the Night 1/2/3
 purchase cap; variants share a type and unspent Stars expire at Dawn. Night 10 has no
-shopping. There is no flask, rewind or redraw in this ruleset.
+shopping. There is no flask, rewind or redraw under these rules.

@@ -19,10 +19,10 @@ legal actions rather than calculating their own rewards. Preserve information
 boundaries, deterministic random continuation and supported current saves.
 Keep the rule guides, executable catalogue and numeric test fixtures in sync.
 Do not infer rules from names or artwork; ask about unresolved rule decisions.
-Namespaces and assemblies use Gathering Season consistently. Core v2 executes
-only rules revision 8; keep format 1, the stable profile identity and numeric
-enum values unchanged. Do not reintroduce historical rule execution or revision
-selection. Unsupported saves must be rejected before state construction and
+Namespaces and assemblies use Gathering Season consistently. Implement only
+the current rules; keep format 1, the stable profile identity, fixed compatibility
+stamp and numeric enum values unchanged. Historical rules are unsupported and
+must not become selectable. Unsupported saves must be rejected before state construction and
 failed Continue must preserve source files.
 
 ## Working method
@@ -69,7 +69,7 @@ Git tag and `GatheringSeason.Core.dll` attached. The initial release is `v1`;
 use `v1.1` and later minor versions for compatible incremental releases, and
 `v2` or later major versions for substantial or incompatible upgrades. Patch
 versions may identify compatible corrections when appropriate. Release versions
-are separate from rules revisions and save/catalogue compatibility identifiers.
+are separate from save/catalogue compatibility identifiers.
 
 When a distributed application adopts a newer Core revision, publish the
 corresponding Core version before that application is released. Reuse an existing

@@ -2,7 +2,7 @@ using System;
 
 namespace GatheringSeason.Core.Ducks.Definitions
 {
-    /// <summary>Immutable reward, bonus and final-conversion values for one rules revision.</summary>
+    /// <summary>Immutable reward, bonus and final-conversion values for the rules.</summary>
     public sealed class DuckEconomyDefinition
     {
         internal DuckEconomyDefinition(

@@ -1,6 +1,6 @@
 # Board and Dream shop
 
-Rules revision 8 uses **Stars** as the Night currency. The Twig numeral is the
+The rules use **Stars** as the Night currency. The Twig numeral is the
 cumulative amount collected along the route by that space. Core adds that route
 total once at Night, alongside Reeds/weather Twigs and any Brambles deduction.
 Never add together the Twig numerals of passed spaces.
@@ -100,7 +100,7 @@ player ducks, Feathers and the Most Rested award are not shop offers. Reeds are 
 retroactively upgraded: each variant is a separate owned chip and pays only when
 placed on a later Day.
 
-Only revision 8 is supported. [Compatibility](../architecture/compatibility.md)
+Only the current rules are supported. [Compatibility](../architecture/compatibility.md)
 explains why Continue never silently changes an existing game. Detailed payout
 order belongs to [encounters](encounters.md); shared weather is specified in
 [Weather reports](world-events.md).

@@ -127,7 +127,7 @@ public sealed class EvaluationRunner
             typeof(MatchSession).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? typeof(MatchSession).Assembly.GetName().Version?.ToString() ?? "unknown",
             finalView.ProfileId,
-            finalView.RulesRevision,
+            DuckRules.CompatibilityStamp,
             finalView.Settings.WishSetId,
             finalView.Settings.WishSetVersion,
             finalView.Economy.CurrencyName,

@@ -28,6 +28,7 @@ public sealed record MultiplayerStudyDay(
     int Day, string EventId, bool CollectiveAttempt, bool CollectiveTriggered,
     IReadOnlyList<MultiplayerStudyDayPlayer> Players);
 
+/// <param name="RulesRevision">Compatibility stamp retained under the original telemetry field name.</param>
 public sealed record MultiplayerStudyResult(
     int SchemaVersion, string SourceLabel, string CoreAssemblyVersion, int RulesRevision, string WishSetId, int WishSetVersion,
     int Seed, int PlayerCount, string Scenario, IReadOnlyDictionary<string, string> Styles,
@@ -138,7 +139,7 @@ public sealed class MultiplayerStudyRunner
         return new MultiplayerStudyResult(3, sourceLabel,
             typeof(MatchSession).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
                 ?? typeof(MatchSession).Assembly.GetName().Version?.ToString() ?? "unknown",
-            final.RulesRevision, final.Settings.WishSetId, final.Settings.WishSetVersion, seed, playerCount, assignment.Scenario,
+            DuckRules.CompatibilityStamp, final.Settings.WishSetId, final.Settings.WishSetVersion, seed, playerCount, assignment.Scenario,
             new Dictionary<string, string>(assignment.Styles, StringComparer.Ordinal), resultPlayers,
             days.Values.Select(day => day.Build(ids)).ToArray(), final.FinalResult.WinnerIds.ToArray(),
             leader - second, actionCount, Microseconds(Stopwatch.GetTimestamp() - started));

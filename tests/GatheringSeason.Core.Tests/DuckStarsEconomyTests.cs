@@ -93,8 +93,6 @@ public sealed class DuckStarsEconomyTests
         var restored = DuckSaves.Restore(save);
         var view = restored.GetSnapshot("human");
 
-        Assert.Equal(8, save.RulesVersion);
-        Assert.Equal(8, view.RulesRevision);
         Assert.True(view.Economy.UsesStars);
         Assert.Equal(view.Players.Single(player => player.Id == "human").FrozenReward,
             view.Players.Single(player => player.Id == "human").RemainingReward);
@@ -116,7 +114,6 @@ public sealed class DuckStarsEconomyTests
         var player = restored.Players.Single(candidate => candidate.Id == "human");
         var outcome = Assert.IsType<DuckNightOutcome>(player.LastNightOutcome);
 
-        Assert.Equal(8, save.RulesVersion);
         Assert.Equal(1, player.PermanentFeatherTrail);
         Assert.Equal(1, outcome.FlowerReward);
         Assert.Equal(1, outcome.FinalShelterReward);

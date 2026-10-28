@@ -53,7 +53,7 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 movement = Math.Max(1, movement - 1);
 
             var incomingLog = state.LogSlowdownPending;
-            // Revision 8 spends the previous Log on this draw, even on a white
+            // The rules spend the previous Log on this draw, even on a white
             // chip. Resolve the newly drawn nuisance afterwards so a fresh Log
             // can arm its own independent next-chip slowdown.
             var logSlowdownPending = false;
