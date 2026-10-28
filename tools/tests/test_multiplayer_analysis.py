@@ -27,6 +27,20 @@ def matrix(seed=0, extra_style=None):
 
 
 class MultiplayerAnalysisTests(unittest.TestCase):
+    def test_missing_or_unsupported_rules_stamps_fail_before_grouping(self):
+        for stamp in (None, 7, 9):
+            records = matrix()
+            for record in records:
+                if stamp is None:
+                    del record["rulesRevision"]
+                else:
+                    record["rulesRevision"] = stamp
+            with self.subTest(stamp=stamp):
+                with self.assertRaisesRegex(ValueError, "compatibility stamp"):
+                    analysis.group_by_wish_set(records)
+                with self.assertRaisesRegex(ValueError, "compatibility stamp"):
+                    analysis.validate(records)
+
     def test_identical_seed_rotations_remain_separate_for_each_wish_set(self):
         second = [dict(record, wishSetId="set-2", wishSetVersion=1) for record in matrix()]
         groups = analysis.group_by_wish_set(matrix() + second)

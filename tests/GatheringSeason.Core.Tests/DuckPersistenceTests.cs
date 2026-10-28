@@ -168,7 +168,7 @@ public sealed class DuckPersistenceTests
         var save = DuckSaves.Capture(match);
 
         Assert.Equal(1, save.FormatVersion);
-        Assert.Equal(DuckRules.CurrentRulesRevision, save.RulesVersion);
+        Assert.Equal(DuckRules.CompatibilityStamp, save.RulesVersion);
         Assert.Equal("gathering-season.duck.v1", save.ProfileId);
 
         var restored = DuckSaves.Restore(save);

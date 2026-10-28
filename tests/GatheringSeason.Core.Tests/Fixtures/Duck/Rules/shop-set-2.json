@@ -1,5 +1,5 @@
 {
-  "status": "Implemented Wish Set 2; Stars economy, rules revision 8.",
+  "status": "Gathering Season rules; Wish Set 2; Stars economy.",
   "offers": [
     {
       "id": "seeds",
@@ -97,7 +97,7 @@
     "remaining_stars_carry_to_next_day": false
   },
   "purchase_policy_status": "All Wishes have unlimited stock; one purchase per helpful type within nest capacity.",
-  "rules_revision": 8,
+  "compatibility_stamp": 8,
   "wish_set_id": "set-2",
   "wish_set_version": 2
 }

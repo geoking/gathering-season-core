@@ -27,12 +27,13 @@ def match(seed=1, swapped=False, winner="human"):
                 "adventure": {"restSpace": 4, "drawCount": 3, "biome": "wetlands",
                               "isSafe": True, "isWornOut": False},
                 "endOfNightTotalTwigs": day * 2 + (3 if seat == "human" else 0),
-                "night": {"day": day, "frozenSleep": 5, "totalTwigsEarned": 2,
+                "night": {"day": day, "frozenReward": 5, "totalTwigsEarned": 2,
                           "feathersAwarded": 1, "reedsTwigs": 0, "eventTwigs": 0,
-                          "flowerSleep": 0, "flockSleep": 0},
-                "purchases": [], "unspentSleep": 0})
+                          "flowerReward": 0, "flockReward": 0},
+                "purchases": [], "unspentReward": 0})
         days.append({"day": day, "players": players})
     return {
+        "schemaVersion": 3, "rulesVersion": 8, "currency": "Stars",
         "sourceLabel": "fixture", "seed": seed, "policies": policies,
         "seatAssignment": seats, "schedule": "cli", "days": days,
         "final": {"winnerIds": [winner], "standings": [
@@ -105,17 +106,29 @@ class AnalysisTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "each Day"):
             analysis.validate_record(bad)
 
-    def test_star_schema_preserves_units_and_counts_free_seeds(self):
-        record = analysis.normalize_record(match())
-        record.update(schemaVersion=2, rulesVersion=4, currency="Stars")
+    def test_star_telemetry_preserves_units_and_counts_free_seeds(self):
+        record = match()
         record["days"][0]["players"][0]["purchases"] = [
             {"offerDefinitionId": "seeds", "type": "seeds", "price": 0}]
         result = analysis.summarize_matchup(analysis.comparison_key(record), [record])
         self.assertEqual(["Stars"], result["currency"])
-        self.assertEqual([4], result["rulesVersions"])
+        self.assertEqual([8], result["rulesVersions"])
         normal = next(player for player in result["players"] if player["policyId"] == "normal")
         self.assertEqual(1, normal["freeSeedPurchases"])
         self.assertEqual(5, normal["byDay"][0]["reward"]["mean"])
+
+    def test_missing_or_unsupported_rules_stamps_fail_before_grouping_or_summary(self):
+        for stamp in (None, 7, 9):
+            record = match()
+            if stamp is None:
+                del record["rulesVersion"]
+            else:
+                record["rulesVersion"] = stamp
+            with self.subTest(stamp=stamp):
+                with self.assertRaisesRegex(ValueError, "compatibility stamp"):
+                    analysis.comparison_key(record)
+                with self.assertRaisesRegex(ValueError, "compatibility stamp"):
+                    analysis.summarize_player([record], "normal")
 
     def test_duplicate_inputs_cannot_inflate_sample_size(self):
         with tempfile.TemporaryDirectory() as directory:

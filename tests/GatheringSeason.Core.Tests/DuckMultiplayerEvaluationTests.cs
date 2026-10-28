@@ -184,7 +184,7 @@ public sealed class DuckMultiplayerEvaluationTests
         var runner = new MultiplayerStudyRunner();
         var result = runner.Run(10, 4, MultiplayerStudyRunner.Assignments(4).First(), "test");
         Assert.Equal(3, result.SchemaVersion);
-        Assert.Equal(8, result.RulesRevision);
+        Assert.Equal(GatheringSeason.Core.Ducks.Definitions.DuckRules.CompatibilityStamp, result.RulesRevision);
         Assert.Equal(10, result.Days.Select(day => day.EventId).Distinct().Count());
         foreach (var day in result.Days)
             foreach (var player in day.Players)

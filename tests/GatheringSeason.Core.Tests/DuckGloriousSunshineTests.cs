@@ -239,7 +239,6 @@ public sealed class DuckGloriousSunshineTests
         var resumed = DuckSaves.Restore(DuckSaves.Capture(restored));
         Assert.Equal(DuckGloriousSunshineBenefit.WarmDreams,
             resumed.GetSnapshot("human").Players.Single(p => p.Id == "human").GloriousSunshineBenefit);
-        Assert.Equal(8, resumed.GetSnapshot("human").RulesRevision);
     }
 
     private static DuckMatchRuntime SunshineRuntime(int day = 1)

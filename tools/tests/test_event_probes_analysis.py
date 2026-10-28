@@ -9,7 +9,7 @@ spec.loader.exec_module(analysis)
 
 
 def record(event="home_before_dark", variant="policy", stars=2):
-    return {"currency": "Stars", "sourceLabel": "test", "seed": 1, "swapped": False,
+    return {"rulesVersion": 8, "currency": "Stars", "sourceLabel": "test", "seed": 1, "swapped": False,
             "schedule": "cli", "day": 2, "sourceStateHash": "same-dawn",
             "eventDefinitionId": event, "variant": variant,
             "players": [{"playerId": seat, "policyId": "normal", "restSpace": 10,
@@ -20,6 +20,17 @@ def record(event="home_before_dark", variant="policy", stars=2):
 
 
 class EventProbeAnalysisTests(unittest.TestCase):
+    def test_missing_or_unsupported_rules_stamps_fail_before_probe_comparison(self):
+        for stamp in (None, 7, 9):
+            item = record()
+            if stamp is None:
+                del item["rulesVersion"]
+            else:
+                item["rulesVersion"] = stamp
+            with self.subTest(stamp=stamp):
+                with self.assertRaisesRegex(ValueError, "compatibility stamp"):
+                    analysis.analyze([item])
+
     def test_contrasts_require_identical_dawn_and_use_named_reference(self):
         base = record()
         event = record("restless_night", stars=1)
