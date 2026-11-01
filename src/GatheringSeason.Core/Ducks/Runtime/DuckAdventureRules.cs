@@ -16,10 +16,13 @@ namespace GatheringSeason.Core.Ducks.Runtime
             DuckEncounterDefinition definition,
             DuckWorldEventType worldEvent,
             DuckRuleDefinitions rules,
-            bool stopAtFirstShelter = false)
+            bool stopAtShelter = false,
+            int? acceptedShelterPosition = null)
         {
             if (rules == null) throw new ArgumentNullException(nameof(rules));
             if (definition == null) throw new ArgumentNullException(nameof(definition));
+            if (acceptedShelterPosition.HasValue && !stopAtShelter)
+                throw new InvalidOperationException("An accepted shelter destination requires stopping at a shelter.");
 
             var type = definition.EncounterType;
             var splashProtectionArmed = false;
@@ -71,11 +74,14 @@ namespace GatheringSeason.Core.Ducks.Runtime
             movement = Math.Max(1, movement);
 
             var position = Math.Min(43, checked(state.Position + movement));
-            if (stopAtFirstShelter)
+            if (stopAtShelter)
             {
                 if (!rules.IsWishSetTwo || type != DuckEncounterType.Tailwind)
                     throw new InvalidOperationException("Only Set 2 Tailwind can stop at a shelter.");
-                position = FirstReachableShelter(state.Position, position, rules)
+                if (acceptedShelterPosition.HasValue
+                    && !IsAcceptedTailwindShelter(state.Position, position, acceptedShelterPosition.Value, rules))
+                    throw new InvalidOperationException("The accepted shelter destination is outside Tailwind choices.");
+                position = acceptedShelterPosition ?? LastReachableShelter(state.Position, position, rules)
                     ?? throw new InvalidOperationException("No shelter is within Tailwind reach.");
             }
             var exhaustion = state.Exhaustion;
@@ -155,11 +161,28 @@ namespace GatheringSeason.Core.Ducks.Runtime
                 exhaustion > safeExhaustionMaximum);
         }
 
-        internal static int? FirstReachableShelter(int position, int fullPosition, DuckRuleDefinitions rules)
+        internal static int? LastReachableShelter(int position, int fullPosition, DuckRuleDefinitions rules)
         {
+            int? last = null;
             foreach (var space in rules.BoardSpaces)
-                if (space.IsShelter && space.Space > position && space.Space <= fullPosition) return space.Space;
-            return null;
+                if (space.IsShelter && space.Space > position && space.Space <= fullPosition
+                    && (!last.HasValue || space.Space > last.Value)) last = space.Space;
+            return last;
+        }
+
+        // Earlier compatible saves may already have committed to the first shelter.
+        // New choices always use the last shelter, but accepted commitments keep their destination.
+        internal static bool IsAcceptedTailwindShelter(int position, int fullPosition, int destination, DuckRuleDefinitions rules) =>
+            destination == LastReachableShelter(position, fullPosition, rules)
+            || destination == FirstReachableShelter(position, fullPosition, rules);
+
+        private static int? FirstReachableShelter(int position, int fullPosition, DuckRuleDefinitions rules)
+        {
+            int? first = null;
+            foreach (var space in rules.BoardSpaces)
+                if (space.IsShelter && space.Space > position && space.Space <= fullPosition
+                    && (!first.HasValue || space.Space < first.Value)) first = space.Space;
+            return first;
         }
 
         internal static int HelpfulTypes(IEnumerable<DuckEncounterType> types)

@@ -48,7 +48,7 @@ namespace GatheringSeason.Core.Ducks.Reference
                 switch (encounter.EncounterType)
                 {
                     case DuckEncounterType.Seeds: return "Move 1 space, plus 1 if the immediately preceding placed chip was an obstacle, including a protected obstacle. Apply weather and Log afterwards.";
-                    case DuckEncounterType.Tailwind: return $"After drawing, choose the full movement from its printed {encounter.BaseMovement}, modified by weather and Log, or stop at the first shelter ahead within that reach and immediately settle.";
+                    case DuckEncounterType.Tailwind: return $"After drawing, choose the full movement from its printed {encounter.BaseMovement}, modified by weather and Log, or stop at the last shelter ahead within that reach and immediately settle.";
                     case DuckEncounterType.Signpost: return "Move 2 spaces and privately see the next two chips, without their order. One remaining chip is certain; after drawing one, the other is certain. Never choose or reorder.";
                     case DuckEncounterType.Splash: return "Move 1 space and protect only the immediately next chip from its +1 exhaustion if it is an obstacle. Its nuisance still applies. A helpful chip uses up this protection too.";
                     case DuckEncounterType.Reeds: return $"Move 1 space. At Night, gather the printed {encounter.TwigYield} twigs only if your final space is a shelter, including when worn out.";

@@ -824,7 +824,7 @@ namespace GatheringSeason.Core.Ducks.AI
                 if (!forceShelter.HasValue && _observation.Rules.IsWishSetTwo && definition.EncounterType == DuckEncounterType.Tailwind)
                 {
                     var projected = DuckAdventureRules.ApplyEncounter(state.State, definition, _observation.CurrentEvent.EventType, _observation.Rules);
-                    if (DuckAdventureRules.FirstReachableShelter(state.State.Position, projected.State.Position, _observation.Rules).HasValue)
+                    if (DuckAdventureRules.LastReachableShelter(state.State.Position, projected.State.Position, _observation.Rules).HasValue)
                         return Math.Max(CandidateValue(state, counts, known, depth, definitionIndex, false),
                             CandidateValue(state, counts, known, depth, definitionIndex, true));
                 }

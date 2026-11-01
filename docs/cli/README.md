@@ -37,7 +37,7 @@ this guide assume the repository root is your current directory.
    tonight); everyone must choose before exploring.
 2. Enter the number beside **Explore**. Core draws a chip, moves your duck and
    resolves its power. You must draw at least once each Day. With Set 2 Tailwind,
-   choose the full modified move or the first reachable shelter, which settles
+   choose the full modified move or the last reachable shelter, which settles
    your duck immediately. These choices appear as ordinary numbered actions.
 3. Review your position, Exhaustion and the CPUs' public progress. Use `board`
    to compare rewards and shelters. `pouch` shows the opening recipe before your

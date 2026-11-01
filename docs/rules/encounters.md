@@ -28,7 +28,7 @@ For a Draw action, resolve one encounter at a time:
    normally. The new chip's nuisance resolves afterwards, so an unprotected new
    Log arms its own next-chip slowdown.
    A Set 2 Tailwind is revealed before the player chooses its full movement or
-   the first reachable shelter and immediate settlement. Reserve the chip until
+   the last reachable shelter and immediate settlement. Reserve the chip until
    that choice; it cannot be replaced, skipped or drawn twice. On Day 10, collect
    all Draw/Settle commitments, then any Tailwind choices, before resolving and
    revealing the whole cohort together.
@@ -76,7 +76,7 @@ pouch, obstacle powers and permanent Feather rules are shared with Set 1.
 | Encounter | Set 2 rule |
 | --- | --- |
 | **Seeds** | Move 1, plus 1 if the immediately preceding placed chip today was an Obstacle, even if protected. Apply weather and Log modifiers afterwards. |
-| **Tailwind →2/→4/→6** | Choose the full modified movement or the first shelter ahead within that distance. Choosing the shelter ends the adventure there after the chip resolves. |
+| **Tailwind →2/→4/→6** | Choose the full modified movement or the last shelter ahead within that distance. Choosing the shelter ends the adventure there after the chip resolves. |
 | **Signpost →2** | Move 2, then privately see the next two chips without their order, or the single remaining chip. No selection, discard or reordering. Drawing one of a pair makes the other known; overlapping peeks retain already established knowledge. Mist suppresses the peek. |
 | **Refreshing splash** | Move 1 and arm protection for the immediately next placed chip. If it is an Obstacle, prevent its Exhaustion while allowing its nuisance. A helpful chip consumes protection. Consecutive Splashes re-arm one protection; they never accumulate charges. |
 | **Nesting reeds ×1/×2/×3** | Move 1. Each placed Reed pays its printed Twigs at Night only if the duck finishes at a shelter, including a worn-out shelter finish. Otherwise it pays zero. No Reeds Twigs are banked before settlement. |
