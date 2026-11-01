@@ -197,34 +197,61 @@ public sealed class DuckWishSetTwoTests
     public void Tailwind_reserves_unplaced_chip_and_restores_both_choices_without_consuming_randomness()
     {
         var runtime = Runtime();
-        PutFirst(runtime, "human", "seeds", "tailwind_4");
         var match = new MatchSession<DuckMatchView>(runtime);
+        AdvanceToDay(match, 4);
+        UseNeutralWeather(runtime);
+        var player = runtime.Player("human");
+        player.PermanentFeatherTrail = player.EffectiveStart = player.Position = 15;
+        player.ActiveMostRestedStep = false;
+        PutFirst(runtime, "human", "seeds");
+        var tailwindId = runtime.State.NextPhysicalChipId++;
+        player.Inventory.Add(new DuckPhysicalChipState(tailwindId, "tailwind_6"));
+        player.BagPhysicalChipIds.Insert(1, tailwindId);
         Execute(match, "human", GameActionKind.Explore);
         var before = DuckSaves.Capture(match);
         Execute(match, "human", GameActionKind.Explore);
         var pending = match.GetSnapshot("human");
         Assert.Single(pending.Players[0].PlacedChips);
-        Assert.Equal(1, pending.Players[0].Position);
-        Assert.Equal(12, pending.OwnBag.Count);
+        Assert.Equal(16, pending.Players[0].Position);
+        Assert.Equal(before.Players[0].BagPhysicalChipIds.Count, pending.OwnBag.Count);
         Assert.Null(pending.RestPreview);
         Assert.Null(pending.DrawProbability);
-        Assert.Equal(4, pending.OwnPendingTailwind!.ShelterPosition);
+        Assert.Equal(21, pending.OwnPendingTailwind!.ShelterPosition);
+        Assert.Equal(22, pending.OwnPendingTailwind.FullPosition);
         Assert.Equal(before.Random.State, DuckSaves.Capture(match).Random.State);
         var full = DuckSaves.Restore(DuckSaves.Capture(match));
         var shelter = DuckSaves.Restore(DuckSaves.Capture(match));
         Choose(full, "human", "duck.tailwind.full");
         Choose(shelter, "human", "duck.tailwind.shelter");
-        Assert.Equal(5, full.GetSnapshot("human").Players[0].Position);
+        Assert.Equal(22, full.GetSnapshot("human").Players[0].Position);
         Assert.False(full.GetSnapshot("human").Players[0].HasFinishedDay);
-        Assert.Equal(4, shelter.GetSnapshot("human").Players[0].Position);
+        Assert.Equal(21, shelter.GetSnapshot("human").Players[0].Position);
         Assert.True(shelter.GetSnapshot("human").Players[0].HasFinishedDay);
         Assert.Null(shelter.GetSnapshot("human").OwnPendingTailwind);
         var state = new DuckAdventureState(0, 0, 5, 0, false, true, false, false, 0, 0);
         var shortened = DuckAdventureRules.ApplyEncounter(state, DuckRules.Set2.Encounter("tailwind_6"), DuckWorldEventType.StillAir, DuckRules.Set2);
         Assert.Equal(3, shortened.Movement);
-        Assert.Null(DuckAdventureRules.FirstReachableShelter(0, shortened.State.Position, DuckRules.Set2));
+        Assert.Null(DuckAdventureRules.LastReachableShelter(0, shortened.State.Position, DuckRules.Set2));
         DuckSaves.Validate(DuckSaves.Capture(full));
         DuckSaves.Validate(DuckSaves.Capture(shelter));
+    }
+
+    [Fact]
+    public void Tailwind_shelter_commitments_respect_modified_reach_and_require_stopping()
+    {
+        var state = new DuckAdventureState(17, 0, 5, 0, false, false, false, false, 0, 0);
+        var tailwind = DuckRules.Set2.Encounter("tailwind_4");
+        var endpoint = DuckAdventureRules.ApplyEncounter(state, tailwind, DuckWorldEventType.HomeBeforeDark,
+            DuckRules.Set2, stopAtShelter: true);
+        Assert.Equal(21, endpoint.State.Position);
+        Assert.Throws<InvalidOperationException>(() => DuckAdventureRules.ApplyEncounter(state, tailwind,
+            DuckWorldEventType.HomeBeforeDark, DuckRules.Set2, stopAtShelter: true, acceptedShelterPosition: 17));
+        Assert.Throws<InvalidOperationException>(() => DuckAdventureRules.ApplyEncounter(state, tailwind,
+            DuckWorldEventType.HomeBeforeDark, DuckRules.Set2, acceptedShelterPosition: 21));
+        var slowed = new DuckAdventureState(16, 0, 5, 0, false, true, false, false, 0, 0);
+        Assert.Throws<InvalidOperationException>(() => DuckAdventureRules.ApplyEncounter(slowed,
+            DuckRules.Set2.Encounter("tailwind_6"), DuckWorldEventType.StillAir, DuckRules.Set2,
+            stopAtShelter: true, acceptedShelterPosition: 21));
     }
 
     [Fact]
@@ -232,8 +259,14 @@ public sealed class DuckWishSetTwoTests
     {
         var runtime = Runtime(4);
         var match = new MatchSession<DuckMatchView>(runtime);
-        AdvanceToFinalDay(match);
-        foreach (var player in runtime.State.Players) PutFirst(runtime, player.Id, "tailwind_6");
+        AdvanceToDay(match);
+        UseNeutralWeather(runtime);
+        foreach (var player in runtime.State.Players)
+        {
+            player.PermanentFeatherTrail = player.EffectiveStart = player.Position = 16;
+            player.ActiveMostRestedStep = false;
+            PutFirst(runtime, player.Id, "tailwind_6");
+        }
         var frozenPositions = runtime.State.Players.Select(player => player.Position).ToArray();
         var frozenHistory = runtime.State.History.Count;
         foreach (var player in runtime.State.Players) Execute(match, player.Id, GameActionKind.Explore);
@@ -249,16 +282,38 @@ public sealed class DuckWishSetTwoTests
         var resumed = DuckSaves.Restore(DuckSaves.Capture(match));
         foreach (var player in runtime.State.Players.Take(3))
         {
-            Choose(match, player.Id, "duck.tailwind.full");
-            Choose(resumed, player.Id, "duck.tailwind.full");
+            var choice = player.Id == "human" ? "duck.tailwind.shelter" : "duck.tailwind.full";
+            Choose(match, player.Id, choice);
+            Choose(resumed, player.Id, choice);
             Assert.Equal(frozenPositions, runtime.State.Players.Select(candidate => candidate.Position));
             Assert.Equal(frozenHistory, runtime.State.History.Count);
         }
-        var midway = DuckSaves.Restore(DuckSaves.Capture(match));
+        var accepted = DuckSaves.Capture(match);
+        Assert.Equal(21, accepted.Players[0].PendingTailwindDestination);
+        Assert.Equal(21, resumed.GetSnapshot("human").OwnPendingTailwind!.ShelterPosition);
+        var malformed = DuckSaves.Capture(match);
+        malformed.Players[0].PendingTailwindDestination = 20;
+        Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(malformed));
+        malformed.Players[0].PendingTailwindDestination = 0;
+        Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(malformed));
+        malformed.Players[0].PendingTailwindDestination = 21;
+        malformed.Players[0].PendingTailwindSettle = false;
+        Assert.Throws<DuckSaveValidationException>(() => DuckSaves.Restore(malformed));
+        var midway = DuckSaves.Restore(accepted);
+        accepted.Players[0].PendingTailwindDestination = 17;
+        var priorCommitment = DuckSaves.Restore(accepted);
+        Assert.Equal(17, priorCommitment.GetSnapshot("human").OwnPendingTailwind!.ShelterPosition);
+        Choose(priorCommitment, "ai-3", "duck.tailwind.full");
+        var priorPlayer = priorCommitment.GetSnapshot("human").Players[0];
+        Assert.Equal(17, priorPlayer.Position);
+        Assert.True(priorPlayer.HasFinishedDay);
+        DuckSaves.Validate(DuckSaves.Capture(priorCommitment));
         Choose(match, "ai-3", "duck.tailwind.full");
         Choose(resumed, "ai-3", "duck.tailwind.full");
         Choose(midway, "ai-3", "duck.tailwind.full");
         Assert.All(runtime.State.Players, player => Assert.Single(player.PlacedChips));
+        Assert.Equal(21, runtime.Player("human").Position);
+        Assert.True(runtime.Player("human").HasFinishedDay);
         Assert.Equal(2, runtime.State.FinalDayDecisionBeat);
         Assert.Equal(Serialize(DuckSaves.Capture(match)), Serialize(DuckSaves.Capture(resumed)));
         Assert.Equal(Serialize(DuckSaves.Capture(match)), Serialize(DuckSaves.Capture(midway)));
@@ -269,7 +324,7 @@ public sealed class DuckWishSetTwoTests
     {
         var runtime = Runtime(3);
         var match = new MatchSession<DuckMatchView>(runtime);
-        AdvanceToFinalDay(match);
+        AdvanceToDay(match);
         runtime.State.WorldEventDeckDefinitionIds[runtime.State.CurrentEventIndex] = "home_before_dark";
         foreach (var player in runtime.State.Players)
         {
@@ -391,9 +446,24 @@ public sealed class DuckWishSetTwoTests
         player.HasFinishedDay = true;
     }
 
-    private static void AdvanceToFinalDay(MatchSession<DuckMatchView> match)
+    private static void UseNeutralWeather(DuckMatchRuntime runtime)
     {
-        while (match.GetSnapshot("human").Day < 10)
+        var index = runtime.State.CurrentEventIndex;
+        var desired = runtime.State.WorldEventDeckDefinitionIds.IndexOf("home_before_dark");
+        (runtime.State.WorldEventDeckDefinitionIds[index], runtime.State.WorldEventDeckDefinitionIds[desired]) =
+            (runtime.State.WorldEventDeckDefinitionIds[desired], runtime.State.WorldEventDeckDefinitionIds[index]);
+        foreach (var player in runtime.State.Players)
+        {
+            player.HasGloriousSunshineChoice = false;
+            player.GloriousSunshineBenefit = default;
+            player.GuideProtectionAvailable = false;
+            player.SafeExhaustionMaximum = 5;
+        }
+    }
+
+    private static void AdvanceToDay(MatchSession<DuckMatchView> match, int day = 10)
+    {
+        while (match.GetSnapshot("human").Day < day)
         {
             var view = match.GetSnapshot("human");
             foreach (var player in view.Players)
