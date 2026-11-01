@@ -152,12 +152,19 @@ next two chips as a set; ordered IDs must match an actual prefix.
 ## Tailwind choice and probability observations
 
 After a Set 2 Tailwind is revealed, `OwnPendingTailwind` supplies its definition,
-full movement/destination and first reachable shelter, if any. The issued
+full movement/destination and last reachable shelter, if any. The issued
 `duck.tailwind.full` and `duck.tailwind.shelter` actions complete that same draw.
 The latter settles immediately. Its chip stays reserved at the pouch head;
 it is not placed or removed twice, and ordinary draw/rest actions are unavailable
 until the choice resolves. Pending state survives save/restore, which issues
 fresh commands and validates the reserved chip and reachable destination.
+A fresh shelter choice uses the last shelter strictly ahead, up to and including
+the full destination after weather and Log modifications. A saved Day-10 shelter
+commitment retains its accepted destination: either that last shelter or the
+first reachable shelter accepted by earlier compatible builds. No intermediate
+shelter or out-of-reach destination is accepted. An unchosen reservation uses the
+current last-shelter choice. The save format, compatibility stamp and action IDs
+are unchanged.
 
 On Day 10, all ordinary Draw/Settle commitments precede any Tailwind choices.
 The entire cohort stays at the preceding public state until every required

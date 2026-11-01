@@ -26,7 +26,7 @@ public sealed class DuckNormalPolicyTests
     [Fact]
     public void Second_set_Tailwind_protects_placed_Reeds_by_choosing_the_reachable_shelter()
     {
-        var scenario = AdventureScenario(8, 4, new[] { "tailwind_6", "grumpy_goose" }, "tailwind_6", wishSetId: "set-2");
+        var scenario = AdventureScenario(16, 4, new[] { "tailwind_6", "grumpy_goose" }, "tailwind_6", wishSetId: "set-2");
         var player = scenario.Runtime.Player("human");
         var previous = player.Inventory.Single(chip => chip.PhysicalChipId == player.PlacedChips[0].PhysicalChipId);
         player.Inventory.Remove(previous);
@@ -39,7 +39,7 @@ public sealed class DuckNormalPolicyTests
         var decision = Choose(scenario);
         Assert.Equal("duck.tailwind.shelter", decision.Id);
         scenario.Match.Execute("human", decision);
-        Assert.Equal(10, scenario.Match.GetSnapshot("human").Players.Single(candidate => candidate.Id == "human").Position);
+        Assert.Equal(21, scenario.Match.GetSnapshot("human").Players.Single(candidate => candidate.Id == "human").Position);
     }
 
     [Fact]

@@ -179,7 +179,9 @@ namespace GatheringSeason.Core.Ducks.Runtime
             if (player.PendingTailwindPhysicalChipId == 0) return null;
             var chip = player.Inventory.Single(candidate => candidate.PhysicalChipId == player.PendingTailwindPhysicalChipId);
             var placement = DuckAdventureRules.ApplyEncounter(AdventureState(runtime, player), runtime.Rules.Encounter(chip.DefinitionId), runtime.CurrentEvent.EventType, runtime.Rules);
-            var shelter = DuckAdventureRules.FirstReachableShelter(player.Position, placement.State.Position, runtime.Rules);
+            var shelter = player.PendingTailwindSettle
+                ? player.PendingTailwindDestination
+                : DuckAdventureRules.LastReachableShelter(player.Position, placement.State.Position, runtime.Rules);
             return new DuckPendingTailwindView(chip.DefinitionId, placement.Movement, placement.State.Position, shelter);
         }
 
@@ -211,7 +213,10 @@ namespace GatheringSeason.Core.Ducks.Runtime
             var definition = runtime.Rules.Encounter(physicalChip.DefinitionId);
             if (allowReserve && player.PendingTailwindPhysicalChipId == 0 && ReserveTailwind(runtime, player)) return;
             var before = AdventureState(runtime, player);
-            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType, runtime.Rules, settleAtShelter);
+            var acceptedShelter = settleAtShelter && player.PendingTailwindDestination != 0
+                ? (int?)player.PendingTailwindDestination : null;
+            var placement = DuckAdventureRules.ApplyEncounter(before, definition, runtime.CurrentEvent.EventType,
+                runtime.Rules, settleAtShelter, acceptedShelter);
             var after = placement.State;
             player.BagPhysicalChipIds.RemoveAt(0);
             if (player.KnownNextPhysicalChipIds.Count > 0)

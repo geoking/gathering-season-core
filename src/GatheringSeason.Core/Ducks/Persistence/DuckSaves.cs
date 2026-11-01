@@ -465,10 +465,11 @@ namespace GatheringSeason.Core.Ducks.Persistence
                     player.ActiveFlock, player.SplashProtectionArmed, player.LogSlowdownPending, player.GuideProtectionAvailable,
                     player.PocketDriftwoodAwarded, player.FlowersPlaced, DuckAdventureRules.HelpfulTypes(player.PlacedHelpfulTypes));
                 var placement = DuckAdventureRules.ApplyEncounter(before, rules.Encounter(inventoryById[player.PendingTailwindPhysicalChipId]), currentEvent, rules);
-                var shelter = rules.BoardSpaces.FirstOrDefault(space => space.IsShelter && space.Space > player.Position && space.Space <= placement.State.Position);
                 Require(player.PendingTailwindDestination == 0 ? !player.PendingTailwindSettle
-                        : save.Day == DuckMatchSettings.StandardDays && player.PendingTailwindDestination ==
-                            (player.PendingTailwindSettle ? shelter?.Space : placement.State.Position),
+                        : save.Day == DuckMatchSettings.StandardDays && (player.PendingTailwindSettle
+                            ? DuckAdventureRules.IsAcceptedTailwindShelter(player.Position, placement.State.Position,
+                                player.PendingTailwindDestination, rules)
+                            : player.PendingTailwindDestination == placement.State.Position),
                     "Pending Tailwind destination must be one of its legal choices.");
             }
             else Require(player.PendingTailwindDestination == 0 && !player.PendingTailwindSettle, "A Tailwind destination needs a reserved chip.");
